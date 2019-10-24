@@ -3,23 +3,20 @@ package foxtrot
 import (
 	"fmt"
 	"gioui.org/app"
+	"gioui.org/font/gofont"
 	"gioui.org/io/system"
 	"gioui.org/layout"
 	"gioui.org/text"
+	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 	"log"
 
-	_ "gioui.org/font/gofont"
-	"gioui.org/unit"
 	"github.com/corywalker/expreduce/expreduce"
 	"github.com/corywalker/expreduce/expreduce/atoms"
 	"github.com/corywalker/expreduce/expreduce/parser"
 	"github.com/corywalker/expreduce/pkg/expreduceapi"
-	_ "golang.org/x/image/font/gofont/gomono"
-	//"golang.org/x/image/font/gofont/goregular"
-	"golang.org/x/image/font/sfnt"
 )
 
 var (
@@ -28,19 +25,10 @@ var (
 	_monoFont = text.Font{Size: unit.Sp(20), Typeface: "Mono", Style: text.Regular}
 	_blue     = rgb(0x5c6bc0)
 	addIcon   *material.Icon
-	theme     = material.NewTheme()
+	theme     *material.Theme
 )
 
 func init() {
-	theme.TextSize = _defaultFontSize
-}
-
-func mustLoadFont(fontData []byte) *sfnt.Font {
-	fnt, err := sfnt.Parse(fontData)
-	if err != nil {
-		panic("failed to load font")
-	}
-	return fnt
 }
 
 func RunUI(engine *expreduce.EvalState) {
@@ -49,6 +37,9 @@ func RunUI(engine *expreduce.EvalState) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	gofont.Register()
+	theme = material.NewTheme()
+	theme.TextSize = _defaultFontSize
 	go func() {
 		w := app.NewWindow(app.Title("Foxtrot"))
 		a := NewApp(engine)

@@ -42,8 +42,8 @@ func (EvalEvent) ImplementsEvent() {}
 
 func (c Cell) Event(gtx *layout.Context) interface{} {
 	for _, e := range c.inEditor.Events(gtx) {
-		if _, ok := e.(widget.SubmitEvent); ok {
-			fmt.Println("Submit Cell")
+		if e, ok := e.(widget.SubmitEvent); ok {
+			c.inEditor.SetText(e.Text)
 			return EvalEvent{}
 		}
 	}
@@ -69,9 +69,7 @@ func (c Cell) Layout(gtx *layout.Context) {
 				c.inLabel().Layout(gtx)
 			})
 			c2 := c.inLayout.Flex(gtx, 1, func() {
-				ed := theme.Editor("")
-				ed.Font = _monoFont
-				ed.Layout(gtx, c.inEditor)
+				c.inEditor2().Layout(gtx, c.inEditor)
 			})
 			layout.Inset{Bottom: padding}.Layout(gtx, func() {
 				c.inLayout.Layout(gtx, c1, c2)
@@ -81,7 +79,7 @@ func (c Cell) Layout(gtx *layout.Context) {
 				c.outLabel().Layout(gtx)
 			})
 			c2 := c.outLayout.Flex(gtx, 1, func() {
-				theme.Label(_defaultFontSize, c.out).Layout(gtx)
+				c.outEditor().Layout(gtx)
 			})
 			layout.Inset{Bottom: padding}.Layout(gtx, func() {
 				c.outLayout.Layout(gtx, c1, c2)
@@ -95,12 +93,6 @@ func (c *Cell) Focus() {
 	c.inEditor.Focus()
 }
 
-func (c *Cell) outLabel() material.Label {
-	l := theme.Label(_defaultFontSize, fmt.Sprintf("Out[%d] ", c.promptNum))
-	l.Font = _monoFont
-	return l
-}
-
 func (c *Cell) inLabel() material.Label {
 	var text string
 	if c.promptNum < 0 {
@@ -109,6 +101,25 @@ func (c *Cell) inLabel() material.Label {
 		text = fmt.Sprintf(" In[%d] ", c.promptNum)
 	}
 	l := theme.Label(_defaultFontSize, text)
-	l.Font = _monoFont
+	l.Font.Variant = "Mono"
+	return l
+}
+
+func (c *Cell) inEditor2() material.Editor {
+	ed := theme.Editor("")
+	ed.Font.Size = _defaultFontSize
+	ed.Font.Variant = "Mono"
+	return ed
+}
+
+func (c *Cell) outLabel() material.Label {
+	l := theme.Label(_defaultFontSize, fmt.Sprintf("Out[%d] ", c.promptNum))
+	l.Font.Variant = "Mono"
+	return l
+}
+
+func (c *Cell) outEditor() material.Label {
+	l := theme.Label(_defaultFontSize, c.out)
+	l.Font.Variant = "Mono"
 	return l
 }
