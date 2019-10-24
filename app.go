@@ -17,7 +17,7 @@ import (
 	"github.com/corywalker/expreduce/expreduce/atoms"
 	"github.com/corywalker/expreduce/expreduce/parser"
 	"github.com/corywalker/expreduce/pkg/expreduceapi"
-	//"golang.org/x/image/font/gofont/gomono"
+	_ "golang.org/x/image/font/gofont/gomono"
 	//"golang.org/x/image/font/gofont/goregular"
 	"golang.org/x/image/font/sfnt"
 )
@@ -30,6 +30,10 @@ var (
 	addIcon   *material.Icon
 	theme     = material.NewTheme()
 )
+
+func init() {
+	theme.TextSize = _defaultFontSize
+}
 
 func mustLoadFont(fontData []byte) *sfnt.Font {
 	fnt, err := sfnt.Parse(fontData)
@@ -59,6 +63,7 @@ func (a *App) loop(w *app.Window) error {
 	gtx := &layout.Context{
 		Queue: w.Queue(),
 	}
+	a.focusNext(len(a.cells))
 	for {
 		e := <-w.Events()
 		switch e := e.(type) {
@@ -74,6 +79,7 @@ func (a *App) loop(w *app.Window) error {
 
 func NewApp(engine *expreduce.EvalState) *App {
 	theme := material.NewTheme()
+	theme.TextSize = _defaultFontSize
 	list := &layout.List{
 		Axis: layout.Vertical,
 	}
@@ -103,7 +109,8 @@ func (a *App) Event(gtx *layout.Context) interface{} {
 	for i, c := range a.cells {
 		e := c.Event(gtx)
 		if _, ok := e.(EvalEvent); ok {
-			a.eval(&a.cells[i])
+			a.eval(i)
+			a.focusNext(i)
 		}
 	}
 	e := a.add.Event(gtx)
@@ -122,7 +129,8 @@ func (a *App) Layout(gtx *layout.Context) {
 	a.drawEntries(gtx, _defaultFontSize)
 }
 
-func (a *App) eval(c *Cell) {
+func (a *App) eval(i int) {
+	c := &a.cells[i]
 	textIn := c.inEditor.Text()
 	if textIn == "" {
 		return
@@ -133,6 +141,14 @@ func (a *App) eval(c *Cell) {
 	c.out = textOut
 	c.promptNum = a.promptCount
 	a.promptCount++
+}
+
+func (a *App) focusNext(i int) {
+	if i < len(a.cells)-1 {
+		a.cells[i+1].Focus()
+	} else {
+		a.add.Focus()
+	}
 }
 
 func (a *App) evaluate() {
@@ -164,7 +180,7 @@ func (a *App) drawEntries(gtx *layout.Context, size unit.Value) {
 func (a *App) AddCell(in, out string) {
 	cell := newCell(in, out, -1)
 	a.cells = append(a.cells, cell)
-	//a.promptCount++
+	cell.Focus()
 }
 
 func expressionToString(es *expreduce.EvalState, exp expreduceapi.Ex, promptCount int) string {

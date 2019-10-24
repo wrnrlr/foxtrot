@@ -13,9 +13,10 @@ type Add struct {
 }
 
 func newAdd() *Add {
+	input := &widget.Editor{SingleLine: true, Submit: true}
 	return &Add{
 		new(widget.Button),
-		new(widget.Editor)}
+		input}
 }
 
 func (a *Add) Layout(gtx *layout.Context) {
@@ -37,6 +38,12 @@ func (a *Add) Event(gtx *layout.Context) interface{} {
 	for a.button.Clicked(gtx) {
 		fmt.Println("Add Button Clicked")
 		return AddCellEvent{}
+	}
+	for _, e := range a.input.Events(gtx) {
+		if _, ok := e.(widget.SubmitEvent); ok {
+			fmt.Println("Submit Cell")
+			return AddCellEvent{}
+		}
 	}
 	return nil
 }

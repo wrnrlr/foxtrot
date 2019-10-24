@@ -3,11 +3,10 @@ package foxtrot
 import (
 	"fmt"
 	"gioui.org/layout"
-	"gioui.org/op"
-	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"gioui.org/widget"
-	"image/color"
+	"gioui.org/widget/material"
+	"github.com/corywalker/expreduce/pkg/expreduceapi"
 )
 
 type Cells []Cell
@@ -22,22 +21,19 @@ type Cell struct {
 	inEditor  *widget.Editor
 	outText   *widget.Label
 	inLayout  *layout.Flex
-	inLabel   *widget.Label
-	outLabel  *widget.Label
 	outLayout *layout.Flex
+	inEx      *expreduceapi.Ex
+	outEx     *expreduceapi.Ex
 }
 
 func newCell(in, out string, i int) Cell {
 	list := &layout.List{Axis: layout.Vertical}
-	inEditor := &widget.Editor{
-		Submit: true}
+	inEditor := &widget.Editor{Submit: true}
 	inEditor.SetText(in)
 	outText := &widget.Label{}
 	inLayout := &layout.Flex{}
-	inLabel := &widget.Label{}
-	outLabel := &widget.Label{}
 	outLayout := &layout.Flex{}
-	return Cell{in, out, i, list, inEditor, outText, inLayout, inLabel, outLabel, outLayout}
+	return Cell{in, out, i, list, inEditor, outText, inLayout, outLayout, nil, nil}
 }
 
 type EvalEvent struct{}
@@ -59,9 +55,6 @@ func (c *Cell) evaluate() {
 	if textIn == "" {
 		return
 	}
-	//expIn := parser.Interp(textIn, a.engine)
-	//expOut := a.engine.Eval(expIn)
-	//textOut := expressionToString(a.engine, expOut, a.promptCount)
 }
 
 func (c Cell) Layout(gtx *layout.Context) {
@@ -73,17 +66,19 @@ func (c Cell) Layout(gtx *layout.Context) {
 	c.list.Layout(gtx, n, func(i int) {
 		if i == 0 {
 			c1 := c.inLayout.Rigid(gtx, func() {
-				theme.Label(_defaultFontSize, fmt.Sprintf(" In[%d] ", c.promptNum)).Layout(gtx)
+				c.inLabel().Layout(gtx)
 			})
 			c2 := c.inLayout.Flex(gtx, 1, func() {
-				theme.Editor("").Layout(gtx, c.inEditor)
+				ed := theme.Editor("")
+				ed.Font = _monoFont
+				ed.Layout(gtx, c.inEditor)
 			})
 			layout.Inset{Bottom: padding}.Layout(gtx, func() {
 				c.inLayout.Layout(gtx, c1, c2)
 			})
 		} else {
 			c1 := c.outLayout.Rigid(gtx, func() {
-				theme.Label(_defaultFontSize, fmt.Sprintf("Out[%d] ", c.promptNum)).Layout(gtx)
+				c.outLabel().Layout(gtx)
 			})
 			c2 := c.outLayout.Flex(gtx, 1, func() {
 				theme.Label(_defaultFontSize, c.out).Layout(gtx)
@@ -96,18 +91,24 @@ func (c Cell) Layout(gtx *layout.Context) {
 	})
 }
 
-func rgb(c uint32) color.RGBA {
-	return argb((0xff << 24) | c)
+func (c *Cell) Focus() {
+	c.inEditor.Focus()
 }
 
-func argb(c uint32) color.RGBA {
-	return color.RGBA{A: uint8(c >> 24), R: uint8(c >> 16), G: uint8(c >> 8), B: uint8(c)}
+func (c *Cell) outLabel() material.Label {
+	l := theme.Label(_defaultFontSize, fmt.Sprintf("Out[%d] ", c.promptNum))
+	l.Font = _monoFont
+	return l
 }
 
-func colorMaterial(ops *op.Ops, color color.RGBA) op.MacroOp {
-	var mat op.MacroOp
-	mat.Record(ops)
-	paint.ColorOp{Color: color}.Add(ops)
-	mat.Stop()
-	return mat
+func (c *Cell) inLabel() material.Label {
+	var text string
+	if c.promptNum < 0 {
+		text = fmt.Sprintf(" In[ ] ")
+	} else {
+		text = fmt.Sprintf(" In[%d] ", c.promptNum)
+	}
+	l := theme.Label(_defaultFontSize, text)
+	l.Font = _monoFont
+	return l
 }
