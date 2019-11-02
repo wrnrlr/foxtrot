@@ -25,10 +25,6 @@ type Out struct {
 	Image image.Image
 }
 
-func (o *Out) Eval() interface{} {
-	return nil
-}
-
 func (o *Out) Layout(num int, gtx *layout.Context) {
 	flex := &layout.Flex{Alignment: layout.Middle}
 	c1 := flex.Rigid(gtx, func() {
@@ -46,11 +42,6 @@ func (o *Out) Layout(num int, gtx *layout.Context) {
 	layout.Inset{Bottom: _padding}.Layout(gtx, func() {
 		flex.Layout(gtx, c1, c2)
 	})
-}
-
-func (o *Out) outPrompt(num int) material.Label {
-	l := theme.Label(_promptFontSize, fmt.Sprintf("Out[%d] ", num))
-	return l
 }
 
 func (o *Out) promptLayout(num int, gtx *layout.Context) {
