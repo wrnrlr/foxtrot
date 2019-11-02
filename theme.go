@@ -20,7 +20,7 @@ var (
 	blue       = rgb(0x1e88e5)
 
 	inlineHeight     = layout.Constraint{Min: 50, Max: 50}
-	promptWidth      = layout.Constraint{Min: 80, Max: 80}
+	promptWidth      = unit.Sp(50)
 	_defaultFontSize = unit.Sp(20)
 	_promptFontSize  = unit.Sp(12)
 	theme            *material.Theme

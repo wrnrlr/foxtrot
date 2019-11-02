@@ -73,7 +73,9 @@ func (c *Cell) promptLayout(gtx *layout.Context) {
 	} else {
 		txt = fmt.Sprintf("In[%d] ", c.promptNum)
 	}
-	gtx.Constraints.Width = promptWidth
+	px := gtx.Config.Px(promptWidth)
+	constraint := layout.Constraint{Min: px, Max: px}
+	gtx.Constraints.Width = constraint
 	label := promptTheme.Label(_promptFontSize, txt)
 	label.Alignment = text.End
 	label.Layout(gtx)

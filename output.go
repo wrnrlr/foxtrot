@@ -51,7 +51,9 @@ func (o *Out) promptLayout(num int, gtx *layout.Context) {
 	} else {
 		txt = fmt.Sprintf("Out[%d] ", num)
 	}
-	gtx.Constraints.Width = promptWidth
+	px := gtx.Config.Px(promptWidth)
+	constraint := layout.Constraint{Min: px, Max: px}
+	gtx.Constraints.Width = constraint
 	label := promptTheme.Label(_promptFontSize, txt)
 	label.Alignment = text.End
 	label.Layout(gtx)

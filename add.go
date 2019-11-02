@@ -3,6 +3,7 @@ package foxtrot
 import (
 	"fmt"
 	"gioui.org/f32"
+	"gioui.org/io/key"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/op"
@@ -10,20 +11,31 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"image"
+	"time"
+)
+
+const (
+	blinksPerSecond  = 1
+	maxBlinkDuration = 10 * time.Second
 )
 
 type Add struct {
-	Index  int
-	button *widget.Button
-	input  *widget.Editor
+	Index int
+	//Focus bool
+	button       *widget.Button
+	input        *widget.Editor
+	caretOn      bool
+	eventKey     int
+	requestFocus bool
+	focused      bool
+	blinkStart   time.Time
 }
 
 func NewAdd() *Add {
-	input := &widget.Editor{SingleLine: true, Submit: true}
 	return &Add{
-		0,
-		new(widget.Button),
-		input}
+		Index:      0,
+		button:     new(widget.Button),
+		blinkStart: time.Now()}
 }
 
 type AddCellEvent struct{}
@@ -33,37 +45,56 @@ func (a *Add) Event(gtx *layout.Context) interface{} {
 		fmt.Println("Add Button Clicked")
 		return AddCellEvent{}
 	}
-	for _, e := range a.input.Events(gtx) {
-		if _, ok := e.(widget.SubmitEvent); ok {
-			fmt.Println("Submit Cell")
-			return AddCellEvent{}
+	//for _, e := range a.input.Events(gtx) {
+	//	if _, ok := e.(widget.SubmitEvent); ok {
+	//		fmt.Println("Submit Cell")
+	//		return AddCellEvent{}
+	//	}
+	//}
+	a.processKey(gtx)
+	return nil
+}
+
+func (a *Add) processKey(gtx *layout.Context) {
+	for _, ke := range gtx.Events(&a.eventKey) {
+		a.blinkStart = gtx.Now()
+		switch ke.(type) {
+		case key.FocusEvent:
+			fmt.Println("Add: key.FocusEvent")
+		case key.Event:
+			fmt.Println("Add: key.Event")
+		case key.EditEvent:
+			fmt.Println("Add: key.EditEvent")
 		}
 	}
-	return nil
 }
 
 func (a *Add) Focus(i int) {
 	a.Index = i
+	a.focused = true
+	a.blinkStart = time.Now()
 }
 
 func (a *Add) Layout(i int, gtx *layout.Context) {
-	length := gtx.Constraints.Width.Max
-	gtx.Constraints.Height = inlineHeight
+	key.InputOp{Key: &a.eventKey, Focus: true}.Add(gtx.Ops)
+	px := gtx.Config.Px(unit.Dp(20))
+	constraint := layout.Constraint{Min: px, Max: px}
+	gtx.Constraints.Height = constraint
 	st := layout.Stack{Alignment: layout.NW}
 	c := st.Expand(gtx, func() {
 		PlusButton{}.Layout(gtx, a.button)
 	})
 	l := st.Expand(gtx, func() {
-		a.line(length, gtx)
+		a.line(gtx)
 		a.cursor(gtx)
 	})
 	st.Layout(gtx, l, c)
 }
 
-func (a *Add) line(length int, gtx *layout.Context) {
-	width := float32(gtx.Config.Px(unit.Dp(2)))
+func (a *Add) line(gtx *layout.Context) {
+	width := float32(gtx.Config.Px(unit.Sp(1)))
 	var p paint.Path
-	var lineLen = float32(length)
+	var lineLen = float32(gtx.Constraints.Width.Max)
 	var merginTop = float32(gtx.Constraints.Height.Min / 2)
 	var stack op.StackOp
 	stack.Push(gtx.Ops)
@@ -77,18 +108,26 @@ func (a *Add) line(length int, gtx *layout.Context) {
 	paint.ColorOp{lightGrey}.Add(gtx.Ops)
 	paint.PaintOp{
 		Rect: f32.Rectangle{
-			Max: f32.Point{X: float32(length), Y: merginTop + width},
+			Max: f32.Point{X: lineLen, Y: merginTop + width},
 		},
 	}.Add(gtx.Ops)
 	stack.Pop()
 }
 
 func (a *Add) cursor(gtx *layout.Context) {
-	length := float32(gtx.Config.Px(unit.Dp(100)))
-	width := float32(gtx.Config.Px(unit.Dp(2)))
+	a.caretOn = false
+	now := gtx.Now()
+	dt := now.Sub(a.blinkStart)
+	const timePerBlink = time.Second / blinksPerSecond
+	a.caretOn = dt%timePerBlink < timePerBlink/2
+	if !a.caretOn {
+		return
+	}
+	length := float32(gtx.Config.Px(unit.Sp(100)))
+	width := float32(gtx.Config.Px(unit.Sp(1)))
 	var p paint.Path
 	var merginTop = float32(gtx.Constraints.Height.Min / 2)
-	var merginLeft = float32(gtx.Config.Px(unit.Dp(60)))
+	var merginLeft = float32(gtx.Config.Px(unit.Sp(60)))
 	var stack op.StackOp
 	stack.Push(gtx.Ops)
 	p.Begin(gtx.Ops)
@@ -110,9 +149,9 @@ func (a *Add) IsIndex(i int) bool {
 type PlusButton struct{}
 
 func (b PlusButton) Layout(gtx *layout.Context, button *widget.Button) {
-	inset := layout.Inset{Left: unit.Dp(20)}
+	inset := layout.Inset{Left: unit.Sp(20)}
 	inset.Layout(gtx, func() {
-		px := gtx.Config.Px(unit.Dp(30))
+		px := gtx.Config.Px(unit.Sp(20))
 		constraint := layout.Constraint{Min: px, Max: px}
 		gtx.Constraints.Width = constraint
 		gtx.Constraints.Height = constraint
@@ -124,7 +163,7 @@ func (b PlusButton) Layout(gtx *layout.Context, button *widget.Button) {
 }
 
 func (b PlusButton) circle(gtx *layout.Context) {
-	px := gtx.Config.Px(unit.Dp(30))
+	px := gtx.Config.Px(unit.Sp(20))
 	size := float32(px)
 	rr := float32(size) * .5
 	var stack op.StackOp
@@ -135,14 +174,16 @@ func (b PlusButton) circle(gtx *layout.Context) {
 }
 
 func (b PlusButton) plus(gtx *layout.Context) {
-	length := float32(gtx.Constraints.Width.Min)
-	width := float32(gtx.Config.Px(unit.Dp(2)))
+	width := float32(gtx.Config.Px(unit.Sp(2)))
+	offset := float32(gtx.Constraints.Width.Min) / 4
+	length := float32(gtx.Constraints.Width.Min) - offset
 	var p1 paint.Path
-	var center = float32(gtx.Constraints.Width.Min/2 - 1)
+	var xcenter = float32(gtx.Constraints.Width.Min/2) - float32(gtx.Config.Px(unit.Sp(1)))
+	var ycenter = float32(gtx.Constraints.Height.Min/2) - float32(gtx.Config.Px(unit.Sp(1)))
 	var stack op.StackOp
 	stack.Push(gtx.Ops)
 	p1.Begin(gtx.Ops)
-	p1.Move(f32.Point{X: 0, Y: center})
+	p1.Move(f32.Point{X: offset, Y: ycenter})
 	p1.Line(f32.Point{X: length, Y: 0})
 	p1.Line(f32.Point{X: 0, Y: width})
 	p1.Line(f32.Point{X: -length, Y: 0})
@@ -154,7 +195,7 @@ func (b PlusButton) plus(gtx *layout.Context) {
 	stack.Push(gtx.Ops)
 	var p2 paint.Path
 	p2.Begin(gtx.Ops)
-	p2.Move(f32.Point{X: center, Y: 0})
+	p2.Move(f32.Point{X: xcenter, Y: offset})
 	p2.Line(f32.Point{X: 0, Y: length})
 	p2.Line(f32.Point{X: width, Y: 0})
 	p2.Line(f32.Point{X: 0, Y: -length})
@@ -163,14 +204,6 @@ func (b PlusButton) plus(gtx *layout.Context) {
 	paint.ColorOp{lightGrey}.Add(gtx.Ops)
 	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: length, Y: length}}}.Add(gtx.Ops)
 	stack.Pop()
-}
-
-type PlaceholderButton struct{}
-
-func (b PlaceholderButton) Layout(gtx *layout.Context, button *widget.Button) {
-	fill(gtx, lightPink)
-	pointer.EllipseAreaOp{Rect: image.Rectangle{Max: gtx.Dimensions.Size}}.Add(gtx.Ops)
-	button.Layout(gtx)
 }
 
 type placeholder struct {
@@ -182,7 +215,9 @@ func newPlaceholder() placeholder {
 }
 
 func (p placeholder) Layout(gtx *layout.Context) {
-	gtx.Constraints.Height = inlineHeight
+	px := gtx.Config.Px(unit.Sp(20))
+	constraint := layout.Constraint{Min: px, Max: px}
+	gtx.Constraints.Height = constraint
 	fill(gtx, white)
 	pointer.EllipseAreaOp{Rect: image.Rectangle{Max: gtx.Dimensions.Size}}.Add(gtx.Ops)
 	p.button.Layout(gtx)
