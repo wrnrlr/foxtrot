@@ -3,37 +3,21 @@ package foxtrot
 import (
 	"fmt"
 	"gioui.org/layout"
-	"gioui.org/unit"
+	"gioui.org/text"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
-	"github.com/corywalker/expreduce/pkg/expreduceapi"
 )
-
-type Cells []Cell
-
-func (cs Cells) Add(c Cell) {}
 
 type Cell struct {
 	in        string
-	out       string
+	out       *Out
 	promptNum int
-	list      *layout.List
 	inEditor  *widget.Editor
-	outText   *widget.Label
-	inLayout  *layout.Flex
-	outLayout *layout.Flex
-	inEx      *expreduceapi.Ex
-	outEx     *expreduceapi.Ex
 }
 
-func newCell(in, out string, i int) Cell {
-	list := &layout.List{Axis: layout.Vertical}
+func newCell(i int) *Cell {
 	inEditor := &widget.Editor{Submit: true}
-	inEditor.SetText(in)
-	outText := &widget.Label{}
-	inLayout := &layout.Flex{}
-	outLayout := &layout.Flex{}
-	return Cell{in, out, i, list, inEditor, outText, inLayout, outLayout, nil, nil}
+	return &Cell{promptNum: i, inEditor: inEditor}
 }
 
 type EvalEvent struct{}
@@ -58,34 +42,23 @@ func (c *Cell) evaluate() {
 }
 
 func (c Cell) Layout(gtx *layout.Context) {
-	padding := unit.Dp(8)
-	n := 1
-	if c.out != "" {
-		n = 2
-	}
-	c.list.Layout(gtx, n, func(i int) {
+	n := c.itemCount()
+	list := &layout.List{Axis: layout.Vertical}
+	list.Layout(gtx, n, func(i int) {
 		if i == 0 {
-			c1 := c.inLayout.Rigid(gtx, func() {
-				c.inLabel().Layout(gtx)
+			f := layout.Flex{Alignment: layout.Middle}
+			c1 := f.Rigid(gtx, func() {
+				c.promptLayout(gtx)
 			})
-			c2 := c.inLayout.Flex(gtx, 1, func() {
+			c2 := f.Flex(gtx, 1, func() {
 				c.inEditor2().Layout(gtx, c.inEditor)
 			})
-			layout.Inset{Bottom: padding}.Layout(gtx, func() {
-				c.inLayout.Layout(gtx, c1, c2)
+			layout.Inset{Bottom: _padding}.Layout(gtx, func() {
+				f.Layout(gtx, c1, c2)
 			})
 		} else {
-			c1 := c.outLayout.Rigid(gtx, func() {
-				c.outLabel().Layout(gtx)
-			})
-			c2 := c.outLayout.Flex(gtx, 1, func() {
-				c.outEditor().Layout(gtx)
-			})
-			layout.Inset{Bottom: padding}.Layout(gtx, func() {
-				c.outLayout.Layout(gtx, c1, c2)
-			})
+			c.out.Layout(c.promptNum, gtx)
 		}
-
 	})
 }
 
@@ -93,16 +66,17 @@ func (c *Cell) Focus() {
 	c.inEditor.Focus()
 }
 
-func (c *Cell) inLabel() material.Label {
-	var text string
+func (c *Cell) promptLayout(gtx *layout.Context) {
+	var txt string
 	if c.promptNum < 0 {
-		text = fmt.Sprintf(" In[ ] ")
+		txt = fmt.Sprintf("In[ ] ")
 	} else {
-		text = fmt.Sprintf(" In[%d] ", c.promptNum)
+		txt = fmt.Sprintf("In[%d] ", c.promptNum)
 	}
-	l := theme.Label(_defaultFontSize, text)
-	l.Font.Variant = "Mono"
-	return l
+	gtx.Constraints.Width = promptWidth
+	label := promptTheme.Label(_promptFontSize, txt)
+	label.Alignment = text.End
+	label.Layout(gtx)
 }
 
 func (c *Cell) inEditor2() material.Editor {
@@ -112,14 +86,29 @@ func (c *Cell) inEditor2() material.Editor {
 	return ed
 }
 
-func (c *Cell) outLabel() material.Label {
-	l := theme.Label(_defaultFontSize, fmt.Sprintf("Out[%d] ", c.promptNum))
-	l.Font.Variant = "Mono"
-	return l
+func (c *Cell) hasOut() bool {
+	return c.out != nil
 }
 
-func (c *Cell) outEditor() material.Label {
-	l := theme.Label(_defaultFontSize, c.out)
-	l.Font.Variant = "Mono"
-	return l
+func (c *Cell) itemCount() int {
+	if c.hasOut() {
+		return 2
+	} else {
+		return 1
+	}
+}
+
+type CellType int
+
+const (
+	EXPRESSION CellType = iota
+	TITLE
+	TEXT
+	CODE
+)
+
+var CellTypeNames = []string{"Foxtrot", "Title", "Text", "Code"}
+
+func (d CellType) String() string {
+	return CellTypeNames[d]
 }
