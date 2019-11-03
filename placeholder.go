@@ -103,6 +103,7 @@ func (p *Placeholder) Layout(i int, gtx *layout.Context) {
 	p.requestFocus = false
 	p.clicker.Add(gtx.Ops)
 	if p.focused {
+
 		px := gtx.Config.Px(unit.Dp(20))
 		constraint := layout.Constraint{Min: px, Max: px}
 		gtx.Constraints.Height = constraint
@@ -156,8 +157,14 @@ func (p *Placeholder) cursor(gtx *layout.Context) {
 	p.caretOn = false
 	now := gtx.Now()
 	dt := now.Sub(p.blinkStart)
+	blinking := dt < maxBlinkDuration
 	const timePerBlink = time.Second / blinksPerSecond
-	p.caretOn = dt%timePerBlink < timePerBlink/2
+	nextBlink := now.Add(timePerBlink/2 - dt%(timePerBlink/2))
+	if blinking {
+		redraw := op.InvalidateOp{At: nextBlink}
+		redraw.Add(gtx.Ops)
+	}
+	p.caretOn = p.focused && (!blinking || dt%timePerBlink < timePerBlink/2)
 	if !p.caretOn {
 		return
 	}
