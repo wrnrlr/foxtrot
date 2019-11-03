@@ -39,7 +39,7 @@ func (a *App) loop(w *app.Window) error {
 	gtx := &layout.Context{
 		Queue: w.Queue(),
 	}
-	//a.focusNext(len(a.cells))
+	//a.focusCell(len(a.cells))
 	for {
 		e := <-w.Events()
 		switch e := e.(type) {

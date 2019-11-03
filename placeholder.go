@@ -3,6 +3,7 @@ package foxtrot
 import (
 	"fmt"
 	"gioui.org/f32"
+	"gioui.org/gesture"
 	"gioui.org/io/key"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
@@ -19,92 +20,129 @@ const (
 	maxBlinkDuration = 10 * time.Second
 )
 
-type Add struct {
-	Index int
-	//Focus bool
-	button       *widget.Button
-	input        *widget.Editor
-	caretOn      bool
+type Placeholder struct {
+	button  *widget.Button
+	pbutton *widget.Button
+
 	eventKey     int
-	requestFocus bool
-	focused      bool
 	blinkStart   time.Time
+	focused      bool
+	caretOn      bool
+	requestFocus bool
+
+	clicker gesture.Click
+
+	events []interface{}
 }
 
-func NewAdd() *Add {
-	return &Add{
-		Index:      0,
+func NewPlaceholder() *Placeholder {
+	return &Placeholder{
 		button:     new(widget.Button),
+		pbutton:    new(widget.Button),
 		blinkStart: time.Now()}
 }
 
-type AddCellEvent struct{}
-
-func (a *Add) Event(gtx *layout.Context) interface{} {
-	for a.button.Clicked(gtx) {
-		fmt.Println("Add Button Clicked")
+func (p *Placeholder) Event(gtx *layout.Context) interface{} {
+	for p.button.Clicked(gtx) {
+		fmt.Println("Placeholder Button Clicked")
 		return AddCellEvent{}
 	}
-	//for _, e := range a.input.Events(gtx) {
-	//	if _, ok := e.(widget.SubmitEvent); ok {
-	//		fmt.Println("Submit Cell")
-	//		return AddCellEvent{}
-	//	}
-	//}
-	a.processKey(gtx)
+	for p.pbutton.Clicked(gtx) {
+		fmt.Println("Focus Placeholder")
+		p.requestFocus = true
+	}
+	return p.processKey(gtx)
+}
+
+func (p *Placeholder) processPointer(gtx *layout.Context) interface{} {
+	for _, evt := range p.clicker.Events(gtx) {
+		switch {
+		case evt.Type == gesture.TypePress && evt.Source == pointer.Mouse,
+			evt.Type == gesture.TypeClick && evt.Source == pointer.Touch:
+			p.blinkStart = gtx.Now()
+			p.requestFocus = true
+		}
+	}
 	return nil
 }
 
-func (a *Add) processKey(gtx *layout.Context) {
-	for _, ke := range gtx.Events(&a.eventKey) {
-		a.blinkStart = gtx.Now()
-		switch ke.(type) {
+func (p *Placeholder) processKey(gtx *layout.Context) interface{} {
+	for _, ke := range gtx.Events(&p.eventKey) {
+		p.blinkStart = gtx.Now()
+		switch ke := ke.(type) {
 		case key.FocusEvent:
-			fmt.Println("Add: key.FocusEvent")
+			p.focused = ke.Focus
+			fmt.Println("Placeholder: key.FocusEvent")
 		case key.Event:
-			fmt.Println("Add: key.Event")
+			if !p.focused {
+				fmt.Println("Placeholder (unfocused): key.Event")
+				break
+			}
+			fmt.Println("Placeholder: key.Event")
+			if ke.Name == key.NameReturn || ke.Name == key.NameEnter {
+				return AddCellEvent{Type: FoxtrotCell}
+			} else if ke.Name == key.NameUpArrow {
+				return FocusPreviousCellEvent{}
+			} else if ke.Name == key.NameDownArrow {
+				return FocusNextCellEvent{}
+			}
 		case key.EditEvent:
-			fmt.Println("Add: key.EditEvent")
+			fmt.Println("Placeholder: key.EditEvent")
 		}
+	}
+	return nil
+}
+
+func (p *Placeholder) Focus() {
+	p.requestFocus = true
+	p.blinkStart = time.Now()
+}
+
+func (p *Placeholder) Layout(i int, gtx *layout.Context) {
+	key.InputOp{Key: &p.eventKey, Focus: p.requestFocus}.Add(gtx.Ops)
+	p.requestFocus = false
+	p.clicker.Add(gtx.Ops)
+	if p.focused {
+		px := gtx.Config.Px(unit.Dp(20))
+		constraint := layout.Constraint{Min: px, Max: px}
+		gtx.Constraints.Height = constraint
+		st := layout.Stack{Alignment: layout.NW}
+		c := st.Expand(gtx, func() {
+			PlusButton{}.Layout(gtx, p.button)
+		})
+		l := st.Expand(gtx, func() {
+			p.line(gtx)
+			p.cursor(gtx)
+		})
+		st.Layout(gtx, l, c)
+	} else {
+		p.placeholderLayout(gtx)
 	}
 }
 
-func (a *Add) Focus(i int) {
-	a.Index = i
-	a.focused = true
-	a.blinkStart = time.Now()
-}
-
-func (a *Add) Layout(i int, gtx *layout.Context) {
-	key.InputOp{Key: &a.eventKey, Focus: true}.Add(gtx.Ops)
-	px := gtx.Config.Px(unit.Dp(20))
+func (p *Placeholder) placeholderLayout(gtx *layout.Context) {
+	px := gtx.Config.Px(unit.Sp(20))
 	constraint := layout.Constraint{Min: px, Max: px}
 	gtx.Constraints.Height = constraint
-	st := layout.Stack{Alignment: layout.NW}
-	c := st.Expand(gtx, func() {
-		PlusButton{}.Layout(gtx, a.button)
-	})
-	l := st.Expand(gtx, func() {
-		a.line(gtx)
-		a.cursor(gtx)
-	})
-	st.Layout(gtx, l, c)
+	fill(gtx, white)
+	pointer.EllipseAreaOp{Rect: image.Rectangle{Max: gtx.Dimensions.Size}}.Add(gtx.Ops)
+	p.pbutton.Layout(gtx)
 }
 
-func (a *Add) line(gtx *layout.Context) {
+func (p *Placeholder) line(gtx *layout.Context) {
 	width := float32(gtx.Config.Px(unit.Sp(1)))
-	var p paint.Path
+	var path paint.Path
 	var lineLen = float32(gtx.Constraints.Width.Max)
 	var merginTop = float32(gtx.Constraints.Height.Min / 2)
 	var stack op.StackOp
 	stack.Push(gtx.Ops)
-	p.Begin(gtx.Ops)
-	p.Move(f32.Point{X: 0, Y: merginTop})
-	p.Line(f32.Point{X: lineLen, Y: 0})
-	p.Line(f32.Point{X: 0, Y: width})
-	p.Line(f32.Point{X: -lineLen, Y: 0})
-	p.Line(f32.Point{X: 0, Y: -width})
-	p.End().Add(gtx.Ops)
+	path.Begin(gtx.Ops)
+	path.Move(f32.Point{X: 0, Y: merginTop})
+	path.Line(f32.Point{X: lineLen, Y: 0})
+	path.Line(f32.Point{X: 0, Y: width})
+	path.Line(f32.Point{X: -lineLen, Y: 0})
+	path.Line(f32.Point{X: 0, Y: -width})
+	path.End().Add(gtx.Ops)
 	paint.ColorOp{lightGrey}.Add(gtx.Ops)
 	paint.PaintOp{
 		Rect: f32.Rectangle{
@@ -114,36 +152,32 @@ func (a *Add) line(gtx *layout.Context) {
 	stack.Pop()
 }
 
-func (a *Add) cursor(gtx *layout.Context) {
-	a.caretOn = false
+func (p *Placeholder) cursor(gtx *layout.Context) {
+	p.caretOn = false
 	now := gtx.Now()
-	dt := now.Sub(a.blinkStart)
+	dt := now.Sub(p.blinkStart)
 	const timePerBlink = time.Second / blinksPerSecond
-	a.caretOn = dt%timePerBlink < timePerBlink/2
-	if !a.caretOn {
+	p.caretOn = dt%timePerBlink < timePerBlink/2
+	if !p.caretOn {
 		return
 	}
 	length := float32(gtx.Config.Px(unit.Sp(100)))
 	width := float32(gtx.Config.Px(unit.Sp(1)))
-	var p paint.Path
+	var path paint.Path
 	var merginTop = float32(gtx.Constraints.Height.Min / 2)
 	var merginLeft = float32(gtx.Config.Px(unit.Sp(60)))
 	var stack op.StackOp
 	stack.Push(gtx.Ops)
-	p.Begin(gtx.Ops)
-	p.Move(f32.Point{X: merginLeft, Y: merginTop})
-	p.Line(f32.Point{X: length, Y: 0})
-	p.Line(f32.Point{X: 0, Y: width})
-	p.Line(f32.Point{X: -length, Y: 0})
-	p.Line(f32.Point{X: 0, Y: -width})
-	p.End().Add(gtx.Ops)
+	path.Begin(gtx.Ops)
+	path.Move(f32.Point{X: merginLeft, Y: merginTop})
+	path.Line(f32.Point{X: length, Y: 0})
+	path.Line(f32.Point{X: 0, Y: width})
+	path.Line(f32.Point{X: -length, Y: 0})
+	path.Line(f32.Point{X: 0, Y: -width})
+	path.End().Add(gtx.Ops)
 	paint.ColorOp{black}.Add(gtx.Ops)
 	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: float32(length), Y: merginTop + width}}}.Add(gtx.Ops)
 	stack.Pop()
-}
-
-func (a *Add) IsIndex(i int) bool {
-	return a.Index == i
 }
 
 type PlusButton struct{}
@@ -206,29 +240,10 @@ func (b PlusButton) plus(gtx *layout.Context) {
 	stack.Pop()
 }
 
-type placeholder struct {
-	button *widget.Button
+type AddCellEvent struct {
+	Type CellType
 }
 
-func newPlaceholder() placeholder {
-	return placeholder{&widget.Button{}}
-}
+type FocusNextCellEvent struct{}
 
-func (p placeholder) Layout(gtx *layout.Context) {
-	px := gtx.Config.Px(unit.Sp(20))
-	constraint := layout.Constraint{Min: px, Max: px}
-	gtx.Constraints.Height = constraint
-	fill(gtx, white)
-	pointer.EllipseAreaOp{Rect: image.Rectangle{Max: gtx.Dimensions.Size}}.Add(gtx.Ops)
-	p.button.Layout(gtx)
-}
-
-func (p placeholder) Event(gtx *layout.Context) interface{} {
-	for p.button.Clicked(gtx) {
-		fmt.Println("Focus Placeholder")
-		return FocusPlaceholder{}
-	}
-	return nil
-}
-
-type FocusPlaceholder struct{}
+type FocusPreviousCellEvent struct{}

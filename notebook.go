@@ -2,6 +2,7 @@ package foxtrot
 
 import (
 	"encoding/xml"
+	"fmt"
 	"gioui.org/layout"
 	"github.com/corywalker/expreduce/expreduce"
 	"github.com/corywalker/expreduce/expreduce/parser"
@@ -10,18 +11,16 @@ import (
 
 type Notebook struct {
 	cells        []*Cell
-	add          *Add
-	placeholders []placeholder
+	placeholders []Placeholder
 	kernel       *expreduce.EvalState
 	promptCount  int
 }
 
 func NewNotebook() *Notebook {
 	cells := make([]*Cell, 0)
-	add := NewAdd()
 	kernel := expreduce.NewEvalState()
-	placeholders := []placeholder{newPlaceholder()}
-	return &Notebook{cells, add, placeholders, kernel, 1}
+	adds := []Placeholder{*NewPlaceholder()}
+	return &Notebook{cells, adds, kernel, 1}
 }
 
 func (nb *Notebook) Event(gtx *layout.Context) interface{} {
@@ -29,33 +28,29 @@ func (nb *Notebook) Event(gtx *layout.Context) interface{} {
 		e := c.Event(gtx)
 		if _, ok := e.(EvalEvent); ok {
 			nb.eval(i)
-			nb.focusNext(i)
+			nb.focusPlaceholder(i + 1)
 		}
 	}
-	for i, p := range nb.placeholders {
-		e := p.Event(gtx)
-		if _, ok := e.(FocusPlaceholder); ok {
-			nb.add.Focus(i)
+	for i, _ := range nb.placeholders {
+		e := nb.placeholders[i].Event(gtx)
+		if ce, ok := e.(AddCellEvent); ok {
+			nb.InsertCell(i, ce.Type)
+			nb.focusCell(i)
+		} else if _, ok := e.(FocusPreviousCellEvent); ok {
+			nb.focusCell(i - 1)
+		} else if _, ok := e.(FocusNextCellEvent); ok {
+			nb.focusCell(i)
 		}
-	}
-	e := nb.add.Event(gtx)
-	if _, ok := e.(AddCellEvent); ok {
-		nb.InsertCell(nb.add.Index)
 	}
 	return nil
 }
 
 func (nb *Notebook) Layout(gtx *layout.Context) {
-	n := len(nb.cells)*2 + 1
+	n := len(nb.cells)*2 + 1 // Their is one more Placeholder then cells
 	list := layout.List{Axis: layout.Vertical}
 	list.Layout(gtx, n, func(i int) {
 		if i%2 == 0 {
-			i = i / 2
-			if nb.add.IsIndex(i) {
-				nb.add.Layout(i, gtx)
-			} else {
-				nb.placeholders[i].Layout(gtx)
-			}
+			nb.placeholders[i/2].Layout(i, gtx)
 		} else {
 			nb.cells[(i-1)/2].Layout(gtx)
 		}
@@ -76,22 +71,26 @@ func (nb *Notebook) eval(i int) {
 	nb.promptCount++
 }
 
-func (nb *Notebook) focusNext(i int) {
-	if i < len(nb.cells)-1 {
-		nb.cells[i+1].Focus()
-	} else {
-		nb.add.Focus(len(nb.cells))
+func (nb *Notebook) focusCell(i int) {
+	if i >= 0 && i < len(nb.cells) {
+		fmt.Printf("Focus cell %d\n", i)
+		nb.cells[i].Focus()
 	}
 }
 
-func (nb *Notebook) InsertCell(index int) {
-	nb.placeholders = append(nb.placeholders, newPlaceholder())
-	cell := newCell(-1)
-	nb.cells = append(nb.cells, newCell(-1))
+func (nb *Notebook) focusPlaceholder(i int) {
+	if i > 0 && i < len(nb.placeholders) {
+		fmt.Printf("Focus Placeholder %d\n", i)
+		nb.placeholders[i].Focus()
+	}
+}
+
+func (nb *Notebook) InsertCell(index int, typ CellType) {
+	nb.placeholders = append(nb.placeholders, *NewPlaceholder())
+	cell := NewCell(typ, -1)
+	nb.cells = append(nb.cells, cell)
 	copy(nb.cells[index+1:], nb.cells[index:])
 	nb.cells[index] = cell
-	nb.add.Focus(-1)
-	cell.Focus()
 }
 
 func (nb *Notebook) DeleteCell(index int) {}

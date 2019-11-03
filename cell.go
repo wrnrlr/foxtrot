@@ -9,20 +9,17 @@ import (
 )
 
 type Cell struct {
+	Type      CellType
 	in        string
 	out       *Out
 	promptNum int
 	inEditor  *widget.Editor
 }
 
-func newCell(i int) *Cell {
+func NewCell(typ CellType, i int) *Cell {
 	inEditor := &widget.Editor{Submit: true}
-	return &Cell{promptNum: i, inEditor: inEditor}
+	return &Cell{Type: typ, promptNum: i, inEditor: inEditor}
 }
-
-type EvalEvent struct{}
-
-func (EvalEvent) ImplementsEvent() {}
 
 func (c Cell) Event(gtx *layout.Context) interface{} {
 	for _, e := range c.inEditor.Events(gtx) {
@@ -63,6 +60,7 @@ func (c Cell) Layout(gtx *layout.Context) {
 }
 
 func (c *Cell) Focus() {
+	fmt.Println("Cell.Focus")
 	c.inEditor.Focus()
 }
 
@@ -103,14 +101,22 @@ func (c *Cell) itemCount() int {
 type CellType int
 
 const (
-	EXPRESSION CellType = iota
-	TITLE
-	TEXT
-	CODE
+	FoxtrotCell CellType = iota
+	TitleCell
+	SubSectionCell
+	SubSubSectionCell
+	TextCell
+	CodeCell
 )
 
-var CellTypeNames = []string{"Foxtrot", "Title", "Text", "Code"}
+var CellTypeNames = []string{"Foxtrot", "Title", "SubSection", "SubSubSection", "Text", "Code"}
 
 func (d CellType) String() string {
 	return CellTypeNames[d]
 }
+
+type EvalEvent struct{}
+
+type FocusPreviousPlaceholder struct{}
+
+type FocusNextPlaceholder struct{}
