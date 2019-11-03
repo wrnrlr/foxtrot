@@ -30,7 +30,8 @@ type Placeholder struct {
 	caretOn      bool
 	requestFocus bool
 
-	clicker gesture.Click
+	clicker  gesture.Click
+	scroller gesture.Scroll
 
 	events []interface{}
 }
@@ -63,11 +64,18 @@ func (p *Placeholder) processPointer(gtx *layout.Context) interface{} {
 			p.requestFocus = true
 		}
 	}
+	axis := gesture.Horizontal
+	sdist := p.scroller.Scroll(gtx.Config, gtx.Queue, gtx.Now(), axis)
+	if sdist > 0 {
+		fmt.Println("Scroll stop")
+		p.scroller.Stop()
+	}
 	return nil
 }
 
 func (p *Placeholder) processKey(gtx *layout.Context) interface{} {
 	for _, ke := range gtx.Events(&p.eventKey) {
+		fmt.Println("Placeholder: Key Event")
 		p.blinkStart = gtx.Now()
 		switch ke := ke.(type) {
 		case key.FocusEvent:
@@ -100,10 +108,10 @@ func (p *Placeholder) Focus() {
 
 func (p *Placeholder) Layout(i int, gtx *layout.Context) {
 	key.InputOp{Key: &p.eventKey, Focus: p.requestFocus}.Add(gtx.Ops)
+	p.scroller.Add(gtx.Ops)
 	p.requestFocus = false
 	p.clicker.Add(gtx.Ops)
 	if p.focused {
-
 		px := gtx.Config.Px(unit.Dp(20))
 		constraint := layout.Constraint{Min: px, Max: px}
 		gtx.Constraints.Height = constraint
