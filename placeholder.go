@@ -81,9 +81,9 @@ func (p *Placeholder) processKey(gtx *layout.Context) interface{} {
 			fmt.Println("Placeholder: key.Event")
 			if ke.Name == key.NameReturn || ke.Name == key.NameEnter {
 				return AddCellEvent{Type: FoxtrotCell}
-			} else if ke.Name == key.NameUpArrow {
+			} else if ke.Name == key.NameUpArrow || ke.Name == key.NameLeftArrow {
 				return FocusPreviousCellEvent{}
-			} else if ke.Name == key.NameDownArrow {
+			} else if ke.Name == key.NameDownArrow || ke.Name == key.NameRightArrow {
 				return FocusNextCellEvent{}
 			}
 		case key.EditEvent:
