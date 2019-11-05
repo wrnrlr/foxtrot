@@ -32,8 +32,10 @@ github.com/stretchr/testify v1.4.0 h1:2E4SXV/wtOkTonXsotYi4li6zVWxYlZuYNCXe9XRJy
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
 github.com/wcharczuk/go-chart v2.0.1+incompatible h1:0pz39ZAycJFF7ju/1mepnk26RLVLBCWz1STcD3doU0A=
 github.com/wcharczuk/go-chart v2.0.1+incompatible/go.mod h1:PF5tmL4EIx/7Wf+hEkpCqYi5He4u90sw+0+6FhrryuE=
+github.com/wrnrlr/expreduce v0.0.0-20190902204200-0a346d0d4ef1/go.mod h1:cBwkSsAKlFM342qYzdoCJMNuyllyrCWSAfCojYiAKPw=
 github.com/wrnrlr/expreduce v0.0.0-20191019174121-67e737b14333 h1:PH49kxjMOfWA5QKPcJPy/GB3sDNFOXdZXcBFAP1ddjY=
 github.com/wrnrlr/expreduce v0.0.0-20191019174121-67e737b14333/go.mod h1:3EjbFfzabXTg2HC8ByxioDHkaPEgOdQWiSiBYXwmUMw=
+github.com/wrnrlr/expreduce v0.0.0-20191104212724-251a8aec3649/go.mod h1:RKnp42uslYbLnq5nCOilAyCpkvVw2lCtzXdXxnaqxF8=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20190510104115-cbcb75029529/go.mod h1:yigFU9vqHzYiE8UmvKecakEJjdnWj3jj499lnFckfCI=
 golang.org/x/exp v0.0.0-20190306152737-a1d7652674e8/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
