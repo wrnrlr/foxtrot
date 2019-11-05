@@ -51,6 +51,7 @@ func (p *Placeholder) Event(gtx *layout.Context) interface{} {
 	for p.pbutton.Clicked(gtx) {
 		fmt.Println("Focus Placeholder")
 		p.requestFocus = true
+		return SelectPlaceholderEvent{}
 	}
 	return p.processKey(gtx)
 }
@@ -80,7 +81,8 @@ func (p *Placeholder) processKey(gtx *layout.Context) interface{} {
 		switch ke := ke.(type) {
 		case key.FocusEvent:
 			p.focused = ke.Focus
-			fmt.Println("Placeholder: key.FocusEvent")
+			//p.active = ke.Focus
+			fmt.Printf("Placeholder: key.FocusEvent: %s\n", ke.Focus)
 		case key.Event:
 			if !p.focused {
 				fmt.Println("Placeholder (unfocused): key.Event")
@@ -106,12 +108,12 @@ func (p *Placeholder) Focus() {
 	p.blinkStart = time.Now()
 }
 
-func (p *Placeholder) Layout(i int, gtx *layout.Context) {
+func (p *Placeholder) Layout(isSelected bool, gtx *layout.Context) {
 	key.InputOp{Key: &p.eventKey, Focus: p.requestFocus}.Add(gtx.Ops)
 	p.scroller.Add(gtx.Ops)
 	p.requestFocus = false
 	p.clicker.Add(gtx.Ops)
-	if p.focused {
+	if isSelected {
 		px := gtx.Config.Px(unit.Dp(20))
 		constraint := layout.Constraint{Min: px, Max: px}
 		gtx.Constraints.Height = constraint
@@ -162,6 +164,9 @@ func (p *Placeholder) line(gtx *layout.Context) {
 }
 
 func (p *Placeholder) cursor(gtx *layout.Context) {
+	if !p.focused {
+		return
+	}
 	p.caretOn = false
 	now := gtx.Now()
 	dt := now.Sub(p.blinkStart)
@@ -258,6 +263,8 @@ func (b PlusButton) plus(gtx *layout.Context) {
 type AddCellEvent struct {
 	Type CellType
 }
+
+type SelectPlaceholderEvent struct{}
 
 type FocusNextCellEvent struct{}
 

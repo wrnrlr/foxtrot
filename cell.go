@@ -115,6 +115,8 @@ func (d CellType) String() string {
 	return CellTypeNames[d]
 }
 
+type SelectCellEvent struct{}
+
 type EvalEvent struct{}
 
 type FocusPreviousPlaceholder struct{}
