@@ -38,25 +38,13 @@ func (c *Cell) evaluate() {
 	}
 }
 
-func (c Cell) Layout(gtx *layout.Context) {
-	n := c.itemCount()
-	list := &layout.List{Axis: layout.Vertical}
-	list.Layout(gtx, n, func(i int) {
-		if i == 0 {
-			f := layout.Flex{Alignment: layout.Middle}
-			c1 := f.Rigid(gtx, func() {
-				c.promptLayout(gtx)
-			})
-			c2 := f.Flex(gtx, 1, func() {
-				c.inEditor2().Layout(gtx, c.inEditor)
-			})
-			layout.Inset{Bottom: _padding}.Layout(gtx, func() {
-				f.Layout(gtx, c1, c2)
-			})
-		} else {
-			c.out.Layout(c.promptNum, gtx)
-		}
-	})
+func (c *Cell) Layout(gtx *layout.Context) {
+	switch c.Type {
+	case FoxtrotCell:
+		c.foxtrotCell(gtx)
+	case TitleCell:
+		c.titleCell(gtx)
+	}
 }
 
 func (c *Cell) Focus() {
@@ -96,6 +84,51 @@ func (c *Cell) itemCount() int {
 	} else {
 		return 1
 	}
+}
+
+func (c *Cell) foxtrotCell(gtx *layout.Context) {
+	n := c.itemCount()
+	list := &layout.List{Axis: layout.Vertical}
+	list.Layout(gtx, n, func(i int) {
+		if i == 0 {
+			f := layout.Flex{Alignment: layout.Middle}
+			c1 := f.Rigid(gtx, func() {
+				c.promptLayout(gtx)
+			})
+			c2 := f.Flex(gtx, 1, func() {
+				c.inEditor2().Layout(gtx, c.inEditor)
+			})
+			layout.Inset{Bottom: _padding}.Layout(gtx, func() {
+				f.Layout(gtx, c1, c2)
+			})
+		} else {
+			c.out.Layout(c.promptNum, gtx)
+		}
+	})
+}
+
+func (c *Cell) titleCell(gtx *layout.Context) {
+	FoxtrotTheme.Editor("Title").Layout(gtx, c.inEditor)
+}
+
+func (c *Cell) subSectionCell(gtx *layout.Context) {
+
+}
+
+func (c *Cell) subSubSectionCell(gtx *layout.Context) {
+
+}
+
+func (c *Cell) textCell(gtx *layout.Context) {
+
+}
+
+func (c *Cell) codeCell(gtx *layout.Context) {
+
+}
+
+type cellType interface {
+	Layout(gtx *layout.Context)
 }
 
 type CellType int

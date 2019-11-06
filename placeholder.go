@@ -95,6 +95,16 @@ func (p *Placeholder) processKey(gtx *layout.Context) interface{} {
 				return FocusPreviousCellEvent{}
 			} else if ke.Name == key.NameDownArrow || ke.Name == key.NameRightArrow {
 				return FocusNextCellEvent{}
+			} else if ke.Name == '1' && ke.Modifiers.Contain(key.ModCommand) {
+				return AddCellEvent{Type: TitleCell}
+			} else if ke.Name == '5' && ke.Modifiers.Contain(key.ModCommand) {
+				return AddCellEvent{Type: SubSectionCell}
+			} else if ke.Name == '6' && ke.Modifiers.Contain(key.ModCommand) {
+				return AddCellEvent{Type: SubSubSectionCell}
+			} else if ke.Name == '7' && ke.Modifiers.Contain(key.ModCommand) {
+				return AddCellEvent{Type: TextCell}
+			} else if ke.Name == '7' && ke.Modifiers.Contain(key.ModCommand) {
+				return AddCellEvent{Type: CodeCell}
 			}
 		case key.EditEvent:
 			fmt.Println("Placeholder: key.EditEvent")
@@ -132,11 +142,16 @@ func (p *Placeholder) Layout(isSelected bool, gtx *layout.Context) {
 }
 
 func (p *Placeholder) placeholderLayout(gtx *layout.Context) {
-	px := gtx.Config.Px(unit.Sp(20))
-	constraint := layout.Constraint{Min: px, Max: px}
-	gtx.Constraints.Height = constraint
-	fill(gtx, white)
-	pointer.EllipseAreaOp{Rect: image.Rectangle{Max: gtx.Dimensions.Size}}.Add(gtx.Ops)
+	width := gtx.Constraints.Width.Max
+	height := gtx.Config.Px(unit.Sp(20))
+	gtx.Constraints.Height = layout.Constraint{Min: height, Max: height}
+	dr := f32.Rectangle{
+		Max: f32.Point{X: float32(width), Y: float32(height)},
+	}
+	paint.ColorOp{Color: lightPink}.Add(gtx.Ops)
+	paint.PaintOp{Rect: dr}.Add(gtx.Ops)
+	gtx.Dimensions = layout.Dimensions{Size: image.Point{X: width, Y: height}}
+	pointer.RectAreaOp{Rect: image.Rectangle{Max: gtx.Dimensions.Size}}.Add(gtx.Ops)
 	p.pbutton.Layout(gtx)
 }
 

@@ -48,6 +48,19 @@ func NewTheme() *Theme {
 	t.TextSize = unit.Sp(16)
 	return t
 }
+
+func initThemes() {
+	FoxtrotTheme = material.NewTheme()
+	TitleTheme = material.NewTheme()
+	TitleTheme.TextSize = unit.Sp(20)
+	TitleTheme.Color.Text = red
+}
+
+var (
+	FoxtrotTheme, TitleTheme *material.Theme
+	TitleEditor              *material.Editor
+)
+
 func rgb(c uint32) color.RGBA {
 	return argb(0xff000000 | c)
 }
