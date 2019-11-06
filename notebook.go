@@ -16,15 +16,16 @@ type Notebook struct {
 	promptCount  int
 
 	selectedPlaceholder int
+	list                layout.List
 }
 
 func NewNotebook() *Notebook {
 	cells := make([]*Cell, 0)
 	kernel := expreduce.NewEvalState()
-	firstPlaceholder := *NewPlaceholder()
+	firstPlaceholder := NewPlaceholder()
 	firstPlaceholder.Focus()
 	adds := []Placeholder{firstPlaceholder}
-	return &Notebook{cells, adds, kernel, 1, 0}
+	return &Notebook{cells, adds, kernel, 1, 0, layout.List{Axis: layout.Vertical}}
 }
 
 func (nb *Notebook) Event(gtx *layout.Context) interface{} {
@@ -53,8 +54,7 @@ func (nb *Notebook) Event(gtx *layout.Context) interface{} {
 
 func (nb *Notebook) Layout(gtx *layout.Context) {
 	n := len(nb.cells)*2 + 1 // Their is one more Placeholder then cells
-	list := layout.List{Axis: layout.Vertical}
-	list.Layout(gtx, n, func(i int) {
+	nb.list.Layout(gtx, n, func(i int) {
 		if i%2 == 0 {
 			i = i / 2
 			isSelected := i == nb.selectedPlaceholder
@@ -96,7 +96,7 @@ func (nb *Notebook) focusPlaceholder(i int) {
 }
 
 func (nb *Notebook) InsertCell(index int, typ CellType) {
-	nb.placeholders = append(nb.placeholders, *NewPlaceholder())
+	nb.placeholders = append(nb.placeholders, NewPlaceholder())
 	cell := NewCell(typ, -1)
 	nb.cells = append(nb.cells, cell)
 	copy(nb.cells[index+1:], nb.cells[index:])
