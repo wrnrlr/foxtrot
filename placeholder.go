@@ -21,8 +21,8 @@ const (
 )
 
 type Placeholder struct {
-	button  *widget.Button
-	pbutton *widget.Button
+	plusButton       *widget.Button
+	backgroundButton *widget.Button
 
 	eventKey     int
 	blinkStart   time.Time
@@ -30,25 +30,25 @@ type Placeholder struct {
 	caretOn      bool
 	requestFocus bool
 
-	clicker  gesture.Click
-	scroller gesture.Scroll
+	clicker gesture.Click
+	//scroller gesture.Scroll
 
 	events []interface{}
 }
 
-func NewPlaceholder() *Placeholder {
-	return &Placeholder{
-		button:     new(widget.Button),
-		pbutton:    new(widget.Button),
-		blinkStart: time.Now()}
+func NewPlaceholder() Placeholder {
+	return Placeholder{
+		plusButton:       new(widget.Button),
+		backgroundButton: new(widget.Button),
+		blinkStart:       time.Now()}
 }
 
 func (p *Placeholder) Event(gtx *layout.Context) interface{} {
-	for p.button.Clicked(gtx) {
+	for p.plusButton.Clicked(gtx) {
 		fmt.Println("Placeholder Button Clicked")
 		return AddCellEvent{}
 	}
-	for p.pbutton.Clicked(gtx) {
+	for p.backgroundButton.Clicked(gtx) {
 		fmt.Println("Focus Placeholder")
 		p.requestFocus = true
 		return SelectPlaceholderEvent{}
@@ -57,6 +57,9 @@ func (p *Placeholder) Event(gtx *layout.Context) interface{} {
 }
 
 func (p *Placeholder) processPointer(gtx *layout.Context) interface{} {
+	if !p.focused {
+		return nil
+	}
 	for _, evt := range p.clicker.Events(gtx) {
 		switch {
 		case evt.Type == gesture.TypePress && evt.Source == pointer.Mouse,
@@ -65,12 +68,12 @@ func (p *Placeholder) processPointer(gtx *layout.Context) interface{} {
 			p.requestFocus = true
 		}
 	}
-	axis := gesture.Horizontal
-	sdist := p.scroller.Scroll(gtx.Config, gtx.Queue, gtx.Now(), axis)
-	if sdist > 0 {
-		fmt.Println("Scroll stop")
-		p.scroller.Stop()
-	}
+	//axis := gesture.Horizontal
+	//sdist := p.scroller.Scroll(gtx.Config, gtx.Queue, gtx.Now(), axis)
+	//if sdist > 0 {
+	//	fmt.Println("Scroll stop")
+	//	p.scroller.Stop()
+	//}
 	return nil
 }
 
@@ -120,16 +123,16 @@ func (p *Placeholder) Focus() {
 
 func (p *Placeholder) Layout(isSelected bool, gtx *layout.Context) {
 	key.InputOp{Key: &p.eventKey, Focus: p.requestFocus}.Add(gtx.Ops)
-	p.scroller.Add(gtx.Ops)
+	//p.scroller.Add(gtx.Ops)
 	p.requestFocus = false
-	p.clicker.Add(gtx.Ops)
 	if isSelected {
+		//p.clicker.Add(gtx.Ops)
 		px := gtx.Config.Px(unit.Dp(20))
 		constraint := layout.Constraint{Min: px, Max: px}
 		gtx.Constraints.Height = constraint
 		st := layout.Stack{Alignment: layout.NW}
 		c := st.Expand(gtx, func() {
-			PlusButton{}.Layout(gtx, p.button)
+			PlusButton{}.Layout(gtx, p.plusButton)
 		})
 		l := st.Expand(gtx, func() {
 			p.line(gtx)
@@ -148,11 +151,11 @@ func (p *Placeholder) placeholderLayout(gtx *layout.Context) {
 	dr := f32.Rectangle{
 		Max: f32.Point{X: float32(width), Y: float32(height)},
 	}
-	paint.ColorOp{Color: lightPink}.Add(gtx.Ops)
+	paint.ColorOp{Color: white}.Add(gtx.Ops)
 	paint.PaintOp{Rect: dr}.Add(gtx.Ops)
 	gtx.Dimensions = layout.Dimensions{Size: image.Point{X: width, Y: height}}
 	pointer.RectAreaOp{Rect: image.Rectangle{Max: gtx.Dimensions.Size}}.Add(gtx.Ops)
-	p.pbutton.Layout(gtx)
+	p.backgroundButton.Layout(gtx)
 }
 
 func (p *Placeholder) line(gtx *layout.Context) {
