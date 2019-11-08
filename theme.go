@@ -21,6 +21,7 @@ var (
 
 	inlineHeight     = layout.Constraint{Min: 50, Max: 50}
 	promptWidth      = unit.Sp(50)
+	cellLeftMargin   = unit.Sp(20)
 	_defaultFontSize = unit.Sp(20)
 	_promptFontSize  = unit.Sp(12)
 	theme            *material.Theme
@@ -52,13 +53,28 @@ func NewTheme() *Theme {
 func initThemes() {
 	FoxtrotTheme = material.NewTheme()
 	TitleTheme = material.NewTheme()
-	TitleTheme.TextSize = unit.Sp(20)
+	TitleTheme.TextSize = unit.Sp(38)
 	TitleTheme.Color.Text = red
+	SectionTheme = material.NewTheme()
+	SectionTheme.TextSize = unit.Sp(32)
+	SectionTheme.Color.Text = red
+	SubSectionTheme = material.NewTheme()
+	SubSectionTheme.TextSize = unit.Sp(26)
+	SubSectionTheme.Color.Text = red
+	SubSubSectionTheme = material.NewTheme()
+	SubSubSectionTheme.TextSize = unit.Sp(20)
+	SubSubSectionTheme.Color.Text = red
+	TextTheme = material.NewTheme()
+	TextTheme.TextSize = unit.Sp(16)
+	TextTheme.Color.Text = black
+	CodeTheme = material.NewTheme()
+	CodeTheme.TextSize = unit.Sp(16)
+	CodeTheme.Color.Text = black
 }
 
 var (
-	FoxtrotTheme, TitleTheme *material.Theme
-	TitleEditor              *material.Editor
+	FoxtrotTheme, TitleTheme, SectionTheme, SubSectionTheme, SubSubSectionTheme, TextTheme, CodeTheme *material.Theme
+	TitleEditor                                                                                       *material.Editor
 )
 
 func rgb(c uint32) color.RGBA {

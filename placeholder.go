@@ -46,7 +46,7 @@ func NewPlaceholder() Placeholder {
 func (p *Placeholder) Event(gtx *layout.Context) interface{} {
 	for p.plusButton.Clicked(gtx) {
 		fmt.Println("Placeholder Button Clicked")
-		return AddCellEvent{}
+		return AddCellEvent{Type: FoxtrotCell}
 	}
 	for p.backgroundButton.Clicked(gtx) {
 		fmt.Println("Focus Placeholder")
@@ -100,13 +100,15 @@ func (p *Placeholder) processKey(gtx *layout.Context) interface{} {
 				return FocusNextCellEvent{}
 			} else if ke.Name == '1' && ke.Modifiers.Contain(key.ModCommand) {
 				return AddCellEvent{Type: TitleCell}
+			} else if ke.Name == '4' && ke.Modifiers.Contain(key.ModCommand) {
+				return AddCellEvent{Type: SectionCell}
 			} else if ke.Name == '5' && ke.Modifiers.Contain(key.ModCommand) {
 				return AddCellEvent{Type: SubSectionCell}
 			} else if ke.Name == '6' && ke.Modifiers.Contain(key.ModCommand) {
 				return AddCellEvent{Type: SubSubSectionCell}
 			} else if ke.Name == '7' && ke.Modifiers.Contain(key.ModCommand) {
 				return AddCellEvent{Type: TextCell}
-			} else if ke.Name == '7' && ke.Modifiers.Contain(key.ModCommand) {
+			} else if ke.Name == '8' && ke.Modifiers.Contain(key.ModCommand) {
 				return AddCellEvent{Type: CodeCell}
 			}
 		case key.EditEvent:

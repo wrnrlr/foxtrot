@@ -44,6 +44,16 @@ func (c *Cell) Layout(gtx *layout.Context) {
 		c.foxtrotCell(gtx)
 	case TitleCell:
 		c.titleCell(gtx)
+	case SectionCell:
+		c.sectionCell(gtx)
+	case SubSectionCell:
+		c.subSectionCell(gtx)
+	case SubSubSectionCell:
+		c.subSubSectionCell(gtx)
+	case TextCell:
+		c.textCell(gtx)
+	case CodeCell:
+		c.codeCell(gtx)
 	}
 }
 
@@ -108,23 +118,40 @@ func (c *Cell) foxtrotCell(gtx *layout.Context) {
 }
 
 func (c *Cell) titleCell(gtx *layout.Context) {
-	FoxtrotTheme.Editor("Title").Layout(gtx, c.inEditor)
+	editor := TitleTheme.Editor("Title")
+	c.plainCell(&editor, gtx)
+}
+
+func (c *Cell) sectionCell(gtx *layout.Context) {
+	editor := SectionTheme.Editor("Section")
+	c.plainCell(&editor, gtx)
 }
 
 func (c *Cell) subSectionCell(gtx *layout.Context) {
-
+	editor := SubSectionTheme.Editor("Sub Section")
+	c.plainCell(&editor, gtx)
 }
 
 func (c *Cell) subSubSectionCell(gtx *layout.Context) {
-
+	editor := SubSubSectionTheme.Editor("Sub Sub Section")
+	c.plainCell(&editor, gtx)
 }
 
 func (c *Cell) textCell(gtx *layout.Context) {
-
+	editor := TextTheme.Editor("Text")
+	c.plainCell(&editor, gtx)
 }
 
 func (c *Cell) codeCell(gtx *layout.Context) {
+	editor := CodeTheme.Editor("Code")
+	editor.Font.Variant = "Mono"
+	editor.Layout(gtx, c.inEditor)
+}
 
+func (c *Cell) plainCell(editor *material.Editor, gtx *layout.Context) {
+	layout.Inset{Left: cellLeftMargin}.Layout(gtx, func() {
+		editor.Layout(gtx, c.inEditor)
+	})
 }
 
 type cellType interface {
@@ -136,13 +163,14 @@ type CellType int
 const (
 	FoxtrotCell CellType = iota
 	TitleCell
+	SectionCell
 	SubSectionCell
 	SubSubSectionCell
 	TextCell
 	CodeCell
 )
 
-var CellTypeNames = []string{"Foxtrot", "Title", "SubSection", "SubSubSection", "Text", "Code"}
+var CellTypeNames = []string{"Foxtrot", "Title", "Section", "SubSection", "SubSubSection", "Text", "Code"}
 
 func (d CellType) String() string {
 	return CellTypeNames[d]
