@@ -7,11 +7,6 @@ Foxtrot is an open-source development environment designed for exploratory progr
 ## Installation
 
 ```bash
-# Clone Foxtrot
-git clone https://github.com/wrnrlr/foxtrot
-
-cd foxtrot/expreduce
-
 # Clone Foxtrot repository and its submodules.
 git clone --recurse-submodules https://github.com/wrnrlr/foxtrot
 
