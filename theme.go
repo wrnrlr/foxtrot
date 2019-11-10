@@ -10,14 +10,15 @@ import (
 )
 
 var (
-	lightGrey  = rgb(0xbbbbbb)
-	lightPink  = rgb(0xffb6c1)
-	lightBlue  = rgb(0x039be5)
-	lightGreen = rgb(0x7cb342)
-	white      = rgb(0xffffff)
-	black      = rgb(0x000000)
-	red        = rgb(0xe53935)
-	blue       = rgb(0x1e88e5)
+	lightGrey     = rgb(0xbbbbbb)
+	lightPink     = rgb(0xffb6c1)
+	lightBlue     = rgb(0x039be5)
+	lightGreen    = rgb(0x7cb342)
+	white         = rgb(0xffffff)
+	black         = rgb(0x000000)
+	red           = rgb(0xe53935)
+	blue          = rgb(0x1e88e5)
+	selectedColor = rgb(0xe1f5fe)
 
 	inlineHeight     = layout.Constraint{Min: 50, Max: 50}
 	promptWidth      = unit.Sp(50)

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gioui.org/layout"
 	"gioui.org/text"
+	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
 )
@@ -14,11 +15,12 @@ type Cell struct {
 	out       *Out
 	promptNum int
 	inEditor  *widget.Editor
+	margin    *Margin
 }
 
 func NewCell(typ CellType, i int) *Cell {
 	inEditor := &widget.Editor{Submit: true}
-	return &Cell{Type: typ, promptNum: i, inEditor: inEditor}
+	return &Cell{Type: typ, promptNum: i, inEditor: inEditor, margin: &Margin{}}
 }
 
 func (c Cell) Event(gtx *layout.Context) interface{} {
@@ -28,6 +30,7 @@ func (c Cell) Event(gtx *layout.Context) interface{} {
 			return EvalEvent{}
 		}
 	}
+	c.margin.Checked(gtx)
 	return nil
 }
 
@@ -39,22 +42,11 @@ func (c *Cell) evaluate() {
 }
 
 func (c *Cell) Layout(gtx *layout.Context) {
-	switch c.Type {
-	case FoxtrotCell:
-		c.foxtrotCell(gtx)
-	case TitleCell:
-		c.titleCell(gtx)
-	case SectionCell:
-		c.sectionCell(gtx)
-	case SubSectionCell:
-		c.subSectionCell(gtx)
-	case SubSubSectionCell:
-		c.subSubSectionCell(gtx)
-	case TextCell:
-		c.textCell(gtx)
-	case CodeCell:
-		c.codeCell(gtx)
-	}
+	layout.Inset{Right: unit.Sp(10)}.Layout(gtx, func() {
+		c.margin.Layout(gtx, func() {
+			c.cellLayout(gtx)
+		})
+	})
 }
 
 func (c *Cell) Focus() {
@@ -93,6 +85,25 @@ func (c *Cell) itemCount() int {
 		return 2
 	} else {
 		return 1
+	}
+}
+
+func (c *Cell) cellLayout(gtx *layout.Context) {
+	switch c.Type {
+	case FoxtrotCell:
+		c.foxtrotCell(gtx)
+	case TitleCell:
+		c.titleCell(gtx)
+	case SectionCell:
+		c.sectionCell(gtx)
+	case SubSectionCell:
+		c.subSectionCell(gtx)
+	case SubSubSectionCell:
+		c.subSubSectionCell(gtx)
+	case TextCell:
+		c.textCell(gtx)
+	case CodeCell:
+		c.codeCell(gtx)
 	}
 }
 
@@ -154,10 +165,6 @@ func (c *Cell) plainCell(editor *material.Editor, gtx *layout.Context) {
 	})
 }
 
-type cellType interface {
-	Layout(gtx *layout.Context)
-}
-
 type CellType int
 
 const (
@@ -174,6 +181,21 @@ var CellTypeNames = []string{"Foxtrot", "Title", "Section", "SubSection", "SubSu
 
 func (d CellType) String() string {
 	return CellTypeNames[d]
+}
+
+func (d CellType) Level() int {
+	switch d {
+	case TitleCell:
+		return 1
+	case SectionCell:
+		return 3
+	case SubSectionCell:
+		return 4
+	case SubSubSectionCell:
+		return 5
+	default:
+		return 0
+	}
 }
 
 type SelectCellEvent struct{}
