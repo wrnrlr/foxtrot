@@ -20,7 +20,7 @@ const (
 	maxBlinkDuration = 10 * time.Second
 )
 
-type Placeholder struct {
+type Slot struct {
 	Active           bool
 	plusButton       *widget.Button
 	backgroundButton *widget.Button
@@ -37,129 +37,129 @@ type Placeholder struct {
 	prevEvents int
 }
 
-func NewPlaceholder() *Placeholder {
-	return &Placeholder{
+func NewSlot() *Slot {
+	return &Slot{
 		plusButton:       new(widget.Button),
 		backgroundButton: new(widget.Button),
 		blinkStart:       time.Now()}
 }
 
-func (p *Placeholder) Event(isActive bool, gtx *layout.Context) []interface{} {
-	p.processEvents(isActive, gtx)
-	events := p.events
-	p.events = nil
-	p.prevEvents = 0
+func (s *Slot) Event(isActive bool, gtx *layout.Context) []interface{} {
+	s.processEvents(isActive, gtx)
+	events := s.events
+	s.events = nil
+	s.prevEvents = 0
 	return events
 }
 
-func (p *Placeholder) processEvents(isActive bool, gtx *layout.Context) {
-	for p.plusButton.Clicked(gtx) {
-		fmt.Println("Placeholder Button Clicked")
-		p.events = append(p.events, AddCellEvent{Type: FoxtrotCell})
+func (s *Slot) processEvents(isActive bool, gtx *layout.Context) {
+	for s.plusButton.Clicked(gtx) {
+		fmt.Println("Slot Button Clicked")
+		s.events = append(s.events, AddCellEvent{Type: FoxtrotCell})
 	}
-	for p.backgroundButton.Clicked(gtx) {
-		fmt.Println("Background button clicked, Focus Placeholder")
-		p.Focus(true, gtx)
-		p.events = append(p.events, SelectPlaceholderEvent{})
+	for s.backgroundButton.Clicked(gtx) {
+		fmt.Println("Background button clicked, Focus Slot")
+		s.Focus(true, gtx)
+		s.events = append(s.events, SelectSlotEvent{})
 	}
-	p.processKey(isActive, gtx)
+	s.processKey(isActive, gtx)
 }
 
-func (p *Placeholder) processPointer(gtx *layout.Context) interface{} {
-	if !p.focused {
+func (s *Slot) processPointer(gtx *layout.Context) interface{} {
+	if !s.focused {
 		return nil
 	}
-	for _, evt := range p.clicker.Events(gtx) {
-		fmt.Println("Placeholder: Clicker event")
+	for _, evt := range s.clicker.Events(gtx) {
+		fmt.Println("Slot: Clicker event")
 		switch {
 		case evt.Type == gesture.TypePress && evt.Source == pointer.Mouse,
 			evt.Type == gesture.TypeClick && evt.Source == pointer.Touch:
-			fmt.Println("Placeholder: Clicker touched")
-			p.blinkStart = gtx.Now()
-			p.requestFocus = true
+			fmt.Println("Slot: Clicker touched")
+			s.blinkStart = gtx.Now()
+			s.requestFocus = true
 		}
 	}
 	return nil
 }
 
-func (p *Placeholder) processKey(isActive bool, gtx *layout.Context) {
+func (s *Slot) processKey(isActive bool, gtx *layout.Context) {
 	if !isActive {
 		return
 	}
-	for _, ke := range gtx.Events(&p.eventKey) {
-		p.blinkStart = gtx.Now()
+	for _, ke := range gtx.Events(&s.eventKey) {
+		s.blinkStart = gtx.Now()
 		switch ke := ke.(type) {
 		case key.FocusEvent:
-			fmt.Printf("Placeholder: key.FocusEvent key.FocusEvent: %s\n", ke.Focus)
-			p.focused = ke.Focus
-			//p.active = ke.Focus
+			fmt.Printf("Slot: key.FocusEvent key.FocusEvent: %s\n", ke.Focus)
+			s.focused = ke.Focus
+			//s.active = ke.Focus
 		case key.Event:
-			if !p.focused {
-				fmt.Println("Placeholder (unfocused): key.Event")
+			if !s.focused {
+				fmt.Println("Slot (unfocused): key.Event")
 				break
 			}
-			fmt.Println("Placeholder: key.Event")
+			fmt.Println("Slot: key.Event")
 			if ke.Name == key.NameReturn || ke.Name == key.NameEnter {
-				p.events = append(p.events, AddCellEvent{Type: FoxtrotCell})
+				s.events = append(s.events, AddCellEvent{Type: FoxtrotCell})
 			} else if ke.Name == key.NameUpArrow || ke.Name == key.NameLeftArrow {
-				p.events = append(p.events, FocusPreviousCellEvent{})
+				s.events = append(s.events, FocusPreviousCellEvent{})
 			} else if ke.Name == key.NameDownArrow || ke.Name == key.NameRightArrow {
-				p.events = append(p.events, FocusNextCellEvent{})
+				s.events = append(s.events, FocusNextCellEvent{})
 			} else if ke.Name == '1' && ke.Modifiers.Contain(key.ModCommand) {
-				p.events = append(p.events, AddCellEvent{Type: TitleCell})
+				s.events = append(s.events, AddCellEvent{Type: TitleCell})
 			} else if ke.Name == '4' && ke.Modifiers.Contain(key.ModCommand) {
-				p.events = append(p.events, AddCellEvent{Type: SectionCell})
+				s.events = append(s.events, AddCellEvent{Type: SectionCell})
 			} else if ke.Name == '5' && ke.Modifiers.Contain(key.ModCommand) {
-				p.events = append(p.events, AddCellEvent{Type: SubSectionCell})
+				s.events = append(s.events, AddCellEvent{Type: SubSectionCell})
 			} else if ke.Name == '6' && ke.Modifiers.Contain(key.ModCommand) {
-				p.events = append(p.events, AddCellEvent{Type: SubSubSectionCell})
+				s.events = append(s.events, AddCellEvent{Type: SubSubSectionCell})
 			} else if ke.Name == '7' && ke.Modifiers.Contain(key.ModCommand) {
-				p.events = append(p.events, AddCellEvent{Type: TextCell})
+				s.events = append(s.events, AddCellEvent{Type: TextCell})
 			} else if ke.Name == '8' && ke.Modifiers.Contain(key.ModCommand) {
-				p.events = append(p.events, AddCellEvent{Type: CodeCell})
+				s.events = append(s.events, AddCellEvent{Type: CodeCell})
 			}
 		case key.EditEvent:
-			fmt.Println("Placeholder: key.EditEvent")
+			fmt.Println("Slot: key.EditEvent")
 		}
 	}
 }
 
-func (p *Placeholder) Focus(requestFocus bool, gtx *layout.Context) {
-	p.requestFocus = requestFocus
+func (s *Slot) Focus(requestFocus bool, gtx *layout.Context) {
+	s.requestFocus = requestFocus
 }
 
-func (p *Placeholder) Layout(isActive bool, gtx *layout.Context) {
+func (s *Slot) Layout(isActive bool, gtx *layout.Context) {
 	// Flush events from before the previous frame.
-	copy(p.events, p.events[p.prevEvents:])
-	p.events = p.events[:len(p.events)-p.prevEvents]
-	p.prevEvents = len(p.events)
-	p.processEvents(isActive, gtx)
-	p.layout(isActive, gtx)
+	copy(s.events, s.events[s.prevEvents:])
+	s.events = s.events[:len(s.events)-s.prevEvents]
+	s.prevEvents = len(s.events)
+	s.processEvents(isActive, gtx)
+	s.layout(isActive, gtx)
 }
 
-func (p *Placeholder) layout(isActive bool, gtx *layout.Context) {
-	key.InputOp{Key: &p.eventKey, Focus: p.requestFocus}.Add(gtx.Ops)
-	p.requestFocus = false
+func (s *Slot) layout(isActive bool, gtx *layout.Context) {
+	key.InputOp{Key: &s.eventKey, Focus: s.requestFocus}.Add(gtx.Ops)
+	s.requestFocus = false
 	if isActive {
-		//p.clicker.Add(gtx.Ops)
+		//s.clicker.Add(gtx.Ops)
 		px := gtx.Config.Px(unit.Dp(20))
 		constraint := layout.Constraint{Min: px, Max: px}
 		gtx.Constraints.Height = constraint
 		st := layout.Stack{Alignment: layout.NW}
 		c := st.Expand(gtx, func() {
-			PlusButton{}.Layout(gtx, p.plusButton)
+			PlusButton{}.Layout(gtx, s.plusButton)
 		})
 		l := st.Expand(gtx, func() {
-			p.line(gtx)
-			p.cursor(gtx)
+			s.line(gtx)
+			s.cursor(gtx)
 		})
 		st.Layout(gtx, l, c)
 	} else {
-		p.placeholderLayout(gtx)
+		s.placeholderLayout(gtx)
 	}
 }
 
-func (p *Placeholder) placeholderLayout(gtx *layout.Context) {
+func (s *Slot) placeholderLayout(gtx *layout.Context) {
 	width := gtx.Constraints.Width.Max
 	height := gtx.Config.Px(unit.Sp(20))
 	gtx.Constraints.Height = layout.Constraint{Min: height, Max: height}
@@ -170,10 +170,10 @@ func (p *Placeholder) placeholderLayout(gtx *layout.Context) {
 	paint.PaintOp{Rect: dr}.Add(gtx.Ops)
 	gtx.Dimensions = layout.Dimensions{Size: image.Point{X: width, Y: height}}
 	pointer.RectAreaOp{Rect: image.Rectangle{Max: gtx.Dimensions.Size}}.Add(gtx.Ops)
-	p.backgroundButton.Layout(gtx)
+	s.backgroundButton.Layout(gtx)
 }
 
-func (p *Placeholder) line(gtx *layout.Context) {
+func (s *Slot) line(gtx *layout.Context) {
 	width := float32(gtx.Config.Px(unit.Sp(1)))
 	var path paint.Path
 	var lineLen = float32(gtx.Constraints.Width.Max)
@@ -196,13 +196,13 @@ func (p *Placeholder) line(gtx *layout.Context) {
 	stack.Pop()
 }
 
-func (p *Placeholder) cursor(gtx *layout.Context) {
-	if !p.focused {
+func (s *Slot) cursor(gtx *layout.Context) {
+	if !s.focused {
 		return
 	}
-	p.caretOn = false
+	s.caretOn = false
 	now := gtx.Now()
-	dt := now.Sub(p.blinkStart)
+	dt := now.Sub(s.blinkStart)
 	blinking := dt < maxBlinkDuration
 	const timePerBlink = time.Second / blinksPerSecond
 	nextBlink := now.Add(timePerBlink/2 - dt%(timePerBlink/2))
@@ -210,8 +210,8 @@ func (p *Placeholder) cursor(gtx *layout.Context) {
 		redraw := op.InvalidateOp{At: nextBlink}
 		redraw.Add(gtx.Ops)
 	}
-	p.caretOn = p.focused && (!blinking || dt%timePerBlink < timePerBlink/2)
-	if !p.caretOn {
+	s.caretOn = s.focused && (!blinking || dt%timePerBlink < timePerBlink/2)
+	if !s.caretOn {
 		return
 	}
 	length := float32(gtx.Config.Px(unit.Sp(100)))
@@ -295,7 +295,7 @@ type AddCellEvent struct {
 	Type CellType
 }
 
-type SelectPlaceholderEvent struct{}
+type SelectSlotEvent struct{}
 
 type FocusNextCellEvent struct{}
 
