@@ -240,14 +240,14 @@ func (b PlusButton) Layout(gtx *layout.Context, button *widget.Button) {
 	inset.Layout(gtx, func() {
 		size := gtx.Config.Px(unit.Sp(20))
 		gtx.Constraints = layout.RigidConstraints(image.Point{size, size})
-		b.circle(gtx)
-		b.plus(gtx)
+		b.drawCircle(gtx)
+		b.drawPlus(gtx)
 		pointer.EllipseAreaOp{Rect: image.Rectangle{Max: gtx.Dimensions.Size}}.Add(gtx.Ops)
 		button.Layout(gtx)
 	})
 }
 
-func (b PlusButton) circle(gtx *layout.Context) {
+func (b PlusButton) drawCircle(gtx *layout.Context) {
 	px := gtx.Config.Px(unit.Sp(20))
 	size := float32(px)
 	rr := float32(size) * .5
@@ -258,7 +258,7 @@ func (b PlusButton) circle(gtx *layout.Context) {
 	stack.Pop()
 }
 
-func (b PlusButton) plus(gtx *layout.Context) {
+func (b PlusButton) drawPlus(gtx *layout.Context) {
 	width := float32(gtx.Config.Px(unit.Sp(2)))
 	offset := float32(gtx.Constraints.Width.Min) / 4
 	length := float32(gtx.Constraints.Width.Min) - offset
