@@ -150,8 +150,8 @@ func (s *Slot) layout(isActive bool, gtx *layout.Context) {
 			PlusButton{}.Layout(gtx, s.plusButton)
 		})
 		l := st.Expand(gtx, func() {
-			s.line(gtx)
-			s.cursor(gtx)
+			s.drawLine(gtx)
+			s.drawCursor(gtx)
 		})
 		st.Layout(gtx, l, c)
 	} else {
@@ -173,7 +173,7 @@ func (s *Slot) placeholderLayout(gtx *layout.Context) {
 	s.backgroundButton.Layout(gtx)
 }
 
-func (s *Slot) line(gtx *layout.Context) {
+func (s *Slot) drawLine(gtx *layout.Context) {
 	width := float32(gtx.Config.Px(unit.Sp(1)))
 	var path paint.Path
 	var lineLen = float32(gtx.Constraints.Width.Max)
@@ -196,7 +196,7 @@ func (s *Slot) line(gtx *layout.Context) {
 	stack.Pop()
 }
 
-func (s *Slot) cursor(gtx *layout.Context) {
+func (s *Slot) drawCursor(gtx *layout.Context) {
 	if !s.focused {
 		return
 	}
