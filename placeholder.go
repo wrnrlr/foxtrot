@@ -21,6 +21,7 @@ const (
 )
 
 type Placeholder struct {
+	Active           bool
 	plusButton       *widget.Button
 	backgroundButton *widget.Button
 
@@ -31,29 +32,37 @@ type Placeholder struct {
 	requestFocus bool
 
 	clicker gesture.Click
-	//scroller gesture.Scroll
 
-	events []interface{}
+	events     []interface{}
+	prevEvents int
 }
 
-func NewPlaceholder() Placeholder {
-	return Placeholder{
+func NewPlaceholder() *Placeholder {
+	return &Placeholder{
 		plusButton:       new(widget.Button),
 		backgroundButton: new(widget.Button),
 		blinkStart:       time.Now()}
 }
 
-func (p *Placeholder) Event(gtx *layout.Context) interface{} {
+func (p *Placeholder) Event(isActive bool, gtx *layout.Context) []interface{} {
+	p.processEvents(isActive, gtx)
+	events := p.events
+	p.events = nil
+	p.prevEvents = 0
+	return events
+}
+
+func (p *Placeholder) processEvents(isActive bool, gtx *layout.Context) {
 	for p.plusButton.Clicked(gtx) {
 		fmt.Println("Placeholder Button Clicked")
-		return AddCellEvent{Type: FoxtrotCell}
+		p.events = append(p.events, AddCellEvent{Type: FoxtrotCell})
 	}
 	for p.backgroundButton.Clicked(gtx) {
-		fmt.Println("Focus Placeholder")
-		p.requestFocus = true
-		return SelectPlaceholderEvent{}
+		fmt.Println("Background button clicked, Focus Placeholder")
+		p.Focus(true, gtx)
+		p.events = append(p.events, SelectPlaceholderEvent{})
 	}
-	return p.processKey(gtx)
+	p.processKey(isActive, gtx)
 }
 
 func (p *Placeholder) processPointer(gtx *layout.Context) interface{} {
@@ -61,31 +70,29 @@ func (p *Placeholder) processPointer(gtx *layout.Context) interface{} {
 		return nil
 	}
 	for _, evt := range p.clicker.Events(gtx) {
+		fmt.Println("Placeholder: Clicker event")
 		switch {
 		case evt.Type == gesture.TypePress && evt.Source == pointer.Mouse,
 			evt.Type == gesture.TypeClick && evt.Source == pointer.Touch:
+			fmt.Println("Placeholder: Clicker touched")
 			p.blinkStart = gtx.Now()
 			p.requestFocus = true
 		}
 	}
-	//axis := gesture.Horizontal
-	//sdist := p.scroller.Scroll(gtx.Config, gtx.Queue, gtx.Now(), axis)
-	//if sdist > 0 {
-	//	fmt.Println("Scroll stop")
-	//	p.scroller.Stop()
-	//}
 	return nil
 }
 
-func (p *Placeholder) processKey(gtx *layout.Context) interface{} {
+func (p *Placeholder) processKey(isActive bool, gtx *layout.Context) {
+	if !isActive {
+		return
+	}
 	for _, ke := range gtx.Events(&p.eventKey) {
-		fmt.Println("Placeholder: Key Event")
 		p.blinkStart = gtx.Now()
 		switch ke := ke.(type) {
 		case key.FocusEvent:
+			fmt.Printf("Placeholder: key.FocusEvent key.FocusEvent: %s\n", ke.Focus)
 			p.focused = ke.Focus
 			//p.active = ke.Focus
-			fmt.Printf("Placeholder: key.FocusEvent: %s\n", ke.Focus)
 		case key.Event:
 			if !p.focused {
 				fmt.Println("Placeholder (unfocused): key.Event")
@@ -93,41 +100,47 @@ func (p *Placeholder) processKey(gtx *layout.Context) interface{} {
 			}
 			fmt.Println("Placeholder: key.Event")
 			if ke.Name == key.NameReturn || ke.Name == key.NameEnter {
-				return AddCellEvent{Type: FoxtrotCell}
+				p.events = append(p.events, AddCellEvent{Type: FoxtrotCell})
 			} else if ke.Name == key.NameUpArrow || ke.Name == key.NameLeftArrow {
-				return FocusPreviousCellEvent{}
+				p.events = append(p.events, FocusPreviousCellEvent{})
 			} else if ke.Name == key.NameDownArrow || ke.Name == key.NameRightArrow {
-				return FocusNextCellEvent{}
+				p.events = append(p.events, FocusNextCellEvent{})
 			} else if ke.Name == '1' && ke.Modifiers.Contain(key.ModCommand) {
-				return AddCellEvent{Type: TitleCell}
+				p.events = append(p.events, AddCellEvent{Type: TitleCell})
 			} else if ke.Name == '4' && ke.Modifiers.Contain(key.ModCommand) {
-				return AddCellEvent{Type: SectionCell}
+				p.events = append(p.events, AddCellEvent{Type: SectionCell})
 			} else if ke.Name == '5' && ke.Modifiers.Contain(key.ModCommand) {
-				return AddCellEvent{Type: SubSectionCell}
+				p.events = append(p.events, AddCellEvent{Type: SubSectionCell})
 			} else if ke.Name == '6' && ke.Modifiers.Contain(key.ModCommand) {
-				return AddCellEvent{Type: SubSubSectionCell}
+				p.events = append(p.events, AddCellEvent{Type: SubSubSectionCell})
 			} else if ke.Name == '7' && ke.Modifiers.Contain(key.ModCommand) {
-				return AddCellEvent{Type: TextCell}
+				p.events = append(p.events, AddCellEvent{Type: TextCell})
 			} else if ke.Name == '8' && ke.Modifiers.Contain(key.ModCommand) {
-				return AddCellEvent{Type: CodeCell}
+				p.events = append(p.events, AddCellEvent{Type: CodeCell})
 			}
 		case key.EditEvent:
 			fmt.Println("Placeholder: key.EditEvent")
 		}
 	}
-	return nil
 }
 
-func (p *Placeholder) Focus() {
-	p.requestFocus = true
-	p.blinkStart = time.Now()
+func (p *Placeholder) Focus(requestFocus bool, gtx *layout.Context) {
+	p.requestFocus = requestFocus
 }
 
-func (p *Placeholder) Layout(isSelected bool, gtx *layout.Context) {
+func (p *Placeholder) Layout(isActive bool, gtx *layout.Context) {
+	// Flush events from before the previous frame.
+	copy(p.events, p.events[p.prevEvents:])
+	p.events = p.events[:len(p.events)-p.prevEvents]
+	p.prevEvents = len(p.events)
+	p.processEvents(isActive, gtx)
+	p.layout(isActive, gtx)
+}
+
+func (p *Placeholder) layout(isActive bool, gtx *layout.Context) {
 	key.InputOp{Key: &p.eventKey, Focus: p.requestFocus}.Add(gtx.Ops)
-	//p.scroller.Add(gtx.Ops)
 	p.requestFocus = false
-	if isSelected {
+	if isActive {
 		//p.clicker.Add(gtx.Ops)
 		px := gtx.Config.Px(unit.Dp(20))
 		constraint := layout.Constraint{Min: px, Max: px}
@@ -225,10 +238,8 @@ type PlusButton struct{}
 func (b PlusButton) Layout(gtx *layout.Context, button *widget.Button) {
 	inset := layout.Inset{Left: unit.Sp(20)}
 	inset.Layout(gtx, func() {
-		px := gtx.Config.Px(unit.Sp(20))
-		constraint := layout.Constraint{Min: px, Max: px}
-		gtx.Constraints.Width = constraint
-		gtx.Constraints.Height = constraint
+		size := gtx.Config.Px(unit.Sp(20))
+		gtx.Constraints = layout.RigidConstraints(image.Point{size, size})
 		b.circle(gtx)
 		b.plus(gtx)
 		pointer.EllipseAreaOp{Rect: image.Rectangle{Max: gtx.Dimensions.Size}}.Add(gtx.Ops)
@@ -289,3 +300,6 @@ type SelectPlaceholderEvent struct{}
 type FocusNextCellEvent struct{}
 
 type FocusPreviousCellEvent struct{}
+
+type Slots struct {
+}

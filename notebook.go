@@ -11,42 +11,61 @@ import (
 
 type Notebook struct {
 	cells        []*Cell
-	placeholders []Placeholder
+	placeholders []*Placeholder
 	kernel       *expreduce.EvalState
 	promptCount  int
 
-	selectedPlaceholder int
-	list                layout.List
+	activePlaceholder int
+	list              layout.List
+	selection         *Selection
 }
 
 func NewNotebook() *Notebook {
 	cells := make([]*Cell, 0)
 	kernel := expreduce.NewEvalState()
 	firstPlaceholder := NewPlaceholder()
-	firstPlaceholder.Focus()
-	adds := []Placeholder{firstPlaceholder}
-	return &Notebook{cells, adds, kernel, 1, 0, layout.List{Axis: layout.Vertical}}
+	//firstPlaceholder.Focus()
+	adds := []*Placeholder{firstPlaceholder}
+	selection := &Selection{}
+	return &Notebook{cells, adds, kernel, 1, 0, layout.List{Axis: layout.Vertical}, selection}
 }
 
 func (nb *Notebook) Event(gtx *layout.Context) interface{} {
+	nb.selection.Reset()
 	for i, c := range nb.cells {
 		e := c.Event(gtx)
-		if _, ok := e.(EvalEvent); ok {
+		switch ce := e.(type) {
+		case EvalEvent:
 			nb.eval(i)
-			nb.focusPlaceholder(i + 1)
+			nb.focusPlaceholder(i+1, gtx)
+		case SelectCellEvent:
+			fmt.Println("Notebook: Select Cell")
+			nb.unfocusPlaceholder()
+			nb.selection.RequestFocus(ce.selected, gtx)
 		}
 	}
-	for i, _ := range nb.placeholders {
-		e := nb.placeholders[i].Event(gtx)
-		if _, ok := e.(SelectPlaceholderEvent); ok {
-			nb.selectedPlaceholder = i
-		} else if ce, ok := e.(AddCellEvent); ok {
-			nb.InsertCell(i, ce.Type)
-			nb.focusCell(i)
-		} else if _, ok := e.(FocusPreviousCellEvent); ok {
-			nb.focusCell(i - 1)
-		} else if _, ok := e.(FocusNextCellEvent); ok {
-			nb.focusCell(i)
+	for i := range nb.placeholders {
+		isActive := nb.activePlaceholder == i
+		es := nb.placeholders[i].Event(isActive, gtx)
+		for _, e := range es {
+			if _, ok := e.(SelectPlaceholderEvent); ok {
+				fmt.Printf("Notebook: select placeholder: %d\n", i)
+				nb.focusPlaceholder(i, gtx)
+			} else if ce, ok := e.(AddCellEvent); ok {
+				nb.InsertCell(i, ce.Type)
+				nb.focusCell(i)
+			} else if _, ok := e.(FocusPreviousCellEvent); ok {
+				nb.focusCell(i - 1)
+			} else if _, ok := e.(FocusNextCellEvent); ok {
+				nb.focusCell(i)
+			}
+		}
+	}
+	es := nb.selection.Event(gtx)
+	for _, e := range es {
+		if _, ok := e.(DeleteSelected); ok {
+			fmt.Println("Delete Selected")
+			nb.DeleteSelected()
 		}
 	}
 	return nil
@@ -57,8 +76,8 @@ func (nb *Notebook) Layout(gtx *layout.Context) {
 	nb.list.Layout(gtx, n, func(i int) {
 		if i%2 == 0 {
 			i = i / 2
-			isSelected := i == nb.selectedPlaceholder
-			nb.placeholders[i].Layout(isSelected, gtx)
+			isActive := nb.activePlaceholder == i
+			nb.placeholders[i].Layout(isActive, gtx)
 		} else {
 			nb.cells[(i-1)/2].Layout(gtx)
 		}
@@ -82,17 +101,23 @@ func (nb *Notebook) eval(i int) {
 func (nb *Notebook) focusCell(i int) {
 	if i >= 0 && i < len(nb.cells) {
 		fmt.Printf("Focus cell %d\n", i)
-		nb.selectedPlaceholder = -1
+		nb.activePlaceholder = -1
 		nb.cells[i].Focus()
 	}
 }
 
-func (nb *Notebook) focusPlaceholder(i int) {
-	if i > 0 && i < len(nb.placeholders) {
+func (nb *Notebook) focusPlaceholder(i int, gtx *layout.Context) {
+	if i >= 0 && i < len(nb.placeholders) {
 		fmt.Printf("Focus Placeholder %d\n", i)
-		nb.selectedPlaceholder = i
-		nb.placeholders[i].Focus()
+		nb.activePlaceholder = i
+		nb.placeholders[i].Focus(true, gtx)
 	}
+}
+
+func (nb *Notebook) unfocusPlaceholder() {
+	//if nb.activePlaceholder > -1 {
+	nb.activePlaceholder = -1
+	//}
 }
 
 func (nb *Notebook) InsertCell(index int, typ CellType) {
@@ -103,7 +128,25 @@ func (nb *Notebook) InsertCell(index int, typ CellType) {
 	nb.cells[index] = cell
 }
 
-func (nb *Notebook) DeleteCell(index int) {}
+func (nb *Notebook) DeleteSelected() {
+	i := 0
+	for _, c := range nb.cells {
+		if !c.IsSelected() {
+			nb.cells[i] = c
+			i++
+		}
+	}
+	nb.cells = nb.cells[:i]
+}
+
+func (nb *Notebook) DeleteCell(i int) {
+	l := len(nb.cells) - 1
+	if i < l {
+		copy(nb.cells[i:], nb.cells[i+1:])
+	}
+	nb.cells[l] = nil // or the zero value of T
+	nb.cells = nb.cells[:l-1]
+}
 
 func ReadNotebookFile() (*Notebook, error) {
 	return nil, nil
@@ -114,3 +157,5 @@ func WriteNotebookFile(path string, notebook *Notebook) error {
 	_ = ioutil.WriteFile(path, content, 0644)
 	return nil
 }
+
+type SaveNotebookEvent struct{}
