@@ -30,8 +30,11 @@ func (c Cell) Event(gtx *layout.Context) interface{} {
 			return EvalEvent{}
 		}
 	}
-	c.margin.Checked(gtx)
-	return nil
+	return c.margin.Event(gtx)
+}
+
+func (c *Cell) IsSelected() bool {
+	return c.margin.checked
 }
 
 func (c *Cell) evaluate() {
@@ -197,8 +200,6 @@ func (d CellType) Level() int {
 		return 0
 	}
 }
-
-type SelectCellEvent struct{}
 
 type EvalEvent struct{}
 
