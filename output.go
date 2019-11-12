@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"gioui.org/layout"
-	"gioui.org/op/paint"
 	"gioui.org/text"
 	"gioui.org/widget/material"
 	"github.com/corywalker/expreduce/expreduce"
@@ -32,19 +31,19 @@ func (o *Out) Layout(num int, gtx *layout.Context) {
 	})
 	c2 := flex.Flex(gtx, 1, func() {
 		f := &layout.Flex{Axis: layout.Vertical}
-		c1 := f.Rigid(gtx, func() {
-			if o.Image == nil {
-				o.outEditor().Layout(gtx)
-			} else {
-				avatarOp := paint.NewImageOp(o.Image)
-				imga := theme.Image(avatarOp)
-				imga.Layout(gtx)
-			}
-		})
+		//c1 := f.Rigid(gtx, func() {
+		//	if o.Image == nil {
+		//		o.outEditor().Layout(gtx)
+		//	} else {
+		//		avatarOp := paint.NewImageOp(o.Image)
+		//		imga := theme.Image(avatarOp)
+		//		imga.Layout(gtx)
+		//	}
+		//})
 		c2 := f.Rigid(gtx, func() {
 			o.expressionLayout(gtx)
 		})
-		f.Layout(gtx, c1, c2)
+		f.Layout(gtx, c2)
 	})
 	layout.Inset{Bottom: _padding}.Layout(gtx, func() {
 		flex.Layout(gtx, c1, c2)
@@ -176,6 +175,7 @@ func (o *Out) outEditor() material.Label {
 
 func (o *Out) SetState(engine *expreduce.EvalState, i int) {
 	textOut := expressionToString(engine, o.Ex, i)
+	fmt.Printf("Out: %s\n", textOut)
 	o.Text = textOut
 	o.Image = displayExpr(o.Ex)
 }
