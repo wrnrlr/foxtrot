@@ -8,6 +8,7 @@ import (
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/op"
+	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"gioui.org/widget"
@@ -105,17 +106,17 @@ func (s *Slot) processKey(isActive bool, gtx *layout.Context) {
 				s.events = append(s.events, FocusPreviousCellEvent{})
 			} else if ke.Name == key.NameDownArrow || ke.Name == key.NameRightArrow {
 				s.events = append(s.events, FocusNextCellEvent{})
-			} else if ke.Name == '1' && ke.Modifiers.Contain(key.ModCommand) {
+			} else if ke.Name == "1" && ke.Modifiers.Contain(key.ModCommand) {
 				s.events = append(s.events, AddCellEvent{Type: TitleCell})
-			} else if ke.Name == '4' && ke.Modifiers.Contain(key.ModCommand) {
+			} else if ke.Name == "4" && ke.Modifiers.Contain(key.ModCommand) {
 				s.events = append(s.events, AddCellEvent{Type: SectionCell})
-			} else if ke.Name == '5' && ke.Modifiers.Contain(key.ModCommand) {
+			} else if ke.Name == "5" && ke.Modifiers.Contain(key.ModCommand) {
 				s.events = append(s.events, AddCellEvent{Type: SubSectionCell})
-			} else if ke.Name == '6' && ke.Modifiers.Contain(key.ModCommand) {
+			} else if ke.Name == "6" && ke.Modifiers.Contain(key.ModCommand) {
 				s.events = append(s.events, AddCellEvent{Type: SubSubSectionCell})
-			} else if ke.Name == '7' && ke.Modifiers.Contain(key.ModCommand) {
+			} else if ke.Name == "7" && ke.Modifiers.Contain(key.ModCommand) {
 				s.events = append(s.events, AddCellEvent{Type: TextCell})
-			} else if ke.Name == '8' && ke.Modifiers.Contain(key.ModCommand) {
+			} else if ke.Name == "8" && ke.Modifiers.Contain(key.ModCommand) {
 				s.events = append(s.events, AddCellEvent{Type: CodeCell})
 			}
 		case key.EditEvent:
@@ -175,7 +176,7 @@ func (s *Slot) placeholderLayout(gtx *layout.Context) {
 
 func (s *Slot) drawLine(gtx *layout.Context) {
 	width := float32(gtx.Config.Px(unit.Sp(1)))
-	var path paint.Path
+	var path clip.Path
 	var lineLen = float32(gtx.Constraints.Width.Max)
 	var merginTop = float32(gtx.Constraints.Height.Min / 2)
 	var stack op.StackOp
@@ -216,7 +217,7 @@ func (s *Slot) drawCursor(gtx *layout.Context) {
 	}
 	length := float32(gtx.Config.Px(unit.Sp(100)))
 	width := float32(gtx.Config.Px(unit.Sp(1)))
-	var path paint.Path
+	var path clip.Path
 	var merginTop = float32(gtx.Constraints.Height.Min / 2)
 	var merginLeft = float32(gtx.Config.Px(unit.Sp(60)))
 	var stack op.StackOp
@@ -262,7 +263,7 @@ func (b PlusButton) drawPlus(gtx *layout.Context) {
 	width := float32(gtx.Config.Px(unit.Sp(2)))
 	offset := float32(gtx.Constraints.Width.Min) / 4
 	length := float32(gtx.Constraints.Width.Min) - offset
-	var p1 paint.Path
+	var p1 clip.Path
 	var xcenter = float32(gtx.Constraints.Width.Min/2) - float32(gtx.Config.Px(unit.Sp(1)))
 	var ycenter = float32(gtx.Constraints.Height.Min/2) - float32(gtx.Config.Px(unit.Sp(1)))
 	var stack op.StackOp
@@ -278,7 +279,7 @@ func (b PlusButton) drawPlus(gtx *layout.Context) {
 	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: length, Y: length}}}.Add(gtx.Ops)
 	stack.Pop()
 	stack.Push(gtx.Ops)
-	var p2 paint.Path
+	var p2 clip.Path
 	p2.Begin(gtx.Ops)
 	p2.Move(f32.Point{X: xcenter, Y: offset})
 	p2.Line(f32.Point{X: 0, Y: length})

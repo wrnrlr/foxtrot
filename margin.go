@@ -8,6 +8,7 @@ import (
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/op"
+	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"image"
@@ -74,7 +75,7 @@ func (m *Margin) layoutMargin(gtx *layout.Context) {
 	s := float32(gtx.Config.Px(unit.Sp(1)))
 	w := float32(gtx.Constraints.Width.Max)
 	h := float32(gtx.Constraints.Height.Max)
-	var p paint.Path
+	var p clip.Path
 	p.Begin(gtx.Ops)
 	p.Move(f32.Point{X: 2 * s, Y: 2 * s})
 	p.Line(f32.Point{X: w - 4*s, Y: 0})

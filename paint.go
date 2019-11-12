@@ -4,6 +4,7 @@ import (
 	"gioui.org/f32"
 	"gioui.org/layout"
 	"gioui.org/op"
+	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"image"
 	"image/color"
@@ -12,7 +13,7 @@ import (
 func rrect(ops *op.Ops, width, height, se, sw, nw, ne float32) {
 	w, h := float32(width), float32(height)
 	const c = 0.55228475 // 4*(sqrt(2)-1)/3
-	var b paint.Path
+	var b clip.Path
 	b.Begin(ops)
 	b.Move(f32.Point{X: w, Y: h - se})
 	b.Cube(f32.Point{X: 0, Y: se * c}, f32.Point{X: -se + se*c, Y: se}, f32.Point{X: -se, Y: se}) // SE
