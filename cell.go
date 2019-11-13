@@ -64,12 +64,14 @@ func (c *Cell) promptLayout(gtx *layout.Context) {
 	} else {
 		txt = fmt.Sprintf("In[%d] ", c.promptNum)
 	}
-	px := gtx.Config.Px(promptWidth)
-	constraint := layout.Constraint{Min: px, Max: px}
-	gtx.Constraints.Width = constraint
-	label := promptTheme.Label(_promptFontSize, txt)
-	label.Alignment = text.End
-	label.Layout(gtx)
+	layout.Inset{Right: unit.Sp(10)}.Layout(gtx, func() {
+		px := gtx.Config.Px(promptWidth)
+		constraint := layout.Constraint{Min: px, Max: px}
+		gtx.Constraints.Width = constraint
+		label := promptTheme.Label(_promptFontSize, txt)
+		label.Alignment = text.End
+		label.Layout(gtx)
+	})
 }
 
 func (c *Cell) inEditor2() material.Editor {

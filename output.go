@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gioui.org/layout"
 	"gioui.org/text"
+	"gioui.org/unit"
 	"gioui.org/widget/material"
 	"github.com/corywalker/expreduce/expreduce"
 	"github.com/corywalker/expreduce/expreduce/atoms"
@@ -25,28 +26,21 @@ type Out struct {
 }
 
 func (o *Out) Layout(num int, gtx *layout.Context) {
-	flex := &layout.Flex{Alignment: layout.Middle}
-	c1 := flex.Rigid(gtx, func() {
-		o.promptLayout(num, gtx)
-	})
-	c2 := flex.Flex(gtx, 1, func() {
-		f := &layout.Flex{Axis: layout.Vertical}
-		//c1 := f.Rigid(gtx, func() {
-		//	if o.Image == nil {
-		//		o.outEditor().Layout(gtx)
-		//	} else {
-		//		avatarOp := paint.NewImageOp(o.Image)
-		//		imga := theme.Image(avatarOp)
-		//		imga.Layout(gtx)
-		//	}
-		//})
-		c2 := f.Rigid(gtx, func() {
-			o.expressionLayout(gtx)
+	layout.Inset{Top: unit.Sp(15)}.Layout(gtx, func() {
+		flex := &layout.Flex{Alignment: layout.Middle}
+		c1 := flex.Rigid(gtx, func() {
+			o.promptLayout(num, gtx)
 		})
-		f.Layout(gtx, c2)
-	})
-	layout.Inset{Bottom: _padding}.Layout(gtx, func() {
-		flex.Layout(gtx, c1, c2)
+		c2 := flex.Flex(gtx, 1, func() {
+			f := &layout.Flex{Axis: layout.Vertical}
+			c2 := f.Rigid(gtx, func() {
+				o.expressionLayout(gtx)
+			})
+			f.Layout(gtx, c2)
+		})
+		layout.Inset{Bottom: _padding}.Layout(gtx, func() {
+			flex.Layout(gtx, c1, c2)
+		})
 	})
 }
 
@@ -57,12 +51,14 @@ func (o *Out) promptLayout(num int, gtx *layout.Context) {
 	} else {
 		txt = fmt.Sprintf("Out[%d] ", num)
 	}
-	px := gtx.Config.Px(promptWidth)
-	constraint := layout.Constraint{Min: px, Max: px}
-	gtx.Constraints.Width = constraint
-	label := promptTheme.Label(_promptFontSize, txt)
-	label.Alignment = text.End
-	label.Layout(gtx)
+	layout.Inset{Right: unit.Sp(10)}.Layout(gtx, func() {
+		px := gtx.Config.Px(promptWidth)
+		constraint := layout.Constraint{Min: px, Max: px}
+		gtx.Constraints.Width = constraint
+		label := promptTheme.Label(_promptFontSize, txt)
+		label.Alignment = text.End
+		label.Layout(gtx)
+	})
 }
 
 func (o *Out) expressionLayout(gtx *layout.Context) {
