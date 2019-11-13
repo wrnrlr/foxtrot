@@ -135,9 +135,7 @@ func (o *Out) drawExpression(ex *atoms.Expression, gtx *layout.Context) layout.W
 		return special
 	}
 	return func() {
-		o.drawSpecialExpression(ex, gtx)
-
-		f := layout.Flex{Axis: layout.Horizontal}
+		f := layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}
 		var children []layout.FlexChild
 		first := f.Rigid(gtx, func() {
 			l1 := &Tag{MaxWidth: inf}
@@ -169,7 +167,7 @@ func (o *Out) drawSpecialExpression(ex *atoms.Expression, gtx *layout.Context) l
 
 func (o *Out) drawList(ex *atoms.Expression, gtx *layout.Context) layout.Widget {
 	return func() {
-		f := layout.Flex{Axis: layout.Horizontal}
+		f := layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}
 		var children []layout.FlexChild
 		first := f.Rigid(gtx, func() {
 			l1 := &Tag{MaxWidth: inf}
