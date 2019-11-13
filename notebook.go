@@ -31,17 +31,17 @@ func NewNotebook() *Notebook {
 }
 
 func (nb *Notebook) Event(gtx *layout.Context) interface{} {
-	nb.selection.Reset()
 	for i, c := range nb.cells {
 		e := c.Event(gtx)
-		switch ce := e.(type) {
+		switch e.(type) {
 		case EvalEvent:
 			nb.eval(i)
 			nb.focusSlot(i+1, gtx)
 		case SelectCellEvent:
 			fmt.Println("Notebook: Select Cell")
 			nb.unfocusSlot()
-			nb.selection.RequestFocus(ce.selected, gtx)
+			nb.selection.SetBegin(i)
+			nb.selection.RequestFocus(true, gtx)
 		}
 	}
 	for i := range nb.slots {
@@ -58,6 +58,14 @@ func (nb *Notebook) Event(gtx *layout.Context) interface{} {
 				nb.focusCell(i - 1)
 			} else if _, ok := e.(FocusNextCellEvent); ok {
 				nb.focusCell(i)
+			} else if _, ok := e.(SelectPreviousCellEvent); ok {
+				nb.unfocusSlot()
+				nb.selection.SetBegin(i - 1)
+				nb.selection.RequestFocus(true, gtx)
+			} else if _, ok := e.(SelectNextCellEvent); ok {
+				nb.unfocusSlot()
+				nb.selection.SetBegin(i)
+				nb.selection.RequestFocus(true, gtx)
 			}
 		}
 	}
@@ -80,7 +88,9 @@ func (nb *Notebook) Layout(gtx *layout.Context) {
 			isLast := i == len(nb.slots)-1
 			nb.slots[i].Layout(isActive, isLast, gtx)
 		} else {
-			nb.cells[(i-1)/2].Layout(gtx)
+			i := (i - 1) / 2
+			isSelected := nb.selection.IsSelected(i)
+			nb.cells[i].Layout(isSelected, gtx)
 		}
 	})
 }
@@ -103,6 +113,7 @@ func (nb *Notebook) focusCell(i int) {
 	if i >= 0 && i < len(nb.cells) {
 		fmt.Printf("Focus cell %d\n", i)
 		nb.activeSlot = -1
+		nb.selection.Clear()
 		nb.cells[i].Focus()
 	}
 }
@@ -111,6 +122,7 @@ func (nb *Notebook) focusSlot(i int, gtx *layout.Context) {
 	if i >= 0 && i < len(nb.slots) {
 		fmt.Printf("Focus Slot %d\n", i)
 		nb.activeSlot = i
+		nb.selection.Clear()
 		nb.slots[i].Focus(true, gtx)
 	}
 }
@@ -132,13 +144,13 @@ func (nb *Notebook) InsertCell(index int, typ CellType) {
 func (nb *Notebook) DeleteSelected() {
 	i := 0
 	for _, c := range nb.cells {
-		if !c.IsSelected() {
+		if !nb.selection.IsSelected(i) {
 			nb.cells[i] = c
 			i++
 		}
 	}
 	nb.cells = nb.cells[:i]
-	nb.slots = nb.slots[:i]
+	nb.slots = nb.slots[:i+1]
 }
 
 func (nb *Notebook) DeleteCell(i int) {

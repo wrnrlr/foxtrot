@@ -17,26 +17,27 @@ import (
 type Margin struct {
 	eventKey int
 	click    gesture.Click
-	checked  bool
+	scroller gesture.Scroll
+	//checked  bool
 }
 
-func (m *Margin) SetChecked(value bool) {
-	m.checked = value
-}
+//func (m *Margin) SetChecked(value bool) {
+//	m.checked = value
+//}
 
 func (m *Margin) Event(gtx *layout.Context) interface{} {
 	for _, e := range m.click.Events(gtx) {
 		fmt.Printf("Margin clicked %v\n", e)
 		switch e.Type {
 		case gesture.TypeClick:
-			m.checked = !m.checked
-			return SelectCellEvent{m.checked}
+			//m.checked = !m.checked
+			return SelectCellEvent{}
 		}
 	}
 	return nil
 }
 
-func (m *Margin) Layout(gtx *layout.Context, widget layout.Widget) {
+func (m *Margin) Layout(gtx *layout.Context, checked bool, widget layout.Widget) {
 	dim := gtx.Dimensions
 
 	marginWidth := gtx.Config.Px(unit.Sp(15))
@@ -50,8 +51,9 @@ func (m *Margin) Layout(gtx *layout.Context, widget layout.Widget) {
 	gtx.Constraints = layout.RigidConstraints(image.Point{X: marginWidth, Y: editorHeight})
 	offset := image.Point{X: editorWidth, Y: 0}
 	op.TransformOp{}.Offset(toPointF(offset)).Add(gtx.Ops)
-	m.layoutMargin(gtx)
+	m.layoutMargin(checked, gtx)
 	pointer.RectAreaOp{Rect: image.Rectangle{Max: image.Point{X: marginWidth, Y: editorHeight}}}.Add(gtx.Ops)
+	m.scroller.Add(gtx.Ops)
 	m.click.Add(gtx.Ops)
 	stack.Pop()
 
@@ -59,11 +61,11 @@ func (m *Margin) Layout(gtx *layout.Context, widget layout.Widget) {
 	gtx.Dimensions = dim
 }
 
-func (m *Margin) layoutMargin(gtx *layout.Context) {
+func (m *Margin) layoutMargin(checked bool, gtx *layout.Context) {
 
 	cs := gtx.Constraints
 
-	if m.checked {
+	if checked {
 		d := image.Point{X: cs.Width.Min, Y: cs.Height.Min}
 		dr := f32.Rectangle{
 			Max: f32.Point{X: float32(d.X), Y: float32(d.Y)},
@@ -98,6 +100,8 @@ type Selection struct {
 	prevEvents   int
 	focused      bool
 	requestFocus bool
+
+	begin, end int
 }
 
 func (s *Selection) Event(gtx *layout.Context) []interface{} {
@@ -129,22 +133,46 @@ func (s *Selection) processEvents(gtx *layout.Context) {
 	}
 }
 
-func (s *Selection) Reset() {
-	s.count = 0
-}
-
 func (s *Selection) RequestFocus(b bool, gtx *layout.Context) {
 	fmt.Printf("Selection Request Focus: %b\n", b)
 	s.requestFocus = b
 	s.processEvents(gtx)
 }
 
-func (s *Selection) IsFocused() bool {
-	return s.count > 0
+func (s *Selection) Clear() {
+	s.begin = -1
+	s.end = -1
 }
 
-type SelectCellEvent struct {
-	selected bool
+func (s *Selection) SetBegin(i int) {
+	s.begin = i
+	s.end = i
 }
+
+func (s *Selection) SetEnd(i int) {
+	s.end = i
+}
+
+func (s *Selection) IsSelected(i int) bool {
+	return s.begin != -1 && s.min() >= i && s.max() <= i
+}
+
+func (s *Selection) min() int {
+	if s.begin < s.end {
+		return s.begin
+	} else {
+		return s.end
+	}
+}
+
+func (s *Selection) max() int {
+	if s.begin > s.end {
+		return s.begin
+	} else {
+		return s.end
+	}
+}
+
+type SelectCellEvent struct{}
 
 type DeleteSelected struct{}

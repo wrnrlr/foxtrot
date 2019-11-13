@@ -33,9 +33,13 @@ func (c Cell) Event(gtx *layout.Context) interface{} {
 	return c.margin.Event(gtx)
 }
 
-func (c *Cell) IsSelected() bool {
-	return c.margin.checked
-}
+//func (c *Cell) IsSelected() bool {
+//	return c.margin.checked
+//}
+
+//func (c *Cell) SetChecked(b bool) {
+//	c.margin.SetChecked(b)
+//}
 
 func (c *Cell) evaluate() {
 	textIn := c.inEditor.Text()
@@ -44,9 +48,9 @@ func (c *Cell) evaluate() {
 	}
 }
 
-func (c *Cell) Layout(gtx *layout.Context) {
+func (c *Cell) Layout(selected bool, gtx *layout.Context) {
 	layout.Inset{Right: unit.Sp(10)}.Layout(gtx, func() {
-		c.margin.Layout(gtx, func() {
+		c.margin.Layout(gtx, selected, func() {
 			c.cellLayout(gtx)
 		})
 	})
