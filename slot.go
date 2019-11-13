@@ -100,7 +100,12 @@ func (s *Slot) processKey(isActive bool, gtx *layout.Context) {
 				break
 			}
 			fmt.Println("Slot: key.Event")
-			if ke.Name == key.NameReturn || ke.Name == key.NameEnter {
+
+			if ke.Name == key.NameUpArrow && ke.Modifiers.Contain(key.ModShift) {
+				s.events = append(s.events, SelectPreviousCellEvent{})
+			} else if ke.Name == key.NameDownArrow && ke.Modifiers.Contain(key.ModShift) {
+				s.events = append(s.events, SelectNextCellEvent{})
+			} else if ke.Name == key.NameReturn || ke.Name == key.NameEnter {
 				s.events = append(s.events, AddCellEvent{Type: FoxtrotCell})
 			} else if ke.Name == key.NameUpArrow || ke.Name == key.NameLeftArrow {
 				s.events = append(s.events, FocusPreviousCellEvent{})
@@ -149,10 +154,6 @@ func (s *Slot) layout(isActive, isLast bool, gtx *layout.Context) {
 		gtx.Constraints.Height = constraint
 	}
 	if isActive {
-		//s.clicker.Add(gtx.Ops)
-		//px := gtx.Config.Px(unit.Dp(20))
-		//constraint := layout.Constraint{Min: px, Max: px}
-		//gtx.Constraints.Height = constraint
 		st := layout.Stack{Alignment: layout.NW}
 		c := st.Expand(gtx, func() {
 			PlusButton{}.Layout(gtx, s.plusButton)
@@ -307,6 +308,10 @@ type SelectSlotEvent struct{}
 type FocusNextCellEvent struct{}
 
 type FocusPreviousCellEvent struct{}
+
+type SelectNextCellEvent struct{}
+
+type SelectPreviousCellEvent struct{}
 
 type Slots struct {
 }
