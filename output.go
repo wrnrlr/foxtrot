@@ -13,6 +13,7 @@ import (
 	api "github.com/corywalker/expreduce/pkg/expreduceapi"
 	"github.com/wcharczuk/go-chart"
 	"image"
+	"strings"
 )
 
 func NewOut(es api.Ex) *Out {
@@ -129,31 +130,101 @@ func (o *Out) drawSymbol(i *atoms.Symbol, gtx *layout.Context) layout.Widget {
 }
 
 func (o *Out) drawExpression(ex *atoms.Expression, gtx *layout.Context) layout.Widget {
+	special := o.drawSpecialExpression(ex, gtx)
+	if special != nil {
+		return special
+	}
+	return func() {
+		o.drawSpecialExpression(ex, gtx)
+
+		f := layout.Flex{Axis: layout.Horizontal}
+		var children []layout.FlexChild
+		first := f.Rigid(gtx, func() {
+			l1 := &Tag{MaxWidth: inf}
+			l1.Layout(gtx, theme.Shaper, text.Font{Size: theme.TextSize}, shortSymbolName(ex)+"[")
+		})
+		children = append(children, first)
+		parts := o.drawParts(ex, f, gtx)
+		children = append(children, parts...)
+		last := f.Rigid(gtx, func() {
+			l1 := &Tag{MaxWidth: inf}
+			l1.Layout(gtx, theme.Shaper, text.Font{Size: theme.TextSize}, "]")
+		})
+		children = append(children, last)
+		f.Layout(gtx, children...)
+	}
+}
+
+func (o *Out) drawSpecialExpression(ex *atoms.Expression, gtx *layout.Context) layout.Widget {
+	switch ex.HeadStr() {
+	case "System`List":
+		return o.drawList(ex, gtx)
+	case "System`Plus":
+	case "System`Minus":
+	case "System`Times":
+	case "System`Power":
+	}
+	return nil
+}
+
+func (o *Out) drawList(ex *atoms.Expression, gtx *layout.Context) layout.Widget {
 	return func() {
 		f := layout.Flex{Axis: layout.Horizontal}
 		var children []layout.FlexChild
-		for _, e := range ex.Parts {
-			var w layout.Widget
-			switch e := e.(type) {
-			case *atoms.String:
-				w = o.drawString(e, gtx)
-			case *atoms.Integer:
-				w = o.drawInteger(e, gtx)
-			case *atoms.Flt:
-				w = o.drawFlt(e, gtx)
-			case *atoms.Rational:
-				w = o.drawRational(e, gtx)
-			case *atoms.Complex:
-				w = o.drawComplex(e, gtx)
-			case *atoms.Symbol:
-				w = o.drawSymbol(e, gtx)
-			case *atoms.Expression:
-				w = o.drawExpression(e, gtx)
-			}
-			c := f.Rigid(gtx, w)
-			children = append(children, c)
-		}
+		first := f.Rigid(gtx, func() {
+			l1 := &Tag{MaxWidth: inf}
+			l1.Layout(gtx, theme.Shaper, text.Font{Size: theme.TextSize}, "{")
+		})
+		children = append(children, first)
+		parts := o.drawParts(ex, f, gtx)
+		children = append(children, parts...)
+		last := f.Rigid(gtx, func() {
+			l1 := &Tag{MaxWidth: inf}
+			l1.Layout(gtx, theme.Shaper, text.Font{Size: theme.TextSize}, "}")
+		})
+		children = append(children, last)
 		f.Layout(gtx, children...)
+	}
+}
+
+func (o *Out) drawParts(ex *atoms.Expression, f layout.Flex, gtx *layout.Context) []layout.FlexChild {
+	var children []layout.FlexChild
+	var comma layout.FlexChild
+	for _, e := range ex.Parts[1:] {
+		var w layout.Widget
+		switch e := e.(type) {
+		case *atoms.String:
+			w = o.drawString(e, gtx)
+		case *atoms.Integer:
+			w = o.drawInteger(e, gtx)
+		case *atoms.Flt:
+			w = o.drawFlt(e, gtx)
+		case *atoms.Rational:
+			w = o.drawRational(e, gtx)
+		case *atoms.Complex:
+			w = o.drawComplex(e, gtx)
+		case *atoms.Symbol:
+			w = o.drawSymbol(e, gtx)
+		case *atoms.Expression:
+			w = o.drawExpression(e, gtx)
+		}
+		children = append(children, comma)
+		comma = f.Rigid(gtx, func() {
+			t := &Tag{MaxWidth: inf}
+			t.Layout(gtx, theme.Shaper, text.Font{Size: theme.TextSize}, ",")
+		})
+		c := f.Rigid(gtx, w)
+		children = append(children, c)
+	}
+	return children
+}
+
+func shortSymbolName(ex *atoms.Expression) string {
+	name := ex.HeadStr()
+	if strings.HasPrefix(name, "System`") {
+		return name[7:]
+	} else {
+		return name
 	}
 }
 
