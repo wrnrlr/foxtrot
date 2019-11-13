@@ -138,6 +138,7 @@ func (nb *Notebook) DeleteSelected() {
 		}
 	}
 	nb.cells = nb.cells[:i]
+	nb.slots = nb.slots[:i]
 }
 
 func (nb *Notebook) DeleteCell(i int) {
