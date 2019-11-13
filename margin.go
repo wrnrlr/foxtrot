@@ -18,12 +18,7 @@ type Margin struct {
 	eventKey int
 	click    gesture.Click
 	scroller gesture.Scroll
-	//checked  bool
 }
-
-//func (m *Margin) SetChecked(value bool) {
-//	m.checked = value
-//}
 
 func (m *Margin) Event(gtx *layout.Context) interface{} {
 	for _, e := range m.click.Events(gtx) {
@@ -62,7 +57,6 @@ func (m *Margin) Layout(gtx *layout.Context, checked bool, widget layout.Widget)
 }
 
 func (m *Margin) layoutMargin(checked bool, gtx *layout.Context) {
-
 	cs := gtx.Constraints
 
 	if checked {
@@ -133,18 +127,14 @@ func (s *Selection) processEvents(gtx *layout.Context) {
 	}
 }
 
-func (s *Selection) RequestFocus(b bool, gtx *layout.Context) {
-	fmt.Printf("Selection Request Focus: %b\n", b)
-	s.requestFocus = b
-	s.processEvents(gtx)
-}
-
 func (s *Selection) Clear() {
+	s.requestFocus = false
 	s.begin = -1
 	s.end = -1
 }
 
 func (s *Selection) SetBegin(i int) {
+	s.requestFocus = true
 	s.begin = i
 	s.end = i
 }

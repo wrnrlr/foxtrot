@@ -24,7 +24,6 @@ func NewNotebook() *Notebook {
 	cells := make([]*Cell, 0)
 	kernel := expreduce.NewEvalState()
 	firstSlot := NewSlot()
-	//firstSlot.Focus()
 	adds := []*Slot{firstSlot}
 	selection := &Selection{}
 	return &Notebook{cells, adds, kernel, 1, 0, layout.List{Axis: layout.Vertical}, selection}
@@ -41,7 +40,6 @@ func (nb *Notebook) Event(gtx *layout.Context) interface{} {
 			fmt.Println("Notebook: Select Cell")
 			nb.unfocusSlot()
 			nb.selection.SetBegin(i)
-			nb.selection.RequestFocus(true, gtx)
 		}
 	}
 	for i := range nb.slots {
@@ -61,11 +59,9 @@ func (nb *Notebook) Event(gtx *layout.Context) interface{} {
 			} else if _, ok := e.(SelectPreviousCellEvent); ok {
 				nb.unfocusSlot()
 				nb.selection.SetBegin(i - 1)
-				nb.selection.RequestFocus(true, gtx)
 			} else if _, ok := e.(SelectNextCellEvent); ok {
 				nb.unfocusSlot()
 				nb.selection.SetBegin(i)
-				nb.selection.RequestFocus(true, gtx)
 			}
 		}
 	}
@@ -128,9 +124,7 @@ func (nb *Notebook) focusSlot(i int, gtx *layout.Context) {
 }
 
 func (nb *Notebook) unfocusSlot() {
-	//if nb.activeSlot > -1 {
 	nb.activeSlot = -1
-	//}
 }
 
 func (nb *Notebook) InsertCell(index int, typ CellType) {
