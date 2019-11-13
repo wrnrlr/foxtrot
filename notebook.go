@@ -77,7 +77,8 @@ func (nb *Notebook) Layout(gtx *layout.Context) {
 		if i%2 == 0 {
 			i = i / 2
 			isActive := nb.activeSlot == i
-			nb.slots[i].Layout(isActive, gtx)
+			isLast := i == len(nb.slots)-1
+			nb.slots[i].Layout(isActive, isLast, gtx)
 		} else {
 			nb.cells[(i-1)/2].Layout(gtx)
 		}

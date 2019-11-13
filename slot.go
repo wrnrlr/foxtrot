@@ -129,23 +129,30 @@ func (s *Slot) Focus(requestFocus bool, gtx *layout.Context) {
 	s.requestFocus = requestFocus
 }
 
-func (s *Slot) Layout(isActive bool, gtx *layout.Context) {
+func (s *Slot) Layout(isActive, isLast bool, gtx *layout.Context) {
 	// Flush events from before the previous frame.
 	copy(s.events, s.events[s.prevEvents:])
 	s.events = s.events[:len(s.events)-s.prevEvents]
 	s.prevEvents = len(s.events)
 	s.processEvents(isActive, gtx)
-	s.layout(isActive, gtx)
+	s.layout(isActive, isLast, gtx)
 }
 
-func (s *Slot) layout(isActive bool, gtx *layout.Context) {
+func (s *Slot) layout(isActive, isLast bool, gtx *layout.Context) {
 	key.InputOp{Key: &s.eventKey, Focus: s.requestFocus}.Add(gtx.Ops)
 	s.requestFocus = false
-	if isActive {
-		//s.clicker.Add(gtx.Ops)
+	if isLast {
+		gtx.Constraints.Height.Min = gtx.Constraints.Height.Max
+	} else {
 		px := gtx.Config.Px(unit.Dp(20))
 		constraint := layout.Constraint{Min: px, Max: px}
 		gtx.Constraints.Height = constraint
+	}
+	if isActive {
+		//s.clicker.Add(gtx.Ops)
+		//px := gtx.Config.Px(unit.Dp(20))
+		//constraint := layout.Constraint{Min: px, Max: px}
+		//gtx.Constraints.Height = constraint
 		st := layout.Stack{Alignment: layout.NW}
 		c := st.Expand(gtx, func() {
 			PlusButton{}.Layout(gtx, s.plusButton)
@@ -162,8 +169,7 @@ func (s *Slot) layout(isActive bool, gtx *layout.Context) {
 
 func (s *Slot) placeholderLayout(gtx *layout.Context) {
 	width := gtx.Constraints.Width.Max
-	height := gtx.Config.Px(unit.Sp(20))
-	gtx.Constraints.Height = layout.Constraint{Min: height, Max: height}
+	height := gtx.Constraints.Height.Max
 	dr := f32.Rectangle{
 		Max: f32.Point{X: float32(width), Y: float32(height)},
 	}
