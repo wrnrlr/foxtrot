@@ -1,4 +1,4 @@
-package foxtrot
+package main
 
 import (
 	"fmt"
@@ -31,7 +31,7 @@ type lineIterator struct {
 	y, prevDesc fixed.Int26_6
 }
 
-const inf = 1e6
+const Inf = 1e6
 
 func (l *lineIterator) Next() (text.String, f32.Point, bool) {
 	for len(l.Lines) > 0 {
@@ -81,7 +81,6 @@ func (l *lineIterator) Next() (text.String, f32.Point, bool) {
 
 func (l Tag) Layout(gtx *layout.Context, s *text.Shaper, font text.Font, txt string) {
 	paint.ColorOp{Color: black}.Add(gtx.Ops)
-
 	opts := text.LayoutOptions{MaxWidth: l.MaxWidth}
 	textLayout := s.Layout(gtx, font, txt, opts)
 	dims := linesDimens(textLayout.Lines)

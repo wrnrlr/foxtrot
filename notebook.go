@@ -99,8 +99,7 @@ func (nb *Notebook) eval(i int) {
 	}
 	expIn := parser.Interp(textIn, nb.kernel)
 	expOut := nb.kernel.Eval(expIn)
-	c.out = NewOut(expOut)
-	c.out.SetState(nb.kernel, nb.promptCount)
+	c.out = &Out{expOut}
 	c.promptNum = nb.promptCount
 	nb.promptCount++
 }

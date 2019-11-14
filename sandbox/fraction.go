@@ -30,7 +30,7 @@ func Rational2(num *big.Int, den *big.Int, gtx *layout.Context) {
 	var stack op.StackOp
 	stack.Push(gtx.Ops)
 	txt := fmt.Sprintf("%s\n%s", num.String(), den.String())
-	l1 := &Tag{Alignment: text.Middle, MaxWidth: inf}
+	l1 := &Tag{Alignment: text.Middle, MaxWidth: Inf}
 	l1.Layout(gtx, theme.Shaper, text.Font{Size: theme.TextSize}, txt)
 	stack.Pop()
 

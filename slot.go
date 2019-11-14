@@ -21,6 +21,7 @@ const (
 	maxBlinkDuration = 10 * time.Second
 )
 
+// Every cell has a slot above and below it that allow new cells to be inserted insert.
 type Slot struct {
 	Active           bool
 	plusButton       *widget.Button
@@ -55,11 +56,9 @@ func (s *Slot) Event(isActive bool, gtx *layout.Context) []interface{} {
 
 func (s *Slot) processEvents(isActive bool, gtx *layout.Context) {
 	for s.plusButton.Clicked(gtx) {
-		fmt.Println("Slot Button Clicked")
 		s.events = append(s.events, AddCellEvent{Type: FoxtrotCell})
 	}
 	for s.backgroundButton.Clicked(gtx) {
-		fmt.Println("Background button clicked, Focus Slot")
 		s.Focus(true, gtx)
 		s.events = append(s.events, SelectSlotEvent{})
 	}
@@ -71,11 +70,9 @@ func (s *Slot) processPointer(gtx *layout.Context) interface{} {
 		return nil
 	}
 	for _, evt := range s.clicker.Events(gtx) {
-		fmt.Println("Slot: Clicker event")
 		switch {
 		case evt.Type == gesture.TypePress && evt.Source == pointer.Mouse,
 			evt.Type == gesture.TypeClick && evt.Source == pointer.Touch:
-			fmt.Println("Slot: Clicker touched")
 			s.blinkStart = gtx.Now()
 			s.requestFocus = true
 		}
@@ -91,15 +88,11 @@ func (s *Slot) processKey(isActive bool, gtx *layout.Context) {
 		s.blinkStart = gtx.Now()
 		switch ke := ke.(type) {
 		case key.FocusEvent:
-			fmt.Printf("Slot: key.FocusEvent key.FocusEvent: %s\n", ke.Focus)
 			s.focused = ke.Focus
-			//s.active = ke.Focus
 		case key.Event:
 			if !s.focused {
-				fmt.Println("Slot (unfocused): key.Event")
 				break
 			}
-			fmt.Println("Slot: key.Event")
 
 			if ke.Name == key.NameUpArrow && ke.Modifiers.Contain(key.ModShift) {
 				s.events = append(s.events, SelectPreviousCellEvent{})
