@@ -1,25 +1,13 @@
-package foxtrot
+package graphics
 
 import (
 	"errors"
 	"fmt"
 	"gioui.org/layout"
-	"gioui.org/text"
 	"github.com/corywalker/expreduce/expreduce/atoms"
 	"github.com/corywalker/expreduce/pkg/expreduceapi"
 	"image/color"
 )
-
-type Style struct {
-	StrokeWidth float32
-	StrokeColor color.RGBA
-
-	FontSize  float32
-	FontColor color.RGBA
-	Font      *text.Shaper
-
-	FillColor color.RGBA
-}
 
 type ContinuousSeries struct {
 	Style Style
