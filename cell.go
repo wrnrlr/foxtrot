@@ -143,27 +143,39 @@ func (c *Cell) foxtrotCell(gtx *layout.Context) {
 }
 
 func (c *Cell) titleCell(gtx *layout.Context) {
-	c.styles.Title.Layout(gtx, c.inEditor)
+	layout.Inset{Left: unit.Sp(10)}.Layout(gtx, func() {
+		c.styles.Title.Layout(gtx, c.inEditor)
+	})
 }
 
 func (c *Cell) sectionCell(gtx *layout.Context) {
-	c.styles.Section.Layout(gtx, c.inEditor)
+	layout.Inset{Left: unit.Sp(10)}.Layout(gtx, func() {
+		c.styles.Section.Layout(gtx, c.inEditor)
+	})
 }
 
 func (c *Cell) subSectionCell(gtx *layout.Context) {
-	c.styles.SubSection.Layout(gtx, c.inEditor)
+	layout.Inset{Left: unit.Sp(10)}.Layout(gtx, func() {
+		c.styles.SubSection.Layout(gtx, c.inEditor)
+	})
 }
 
 func (c *Cell) subSubSectionCell(gtx *layout.Context) {
-	c.styles.SubSubSection.Layout(gtx, c.inEditor)
+	layout.Inset{Left: unit.Sp(10)}.Layout(gtx, func() {
+		c.styles.SubSubSection.Layout(gtx, c.inEditor)
+	})
 }
 
 func (c *Cell) textCell(gtx *layout.Context) {
-	c.styles.Text.Layout(gtx, c.inEditor)
+	layout.Inset{Left: unit.Sp(10)}.Layout(gtx, func() {
+		c.styles.Text.Layout(gtx, c.inEditor)
+	})
 }
 
 func (c *Cell) codeCell(gtx *layout.Context) {
-	c.styles.Code.Layout(gtx, c.inEditor)
+	layout.Inset{Left: unit.Sp(10)}.Layout(gtx, func() {
+		c.styles.Code.Layout(gtx, c.inEditor)
+	})
 }
 
 type CellType int
