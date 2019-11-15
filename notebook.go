@@ -18,6 +18,7 @@ type Notebook struct {
 	activeSlot int
 	list       layout.List
 	selection  *Selection
+	styles     *Styles
 }
 
 func NewNotebook() *Notebook {
@@ -26,13 +27,14 @@ func NewNotebook() *Notebook {
 	firstSlot := NewSlot()
 	adds := []*Slot{firstSlot}
 	selection := &Selection{}
-	return &Notebook{cells, adds, kernel, 1, 0, layout.List{Axis: layout.Vertical}, selection}
+	styles := DefaultStyles()
+	return &Notebook{cells, adds, kernel, 1, 0, layout.List{Axis: layout.Vertical}, selection, styles}
 }
 
 func (nb *Notebook) Event(gtx *layout.Context) interface{} {
 	for i, c := range nb.cells {
 		e := c.Event(gtx)
-		switch e.(type) {
+		switch e := e.(type) {
 		case EvalEvent:
 			nb.eval(i)
 			nb.focusSlot(i+1, gtx)
@@ -40,6 +42,8 @@ func (nb *Notebook) Event(gtx *layout.Context) interface{} {
 			fmt.Println("Notebook: Select Cell")
 			nb.unfocusSlot()
 			nb.selection.SetBegin(i)
+		case FocusPlaceholder:
+			nb.focusSlot(i+e.Offset, gtx)
 		}
 	}
 	for i := range nb.slots {
@@ -128,7 +132,7 @@ func (nb *Notebook) unfocusSlot() {
 
 func (nb *Notebook) InsertCell(index int, typ CellType) {
 	nb.slots = append(nb.slots, NewSlot())
-	cell := NewCell(typ, -1)
+	cell := NewCell(typ, -1, nb.styles)
 	nb.cells = append(nb.cells, cell)
 	copy(nb.cells[index+1:], nb.cells[index:])
 	nb.cells[index] = cell

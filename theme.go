@@ -6,6 +6,7 @@ import (
 	"gioui.org/text"
 	"gioui.org/unit"
 	"gioui.org/widget/material"
+	"github.com/wrnrlr/foxtrot/editor"
 	"image/color"
 )
 
@@ -40,43 +41,51 @@ type Theme struct {
 	TextSize unit.Value
 }
 
-func NewTheme() *Theme {
-	t := &Theme{
-		Shaper: font.Default(),
-	}
-	t.Color.Primary = rgb(0x3f51b5)
-	t.Color.Text = rgb(0x000000)
-	t.Color.Hint = rgb(0xbbbbbb)
-	t.TextSize = unit.Sp(16)
-	return t
+type Styles struct {
+	Foxtrot, Title, Section, SubSection, SubSubSection, Text, Code editor.EditorStyle
+	shaper                                                         *text.Shaper
 }
 
-func initThemes() {
-	FoxtrotTheme = material.NewTheme()
-	TitleTheme = material.NewTheme()
-	TitleTheme.TextSize = unit.Sp(38)
-	TitleTheme.Color.Text = red
-	SectionTheme = material.NewTheme()
-	SectionTheme.TextSize = unit.Sp(32)
-	SectionTheme.Color.Text = red
-	SubSectionTheme = material.NewTheme()
-	SubSectionTheme.TextSize = unit.Sp(26)
-	SubSectionTheme.Color.Text = red
-	SubSubSectionTheme = material.NewTheme()
-	SubSubSectionTheme.TextSize = unit.Sp(20)
-	SubSubSectionTheme.Color.Text = red
-	TextTheme = material.NewTheme()
-	TextTheme.TextSize = unit.Sp(16)
-	TextTheme.Color.Text = black
-	CodeTheme = material.NewTheme()
-	CodeTheme.TextSize = unit.Sp(16)
-	CodeTheme.Color.Text = black
+func DefaultStyles() *Styles {
+	styles := Styles{}
+	shaper := font.Default()
+	styles.Foxtrot = editor.EditorStyle{
+		Font:       text.Font{Variant: "Mono", Size: unit.Sp(16)},
+		Color:      black,
+		CaretColor: black,
+		Shaper:     shaper}
+	styles.Title = editor.EditorStyle{
+		Font:       text.Font{Variant: "Regular", Size: unit.Sp(38)},
+		Color:      red,
+		CaretColor: black,
+		Shaper:     shaper}
+	styles.Section = editor.EditorStyle{
+		Font:       text.Font{Variant: "Regular", Size: unit.Sp(32)},
+		Color:      red,
+		CaretColor: black,
+		Shaper:     shaper}
+	styles.SubSection = editor.EditorStyle{
+		Font:       text.Font{Variant: "Regular", Size: unit.Sp(26)},
+		Color:      red,
+		CaretColor: black,
+		Shaper:     shaper}
+	styles.SubSubSection = editor.EditorStyle{
+		Font:       text.Font{Variant: "Regular", Size: unit.Sp(20)},
+		Color:      red,
+		CaretColor: black,
+		Shaper:     shaper}
+	styles.Text = editor.EditorStyle{
+		Font:       text.Font{Variant: "Mono", Size: unit.Sp(16)},
+		Color:      black,
+		CaretColor: black,
+		Shaper:     shaper}
+	styles.Code = editor.EditorStyle{
+		Font:       text.Font{Variant: "Mono", Size: unit.Sp(16)},
+		Color:      black,
+		CaretColor: black,
+		Shaper:     shaper}
+	return &styles
 }
-
-var (
-	FoxtrotTheme, TitleTheme, SectionTheme, SubSectionTheme, SubSubSectionTheme, TextTheme, CodeTheme *material.Theme
-	TitleEditor                                                                                       *material.Editor
-)
 
 func rgb(c uint32) color.RGBA {
 	return argb(0xff000000 | c)
@@ -84,18 +93,4 @@ func rgb(c uint32) color.RGBA {
 
 func argb(c uint32) color.RGBA {
 	return color.RGBA{A: uint8(c >> 24), R: uint8(c >> 16), G: uint8(c >> 8), B: uint8(c)}
-}
-
-type Label struct {
-	// Face defines the text style.
-	Font text.Font
-	// Color is the text color.
-	Color color.RGBA
-	// Alignment specify the text alignment.
-	Alignment text.Alignment
-	// MaxLines limits the number of lines. Zero means no limit.
-	MaxLines int
-	Text     string
-
-	shaper *text.Shaper
 }

@@ -11,7 +11,6 @@ import (
 
 func RunUI() {
 	gofont.Register()
-	initThemes()
 	theme = material.NewTheme()
 	theme.TextSize = _defaultFontSize
 	promptTheme = material.NewTheme()

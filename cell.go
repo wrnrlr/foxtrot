@@ -2,11 +2,12 @@ package foxtrot
 
 import (
 	"fmt"
+	"gioui.org/io/key"
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
-	"gioui.org/widget"
 	"gioui.org/widget/material"
+	"github.com/wrnrlr/foxtrot/editor"
 )
 
 type Cell struct {
@@ -14,20 +15,32 @@ type Cell struct {
 	in        string
 	out       *Out
 	promptNum int
-	inEditor  *widget.Editor
+	inEditor  *editor.Editor
 	margin    *Margin
+	styles    *Styles
 }
 
-func NewCell(typ CellType, i int) *Cell {
-	inEditor := &widget.Editor{Submit: true}
-	return &Cell{Type: typ, promptNum: i, inEditor: inEditor, margin: &Margin{}}
+func NewCell(typ CellType, i int, styles *Styles) *Cell {
+	inEditor := &editor.Editor{}
+	return &Cell{Type: typ, promptNum: i, inEditor: inEditor, margin: &Margin{}, styles: styles}
 }
 
 func (c Cell) Event(gtx *layout.Context) interface{} {
 	for _, e := range c.inEditor.Events(gtx) {
-		if e, ok := e.(widget.SubmitEvent); ok {
-			c.inEditor.SetText(e.Text)
-			return EvalEvent{}
+		if ce, ok := e.(editor.CommandEvent); ok {
+			lineCount, lineWidth, caretY, caretX := c.inEditor.CaretLine()
+			if (ce.Event.Name == key.NameEnter || ce.Event.Name == key.NameReturn) && ce.Event.Modifiers.Contain(key.ModShift) {
+				return EvalEvent{}
+			} else if ce.Event.Name == key.NameUpArrow && caretY == 0 {
+				return FocusPlaceholder{Offset: 0}
+			} else if ce.Event.Name == key.NameLeftArrow && caretY == 0 && caretX == 0 {
+				return FocusPlaceholder{Offset: 0}
+			} else if ce.Event.Name == key.NameDownArrow && caretY == lineCount {
+				return FocusPlaceholder{Offset: 1}
+			} else if ce.Event.Name == key.NameRightArrow && caretY == lineCount && caretX == lineWidth {
+				return FocusPlaceholder{Offset: 1}
+			}
+			fmt.Printf("Caret: lineCount: %v, lineWidth: %v, caretY: %v, caretX: %v\n", lineCount, lineWidth, caretY, caretX)
 		}
 	}
 	return c.margin.Event(gtx)
@@ -118,7 +131,7 @@ func (c *Cell) foxtrotCell(gtx *layout.Context) {
 				c.promptLayout(gtx)
 			})
 			c2 := f.Flex(gtx, 1, func() {
-				c.inEditor2().Layout(gtx, c.inEditor)
+				c.styles.Foxtrot.Layout(gtx, c.inEditor)
 			})
 			layout.Inset{Bottom: _padding}.Layout(gtx, func() {
 				f.Layout(gtx, c1, c2)
@@ -130,40 +143,27 @@ func (c *Cell) foxtrotCell(gtx *layout.Context) {
 }
 
 func (c *Cell) titleCell(gtx *layout.Context) {
-	editor := TitleTheme.Editor("Title")
-	c.plainCell(&editor, gtx)
+	c.styles.Title.Layout(gtx, c.inEditor)
 }
 
 func (c *Cell) sectionCell(gtx *layout.Context) {
-	editor := SectionTheme.Editor("Section")
-	c.plainCell(&editor, gtx)
+	c.styles.Section.Layout(gtx, c.inEditor)
 }
 
 func (c *Cell) subSectionCell(gtx *layout.Context) {
-	editor := SubSectionTheme.Editor("Sub Section")
-	c.plainCell(&editor, gtx)
+	c.styles.SubSection.Layout(gtx, c.inEditor)
 }
 
 func (c *Cell) subSubSectionCell(gtx *layout.Context) {
-	editor := SubSubSectionTheme.Editor("Sub Sub Section")
-	c.plainCell(&editor, gtx)
+	c.styles.SubSubSection.Layout(gtx, c.inEditor)
 }
 
 func (c *Cell) textCell(gtx *layout.Context) {
-	editor := TextTheme.Editor("Text")
-	c.plainCell(&editor, gtx)
+	c.styles.Text.Layout(gtx, c.inEditor)
 }
 
 func (c *Cell) codeCell(gtx *layout.Context) {
-	editor := CodeTheme.Editor("Code")
-	editor.Font.Variant = "Mono"
-	editor.Layout(gtx, c.inEditor)
-}
-
-func (c *Cell) plainCell(editor *material.Editor, gtx *layout.Context) {
-	layout.Inset{Left: cellLeftMargin}.Layout(gtx, func() {
-		editor.Layout(gtx, c.inEditor)
-	})
+	c.styles.Code.Layout(gtx, c.inEditor)
 }
 
 type CellType int
@@ -200,6 +200,10 @@ func (d CellType) Level() int {
 }
 
 type EvalEvent struct{}
+
+type FocusPlaceholder struct {
+	Offset int
+}
 
 type FocusPreviousPlaceholder struct{}
 
