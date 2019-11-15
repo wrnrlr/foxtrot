@@ -1,4 +1,4 @@
-package foxtrot
+package notebook
 
 import (
 	"gioui.org/font"

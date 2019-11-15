@@ -1,4 +1,4 @@
-package foxtrot
+package notebook
 
 // https://www.geeksforgeeks.org/gap-buffer-data-structure/
 // https://darrenburns.net/posts/piece-table/

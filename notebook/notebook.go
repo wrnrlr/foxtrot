@@ -1,4 +1,4 @@
-package foxtrot
+package notebook
 
 import (
 	"encoding/xml"

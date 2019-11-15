@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/wrnrlr/foxtrot"
+	"github.com/wrnrlr/foxtrot/notebook"
 )
 
 func main() {
-	foxtrot.RunUI()
+	notebook.RunUI()
 }
