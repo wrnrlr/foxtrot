@@ -3,14 +3,17 @@ package notebook
 import (
 	"fmt"
 	"gioui.org/layout"
+	"gioui.org/op/paint"
 	"gioui.org/text"
 	"gioui.org/unit"
+	"gioui.org/widget"
 	api "github.com/corywalker/expreduce/pkg/expreduceapi"
 	"github.com/wrnrlr/foxtrot/graphics"
 )
 
 type Out struct {
-	Ex api.Ex
+	Ex  api.Ex
+	Err error
 }
 
 func (o *Out) Layout(num int, gtx *layout.Context) {
@@ -20,11 +23,11 @@ func (o *Out) Layout(num int, gtx *layout.Context) {
 			o.promptLayout(num, gtx)
 		})
 		c2 := flex.Flex(gtx, 1, func() {
-			f := &layout.Flex{Axis: layout.Vertical}
-			c2 := f.Rigid(gtx, func() {
+			if o.Err == nil {
 				o.expressionLayout(gtx)
-			})
-			f.Layout(gtx, c2)
+			} else {
+				o.errorLayout(gtx)
+			}
 		})
 		layout.Inset{Bottom: _padding}.Layout(gtx, func() {
 			flex.Layout(gtx, c1, c2)
@@ -47,6 +50,13 @@ func (o *Out) promptLayout(num int, gtx *layout.Context) {
 		label.Alignment = text.End
 		label.Layout(gtx)
 	})
+}
+
+func (o *Out) errorLayout(gtx *layout.Context) {
+	paint.ColorOp{Color: red}.Add(gtx.Ops)
+	l := &widget.Label{}
+	ft := text.Font{Size: unit.Sp(18)}
+	l.Layout(gtx, theme.Shaper, ft, o.Err.Error())
 }
 
 func (o *Out) expressionLayout(gtx *layout.Context) {

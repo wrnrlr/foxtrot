@@ -1,6 +1,7 @@
 package notebook
 
 import (
+	"bytes"
 	"encoding/xml"
 	"fmt"
 	"gioui.org/layout"
@@ -101,9 +102,10 @@ func (nb *Notebook) eval(i int) {
 	if textIn == "" {
 		return
 	}
-	expIn := parser.Interp(textIn, nb.kernel)
-	expOut := nb.kernel.Eval(expIn)
-	c.out = &Out{expOut}
+	src := parser.ReplaceSyms(textIn)
+	buf := bytes.NewBufferString(src)
+	expOut, err := parser.InterpBuf(buf, "nofile", nb.kernel)
+	c.out = &Out{expOut, err}
 	c.promptNum = nb.promptCount
 	nb.promptCount++
 }
