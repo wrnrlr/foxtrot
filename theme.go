@@ -50,32 +50,32 @@ func DefaultStyles() *Styles {
 	styles := Styles{}
 	shaper := font.Default()
 	styles.Foxtrot = editor.EditorStyle{
-		Font:       text.Font{Variant: "Mono", Size: unit.Sp(16)},
+		Font:       text.Font{Variant: "Mono", Size: unit.Sp(18)},
 		Color:      black,
 		CaretColor: black,
 		Shaper:     shaper}
 	styles.Title = editor.EditorStyle{
-		Font:       text.Font{Variant: "Regular", Size: unit.Sp(38)},
+		Font:       text.Font{Size: unit.Sp(38)},
 		Color:      red,
 		CaretColor: black,
 		Shaper:     shaper}
 	styles.Section = editor.EditorStyle{
-		Font:       text.Font{Variant: "Regular", Size: unit.Sp(32)},
+		Font:       text.Font{Size: unit.Sp(32)},
 		Color:      red,
 		CaretColor: black,
 		Shaper:     shaper}
 	styles.SubSection = editor.EditorStyle{
-		Font:       text.Font{Variant: "Regular", Size: unit.Sp(26)},
+		Font:       text.Font{Size: unit.Sp(26)},
 		Color:      red,
 		CaretColor: black,
 		Shaper:     shaper}
 	styles.SubSubSection = editor.EditorStyle{
-		Font:       text.Font{Variant: "Regular", Size: unit.Sp(20)},
+		Font:       text.Font{Size: unit.Sp(20)},
 		Color:      red,
 		CaretColor: black,
 		Shaper:     shaper}
 	styles.Text = editor.EditorStyle{
-		Font:       text.Font{Variant: "Mono", Size: unit.Sp(16)},
+		Font:       text.Font{Size: unit.Sp(16)},
 		Color:      black,
 		CaretColor: black,
 		Shaper:     shaper}
