@@ -62,7 +62,7 @@ func Complex(i *atoms.Complex, st *Style, gtx *layout.Context) layout.Widget {
 func Symbol(i *atoms.Symbol, st *Style, gtx *layout.Context) layout.Widget {
 	return func() {
 		l := &Tag{MaxWidth: Inf}
-		l.Layout(gtx, st, i.StringForm(api.ToStringParams{}))
+		l.Layout(gtx, st, i.String())
 	}
 }
 
