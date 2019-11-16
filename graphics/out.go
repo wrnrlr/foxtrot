@@ -6,7 +6,6 @@ import (
 	"github.com/corywalker/expreduce/expreduce/atoms"
 	api "github.com/corywalker/expreduce/pkg/expreduceapi"
 	"math/big"
-	"strings"
 )
 
 func Ex(ex api.Ex, st *Style, gtx *layout.Context) layout.Widget {
@@ -56,73 +55,6 @@ func Complex(i *atoms.Complex, st *Style, gtx *layout.Context) layout.Widget {
 	return func() {
 		l := &Tag{MaxWidth: Inf}
 		l.Layout(gtx, st, i.StringForm(api.ToStringParams{}))
-	}
-}
-
-func Symbol(i *atoms.Symbol, st *Style, gtx *layout.Context) layout.Widget {
-	return func() {
-		l := &Tag{MaxWidth: Inf}
-		l.Layout(gtx, st, i.StringForm(api.ToStringParams{}))
-	}
-}
-
-func Expression(ex *atoms.Expression, st *Style, gtx *layout.Context) layout.Widget {
-	special := drawSpecialExpression(ex, st, gtx)
-	if special != nil {
-		return special
-	}
-	return func() {
-		f := layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}
-		var children []layout.FlexChild
-		first := f.Rigid(gtx, func() {
-			l1 := &Tag{MaxWidth: Inf}
-			l1.Layout(gtx, st, shortSymbolName(ex)+"[")
-		})
-		children = append(children, first)
-		parts := Parts(ex, f, ",", st, gtx)
-		children = append(children, parts...)
-		last := f.Rigid(gtx, func() {
-			l1 := &Tag{MaxWidth: Inf}
-			l1.Layout(gtx, st, "]")
-		})
-		children = append(children, last)
-		f.Layout(gtx, children...)
-	}
-}
-
-func drawSpecialExpression(ex *atoms.Expression, st *Style, gtx *layout.Context) layout.Widget {
-	switch ex.HeadStr() {
-	case "System`List":
-		return List(ex, st, gtx)
-	case "System`Plus":
-		return drawInfix(ex, "+", st, gtx)
-	case "System`Minus":
-		return drawInfix(ex, "-", st, gtx)
-	case "System`Times":
-		return drawInfix(ex, "*", st, gtx)
-	case "System`Power":
-		return Power(ex, st, gtx)
-	}
-	return nil
-}
-
-func List(ex *atoms.Expression, st *Style, gtx *layout.Context) layout.Widget {
-	return func() {
-		f := layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}
-		var children []layout.FlexChild
-		first := f.Rigid(gtx, func() {
-			l1 := &Tag{MaxWidth: Inf}
-			l1.Layout(gtx, st, "{")
-		})
-		children = append(children, first)
-		parts := Parts(ex, f, ",", st, gtx)
-		children = append(children, parts...)
-		last := f.Rigid(gtx, func() {
-			l1 := &Tag{MaxWidth: Inf}
-			l1.Layout(gtx, st, "}")
-		})
-		children = append(children, last)
-		f.Layout(gtx, children...)
 	}
 }
 
@@ -202,13 +134,4 @@ func Parts(ex *atoms.Expression, f layout.Flex, infix string, st *Style, gtx *la
 		children = append(children, c)
 	}
 	return children
-}
-
-func shortSymbolName(ex *atoms.Expression) string {
-	name := ex.HeadStr()
-	if strings.HasPrefix(name, "System`") {
-		return name[7:]
-	} else {
-		return name
-	}
 }
