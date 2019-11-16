@@ -1,34 +1,11 @@
 package graphics
 
 import (
-	"fmt"
 	"gioui.org/layout"
 	"github.com/corywalker/expreduce/expreduce/atoms"
 	api "github.com/corywalker/expreduce/pkg/expreduceapi"
 	"math/big"
 )
-
-func Ex(ex api.Ex, st *Style, gtx *layout.Context) layout.Widget {
-	switch ex := ex.(type) {
-	case *atoms.String:
-		return String(ex, st, gtx)
-	case *atoms.Integer:
-		return Integer(ex, st, gtx)
-	case *atoms.Flt:
-		return Flt(ex, st, gtx)
-	case *atoms.Rational:
-		return Rational(ex, st, gtx)
-	case *atoms.Complex:
-		return Complex(ex, st, gtx)
-	case *atoms.Symbol:
-		return Symbol(ex, st, gtx)
-	case *atoms.Expression:
-		return Expression(ex, st, gtx)
-	default:
-		fmt.Println("unknown expression type")
-	}
-	return nil
-}
 
 func String(s *atoms.String, st *Style, gtx *layout.Context) layout.Widget {
 	return func() {

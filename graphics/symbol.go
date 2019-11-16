@@ -14,22 +14,6 @@ func Symbol(i *atoms.Symbol, st *Style, gtx *layout.Context) layout.Widget {
 	}
 }
 
-func drawSpecialExpression(ex *atoms.Expression, st *Style, gtx *layout.Context) layout.Widget {
-	switch ex.HeadStr() {
-	case "System`List":
-		return List(ex, st, gtx)
-	case "System`Plus":
-		return drawInfix(ex, "+", st, gtx)
-	case "System`Minus":
-		return drawInfix(ex, "-", st, gtx)
-	case "System`Times":
-		return drawInfix(ex, "*", st, gtx)
-	case "System`Power":
-		return Power(ex, st, gtx)
-	}
-	return nil
-}
-
 func shortSymbolName(ex *atoms.Expression) string {
 	name := ex.HeadStr()
 	if strings.HasPrefix(name, "System`") {
