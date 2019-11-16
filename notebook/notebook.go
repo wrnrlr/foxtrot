@@ -104,8 +104,10 @@ func (nb *Notebook) eval(i int) {
 	}
 	src := parser.ReplaceSyms(textIn)
 	buf := bytes.NewBufferString(src)
+	//expOut := parser.Interp(textIn, nb.kernel)
 	expOut, err := parser.InterpBuf(buf, "nofile", nb.kernel)
-	c.out = &Out{expOut, err}
+	expOut = nb.kernel.Eval(expOut)
+	c.out = &Out{Ex: expOut, Err: err}
 	c.promptNum = nb.promptCount
 	nb.promptCount++
 }
