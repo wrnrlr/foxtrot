@@ -8,6 +8,7 @@ import (
 )
 
 type Style struct {
+	Color     color.RGBA
 	Shaper    *text.Shaper
 	Font      text.Font
 	TextColor color.RGBA
@@ -15,6 +16,8 @@ type Style struct {
 
 	StrokeWidth float32
 	StrokeColor color.RGBA
+
+	Thickness float32
 }
 
 func NewStyle() *Style {

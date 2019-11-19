@@ -2,6 +2,7 @@ package notebook
 
 import (
 	"fmt"
+	"gioui.org/font"
 	"gioui.org/layout"
 	"gioui.org/op/paint"
 	"gioui.org/text"
@@ -9,6 +10,7 @@ import (
 	"gioui.org/widget"
 	api "github.com/corywalker/expreduce/pkg/expreduceapi"
 	"github.com/wrnrlr/foxtrot/graphics"
+	"github.com/wrnrlr/foxtrot/output"
 )
 
 type Out struct {
@@ -56,11 +58,12 @@ func (o *Out) errorLayout(gtx *layout.Context) {
 	paint.ColorOp{Color: red}.Add(gtx.Ops)
 	l := &widget.Label{}
 	ft := text.Font{Size: unit.Sp(18)}
-	l.Layout(gtx, theme.Shaper, ft, o.Err.Error())
+	shaper := font.Default()
+	l.Layout(gtx, shaper, ft, o.Err.Error())
 }
 
 func (o *Out) expressionLayout(gtx *layout.Context) {
 	st := graphics.NewStyle()
-	w := graphics.Ex(o.Ex, st, gtx)
+	w := output.Ex(o.Ex, st, gtx)
 	w()
 }

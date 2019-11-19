@@ -10,6 +10,17 @@ import (
 	"image/color"
 )
 
+func paintRect(width, height float32, gtx *layout.Context) {
+	var p clip.Path
+	p.Begin(gtx.Ops)
+	p.Move(f32.Point{X: 0, Y: 0})
+	p.Line(f32.Point{X: width, Y: 0})
+	p.Line(f32.Point{X: 0, Y: height})
+	p.Line(f32.Point{X: -width, Y: 0})
+	p.Line(f32.Point{X: 0, Y: -height})
+	p.End().Add(gtx.Ops)
+}
+
 func rrect(ops *op.Ops, width, height, se, sw, nw, ne float32) {
 	w, h := float32(width), float32(height)
 	const c = 0.55228475 // 4*(sqrt(2)-1)/3

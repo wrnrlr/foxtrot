@@ -1,4 +1,4 @@
-package graphics
+package output
 
 import (
 	"fmt"
@@ -10,14 +10,15 @@ import (
 	"gioui.org/text"
 	"gioui.org/unit"
 	"github.com/corywalker/expreduce/expreduce/atoms"
+	"github.com/wrnrlr/foxtrot/graphics"
 )
 
-func Rational(i *atoms.Rational, st *Style, gtx *layout.Context) layout.Widget {
+func Rational(i *atoms.Rational, st *graphics.Style, gtx *layout.Context) layout.Widget {
 	return func() {
 		var stack op.StackOp
 		stack.Push(gtx.Ops)
 		txt := fmt.Sprintf("%s\n%s", i.Num.String(), i.Den.String())
-		l1 := &Tag{Alignment: text.Middle, MaxWidth: Inf}
+		l1 := &graphics.Tag{Alignment: text.Middle, MaxWidth: graphics.Inf}
 		l1.Layout(gtx, st, txt)
 		stack.Pop()
 

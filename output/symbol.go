@@ -1,15 +1,16 @@
-package graphics
+package output
 
 import (
 	"gioui.org/layout"
 	"github.com/corywalker/expreduce/expreduce/atoms"
 	api "github.com/corywalker/expreduce/pkg/expreduceapi"
+	"github.com/wrnrlr/foxtrot/graphics"
 	"strings"
 )
 
-func Symbol(i *atoms.Symbol, st *Style, gtx *layout.Context) layout.Widget {
+func Symbol(i *atoms.Symbol, st *graphics.Style, gtx *layout.Context) layout.Widget {
 	return func() {
-		l := &Tag{MaxWidth: Inf}
+		l := &graphics.Tag{MaxWidth: graphics.Inf}
 		l.Layout(gtx, st, i.StringForm(api.ToStringParams{}))
 	}
 }
