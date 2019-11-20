@@ -43,7 +43,8 @@ func (m *Margin) Layout(gtx *layout.Context, checked bool, widget layout.Widget)
 	offset := image.Point{X: editorWidth, Y: 0}
 	op.TransformOp{}.Offset(toPointF(offset)).Add(gtx.Ops)
 	m.layoutMargin(checked, gtx)
-	pointer.RectAreaOp{Rect: image.Rectangle{Max: image.Point{X: marginWidth, Y: editorHeight}}}.Add(gtx.Ops)
+	r := image.Rectangle{Max: image.Point{X: marginWidth, Y: editorHeight}}
+	pointer.Rect(r).Add(gtx.Ops)
 	m.scroller.Add(gtx.Ops)
 	m.click.Add(gtx.Ops)
 	stack.Pop()

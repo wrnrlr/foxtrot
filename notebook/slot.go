@@ -170,7 +170,8 @@ func (s *Slot) placeholderLayout(gtx *layout.Context) {
 	paint.ColorOp{Color: white}.Add(gtx.Ops)
 	paint.PaintOp{Rect: dr}.Add(gtx.Ops)
 	gtx.Dimensions = layout.Dimensions{Size: image.Point{X: width, Y: height}}
-	pointer.RectAreaOp{Rect: image.Rectangle{Max: gtx.Dimensions.Size}}.Add(gtx.Ops)
+	r := image.Rectangle{Max: gtx.Dimensions.Size}
+	pointer.Rect(r).Add(gtx.Ops)
 	s.backgroundButton.Layout(gtx)
 }
 
@@ -243,7 +244,8 @@ func (b PlusButton) Layout(gtx *layout.Context, button *widget.Button) {
 		gtx.Constraints = layout.RigidConstraints(image.Point{size, size})
 		b.drawCircle(gtx)
 		b.drawPlus(gtx)
-		pointer.EllipseAreaOp{Rect: image.Rectangle{Max: gtx.Dimensions.Size}}.Add(gtx.Ops)
+		r := image.Rectangle{Max: gtx.Dimensions.Size}
+		pointer.Ellipse(r).Add(gtx.Ops)
 		button.Layout(gtx)
 	})
 }

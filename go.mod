@@ -3,7 +3,7 @@ module github.com/wrnrlr/foxtrot
 go 1.13
 
 require (
-	gioui.org v0.0.0-20191111125045-2e0406802b84
+	gioui.org v0.0.0-20191118143809-f8de7545f4f7
 	github.com/corywalker/expreduce v0.0.0-20190902204200-0a346d0d4ef1
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/wcharczuk/go-chart v2.0.1+incompatible
