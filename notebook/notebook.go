@@ -3,7 +3,6 @@ package notebook
 import (
 	"bytes"
 	"encoding/xml"
-	"fmt"
 	"gioui.org/layout"
 	"github.com/corywalker/expreduce/expreduce"
 	"github.com/corywalker/expreduce/expreduce/parser"
@@ -54,7 +53,6 @@ func (nb *Notebook) Event(gtx *layout.Context) interface{} {
 		es := nb.slots[i].Event(isActive, gtx)
 		for _, e := range es {
 			if _, ok := e.(SelectSlotEvent); ok {
-				fmt.Printf("Notebook: select placeholder: %d\n", i)
 				nb.focusSlot(i, gtx)
 			} else if ce, ok := e.(AddCellEvent); ok {
 				nb.InsertCell(i, ce.Type)
@@ -76,7 +74,6 @@ func (nb *Notebook) Event(gtx *layout.Context) interface{} {
 	for _, e := range es {
 		switch e := e.(type) {
 		case DeleteSelected:
-			fmt.Println("Delete Selected")
 			nb.DeleteSelected()
 		case FocusSlotEvent:
 			nb.focusSlot(e.Index, gtx)
@@ -118,7 +115,6 @@ func (nb *Notebook) eval(i int) {
 
 func (nb *Notebook) focusCell(i int) {
 	if i >= 0 && i < len(nb.cells) {
-		fmt.Printf("Focus cell %d\n", i)
 		nb.activeSlot = -1
 		nb.selection.Clear()
 		nb.cells[i].Focus()
@@ -127,7 +123,6 @@ func (nb *Notebook) focusCell(i int) {
 
 func (nb *Notebook) focusSlot(i int, gtx *layout.Context) {
 	if i >= 0 && i < len(nb.slots) {
-		fmt.Printf("Focus Slot %d\n", i)
 		nb.activeSlot = i
 		nb.selection.Clear()
 		nb.slots[i].Focus(true, gtx)

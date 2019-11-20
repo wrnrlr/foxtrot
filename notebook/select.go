@@ -1,7 +1,6 @@
 package notebook
 
 import (
-	"fmt"
 	"gioui.org/io/key"
 	"gioui.org/layout"
 )
@@ -44,10 +43,8 @@ func (s *Selection) processEvents(gtx *layout.Context) {
 			if ke.Name == key.NameDeleteBackward || ke.Name == key.NameDeleteForward {
 				s.events = append(s.events, DeleteSelected{})
 			} else if ke.Name == key.NameUpArrow && ke.Modifiers.Contain(key.ModShift) {
-				fmt.Printf("Select Up\n")
 				s.SetLast(s.last - 1)
 			} else if ke.Name == key.NameDownArrow && ke.Modifiers.Contain(key.ModShift) {
-				fmt.Printf("Select Down\n")
 				s.SetLast(s.last + 1)
 			} else if ke.Name == key.NameUpArrow && !ke.Modifiers.Contain(key.ModShift) {
 				s.events = append(s.events, FocusSlotEvent{Index: s.min()})
