@@ -11,6 +11,7 @@ import (
 	api "github.com/corywalker/expreduce/pkg/expreduceapi"
 	"github.com/wrnrlr/foxtrot/graphics"
 	"github.com/wrnrlr/foxtrot/output"
+	"strings"
 )
 
 type Out struct {
@@ -59,7 +60,9 @@ func (o *Out) errorLayout(gtx *layout.Context) {
 	l := &widget.Label{}
 	ft := text.Font{Size: unit.Sp(18)}
 	shaper := font.Default()
-	l.Layout(gtx, shaper, ft, o.Err.Error())
+	parts := strings.Split(o.Err.Error(), ":")
+	errorTxt := fmt.Sprintf("Error at line %s, column %s : %s", parts[2], parts[1], parts[3])
+	l.Layout(gtx, shaper, ft, errorTxt)
 }
 
 func (o *Out) expressionLayout(gtx *layout.Context) {
