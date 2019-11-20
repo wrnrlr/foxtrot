@@ -104,7 +104,6 @@ func (nb *Notebook) eval(i int) {
 	}
 	src := parser.ReplaceSyms(textIn)
 	buf := bytes.NewBufferString(src)
-	//expOut := parser.Interp(textIn, nb.kernel)
 	expOut, err := parser.InterpBuf(buf, "nofile", nb.kernel)
 	expOut = nb.kernel.Eval(expOut)
 	c.out = &Out{Ex: expOut, Err: err}
