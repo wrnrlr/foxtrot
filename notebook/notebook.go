@@ -27,7 +27,7 @@ func NewNotebook() *Notebook {
 	kernel := expreduce.NewEvalState()
 	firstSlot := NewSlot()
 	adds := []*Slot{firstSlot}
-	selection := &Selection{}
+	selection := NewSelection()
 	styles := DefaultStyles()
 	return &Notebook{cells, adds, kernel, 1, 0, layout.List{Axis: layout.Vertical}, selection, styles}
 }
@@ -39,10 +39,12 @@ func (nb *Notebook) Event(gtx *layout.Context) interface{} {
 		case EvalEvent:
 			nb.eval(i)
 			nb.focusSlot(i+1, gtx)
-		case SelectCellEvent:
-			fmt.Println("Notebook: Select Cell")
+		case SelectFirstCellEvent:
 			nb.unfocusSlot()
-			nb.selection.SetBegin(i)
+			nb.selection.SetFirst(i)
+		case SelectLastCellEvent:
+			nb.unfocusSlot()
+			nb.selection.SetLast(i)
 		case FocusPlaceholder:
 			nb.focusSlot(i+e.Offset, gtx)
 		}
@@ -63,10 +65,10 @@ func (nb *Notebook) Event(gtx *layout.Context) interface{} {
 				nb.focusCell(i)
 			} else if _, ok := e.(SelectPreviousCellEvent); ok {
 				nb.unfocusSlot()
-				nb.selection.SetBegin(i - 1)
+				nb.selection.SetFirst(i - 1)
 			} else if _, ok := e.(SelectNextCellEvent); ok {
 				nb.unfocusSlot()
-				nb.selection.SetBegin(i)
+				nb.selection.SetFirst(i)
 			}
 		}
 	}

@@ -1,12 +1,11 @@
 package notebook
 
 import (
-	"fmt"
 	"gioui.org/io/key"
 	"gioui.org/layout"
 )
 
-// Select a range of cells from begin to end
+// Select a range of cells from first to last
 type Selection struct {
 	eventKey     int
 	count        int
@@ -15,7 +14,11 @@ type Selection struct {
 	focused      bool
 	requestFocus bool
 
-	begin, end int
+	first, last int
+}
+
+func NewSelection() *Selection {
+	return &Selection{first: -1, last: -1}
 }
 
 func (s *Selection) Event(gtx *layout.Context) []interface{} {
@@ -36,12 +39,10 @@ func (s *Selection) processEvents(gtx *layout.Context) {
 	for _, e := range gtx.Events(&s.eventKey) {
 		switch ke := e.(type) {
 		case key.Event:
-			fmt.Printf("Selection Key Event\n")
 			if ke.Name == key.NameDeleteBackward || ke.Name == key.NameDeleteForward {
 				s.events = append(s.events, DeleteSelected{})
 			}
 		case key.FocusEvent:
-			fmt.Printf("Selection Focus Event: %b\n", ke.Focus)
 			s.focused = ke.Focus
 		}
 	}
@@ -49,37 +50,41 @@ func (s *Selection) processEvents(gtx *layout.Context) {
 
 func (s *Selection) Clear() {
 	s.requestFocus = false
-	s.begin = -1
-	s.end = -1
+	s.first = -1
+	s.last = -1
 }
 
-func (s *Selection) SetBegin(i int) {
+func (s *Selection) SetFirst(i int) {
 	s.requestFocus = true
-	s.begin = i
-	s.end = i
+	s.first = i
+	s.last = i
 }
 
-func (s *Selection) SetEnd(i int) {
-	s.end = i
+func (s *Selection) SetLast(i int) {
+	s.requestFocus = true
+	if s.first == -1 {
+		s.first = i
+	}
+	s.last = i
 }
 
 func (s *Selection) IsSelected(i int) bool {
-	return s.begin != -1 && s.min() >= i && s.max() <= i
+	return s.first != -1 && i >= s.min() && i <= s.max()
 }
 
 func (s *Selection) min() int {
-	if s.begin < s.end {
-		return s.begin
+	if s.first < s.last {
+		return s.first
 	} else {
-		return s.end
+		return s.last
 	}
 }
 
 func (s *Selection) max() int {
-	if s.begin > s.end {
-		return s.begin
+	if s.first > s.last {
+		return s.first
 	} else {
-		return s.end
+		return s.last
 	}
 }
 

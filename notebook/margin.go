@@ -3,6 +3,7 @@ package notebook
 import (
 	"gioui.org/f32"
 	"gioui.org/gesture"
+	"gioui.org/io/key"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/op"
@@ -20,9 +21,10 @@ type Margin struct {
 
 func (m *Margin) Event(gtx *layout.Context) interface{} {
 	for _, e := range m.click.Events(gtx) {
-		switch e.Type {
-		case gesture.TypeClick:
-			return SelectCellEvent{}
+		if e.Type == gesture.TypeClick && !e.Modifiers.Contain(key.ModShift) {
+			return SelectFirstCellEvent{}
+		} else if e.Type == gesture.TypeClick && e.Modifiers.Contain(key.ModShift) {
+			return SelectLastCellEvent{}
 		}
 	}
 	return nil
@@ -84,4 +86,6 @@ func (m *Margin) layoutMargin(checked bool, gtx *layout.Context) {
 	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: w, Y: h}}}.Add(gtx.Ops)
 }
 
-type SelectCellEvent struct{}
+type SelectFirstCellEvent struct{}
+
+type SelectLastCellEvent struct{}
