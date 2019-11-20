@@ -74,9 +74,12 @@ func (nb *Notebook) Event(gtx *layout.Context) interface{} {
 	}
 	es := nb.selection.Event(gtx)
 	for _, e := range es {
-		if _, ok := e.(DeleteSelected); ok {
+		switch e := e.(type) {
+		case DeleteSelected:
 			fmt.Println("Delete Selected")
 			nb.DeleteSelected()
+		case FocusSlotEvent:
+			nb.focusSlot(e.Index, gtx)
 		}
 	}
 	return nil
@@ -141,6 +144,7 @@ func (nb *Notebook) InsertCell(index int, typ CellType) {
 	nb.cells = append(nb.cells, cell)
 	copy(nb.cells[index+1:], nb.cells[index:])
 	nb.cells[index] = cell
+	nb.selection.Size = len(nb.cells)
 }
 
 func (nb *Notebook) DeleteSelected() {
@@ -153,15 +157,7 @@ func (nb *Notebook) DeleteSelected() {
 	}
 	nb.cells = nb.cells[:unselectedCount]
 	nb.slots = nb.slots[:unselectedCount+1]
-}
-
-func (nb *Notebook) DeleteCell(i int) {
-	l := len(nb.cells) - 1
-	if i < l {
-		copy(nb.cells[i:], nb.cells[i+1:])
-	}
-	nb.cells[l] = nil // or the zero value of T
-	nb.cells = nb.cells[:l-1]
+	nb.selection.Size = unselectedCount
 }
 
 func ReadNotebookFile() (*Notebook, error) {
