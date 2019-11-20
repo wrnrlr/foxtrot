@@ -144,15 +144,15 @@ func (nb *Notebook) InsertCell(index int, typ CellType) {
 }
 
 func (nb *Notebook) DeleteSelected() {
-	i := 0
-	for _, c := range nb.cells {
+	unselectedCount := 0
+	for i, c := range nb.cells {
 		if !nb.selection.IsSelected(i) {
-			nb.cells[i] = c
-			i++
+			nb.cells[unselectedCount] = c
+			unselectedCount++
 		}
 	}
-	nb.cells = nb.cells[:i]
-	nb.slots = nb.slots[:i+1]
+	nb.cells = nb.cells[:unselectedCount]
+	nb.slots = nb.slots[:unselectedCount+1]
 }
 
 func (nb *Notebook) DeleteCell(i int) {

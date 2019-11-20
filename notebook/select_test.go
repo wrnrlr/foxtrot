@@ -14,7 +14,7 @@ func TestSetFirst(t *testing.T) {
 	s := NewSelection()
 	s.SetFirst(1)
 	assert.False(t, s.IsSelected(0))
-	assert.True /**/ (t, s.IsSelected(1))
+	assert.True(t, s.IsSelected(1))
 	assert.False(t, s.IsSelected(2))
 }
 
