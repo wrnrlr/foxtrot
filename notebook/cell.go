@@ -2,7 +2,6 @@ package notebook
 
 import (
 	"fmt"
-	"gioui.org/io/key"
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
@@ -27,21 +26,27 @@ func NewCell(typ CellType, i int, styles *Styles) *Cell {
 
 func (c Cell) Event(gtx *layout.Context) interface{} {
 	for _, e := range c.inEditor.Events(gtx) {
-		if ce, ok := e.(editor.CommandEvent); ok {
-			lineCount, lineWidth, caretY, caretX := c.inEditor.CaretLine()
-			if (ce.Event.Name == key.NameEnter || ce.Event.Name == key.NameReturn) && ce.Event.Modifiers.Contain(key.ModShift) {
-				return EvalEvent{}
-			} else if ce.Event.Name == key.NameUpArrow && caretY == 0 {
-				return FocusPlaceholder{Offset: 0}
-			} else if ce.Event.Name == key.NameLeftArrow && caretY == 0 && caretX == 0 {
-				return FocusPlaceholder{Offset: 0}
-			} else if ce.Event.Name == key.NameDownArrow && caretY == lineCount {
-				return FocusPlaceholder{Offset: 1}
-			} else if ce.Event.Name == key.NameRightArrow && caretY == lineCount && caretX == lineWidth {
-				return FocusPlaceholder{Offset: 1}
-			}
-			fmt.Printf("Caret: lineCount: %v, lineWidth: %v, caretY: %v, caretX: %v\n", lineCount, lineWidth, caretY, caretX)
+		switch e.(type) {
+		case editor.SubmitEvent:
+			return EvalEvent{}
+		case editor.UpEvent:
+			return FocusPlaceholder{Offset: 0}
+		case editor.DownEvent:
+			return FocusPlaceholder{Offset: 1}
 		}
+		//if ce, ok := e.(editor.CommandEvent); ok {
+		//	lineCount, lineWidth, caretY, caretX := c.inEditor.CaretLine()
+		//	if ce.Event.Name == key.NameUpArrow && caretY == 0 {
+		//		return FocusPlaceholder{Offset: 0}
+		//	} else if ce.Event.Name == key.NameLeftArrow && caretY == 0 && caretX == 0 {
+		//		return FocusPlaceholder{Offset: 0}
+		//	} else if ce.Event.Name == key.NameDownArrow && caretY == lineCount {
+		//		return FocusPlaceholder{Offset: 1}
+		//	} else if ce.Event.Name == key.NameRightArrow && caretY == lineCount && caretX == lineWidth {
+		//		return FocusPlaceholder{Offset: 1}
+		//	}
+		//	fmt.Printf("Caret: lineCount: %v, lineWidth: %v, caretY: %v, caretX: %v\n", lineCount, lineWidth, caretY, caretX)
+		//}
 	}
 	return c.margin.Event(gtx)
 }

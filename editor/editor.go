@@ -3,6 +3,7 @@
 package editor
 
 import (
+	"fmt"
 	"image"
 	"math"
 	"strings"
@@ -54,8 +55,7 @@ type Editor struct {
 	carXOff fixed.Int26_6
 
 	// Track the number of lines and length of current line
-	lineCount int
-	lineWidth int
+	lineCount, lineWidth, carLine, carCol int
 
 	scroller  gesture.Scroll
 	scrollOff image.Point
@@ -75,6 +75,12 @@ type EditorEvent interface {
 // A ChangeEvent is generated for every user change to the text.
 type ChangeEvent struct{}
 
+type SubmitEvent struct{}
+
+type UpEvent struct{}
+
+type DownEvent struct{}
+
 // A CommandEvent is generated for when moving the cursor
 // and when command keys like enter and arrows-keys is pressed
 type CommandEvent struct {
@@ -92,23 +98,10 @@ const (
 	maxBlinkDuration = 10 * time.Second
 )
 
-func (e *Editor) XcarXOff() fixed.Int26_6 {
-	return e.carXOff
-}
-
-func (e *Editor) LineCount() int {
-	return e.lineCount
-}
-
-func (e *Editor) CaretLine() (int, int, int, int) {
-	carLine, carCol, _, _ := e.LayoutCaret()
-	line := e.lines[carLine]
-	lineWidth := len(line.Text.String) - 1
-	return e.lineCount - 1, lineWidth, carLine, carCol
-}
-
-func (e *Editor) CaretPosition() (lineHeight, lineLength, caretX, caretY int) {
-	return
+func (e *Editor) CaretLine() {
+	e.carLine, e.carCol, _, _ = e.LayoutCaret()
+	line := e.lines[e.carLine]
+	e.lineWidth = len(line.Text.String)
 }
 
 // Events returns available editor events.
@@ -175,15 +168,30 @@ func (e *Editor) processKey(gtx *layout.Context) {
 			if !e.focused {
 				break
 			}
+			if (ke.Name == key.NameEnter || ke.Name == key.NameReturn) && ke.Modifiers.Contain(key.ModShift) {
+				e.events = append(e.events, SubmitEvent{})
+				return
+			} else if ke.Name == key.NameUpArrow && e.carLine == 0 {
+				e.events = append(e.events, UpEvent{})
+			} else if ke.Name == key.NameLeftArrow && e.carLine == 0 && e.carCol == 0 {
+				e.events = append(e.events, UpEvent{})
+			} else if ke.Name == key.NameDownArrow && e.carLine == e.lineCount-1 {
+				e.events = append(e.events, DownEvent{})
+			} else if ke.Name == key.NameRightArrow && e.carLine == e.lineCount-1 && e.carCol == e.lineWidth {
+				e.events = append(e.events, DownEvent{})
+			}
+			fmt.Printf("Caret: lineCount: %v, lineWidth: %v, caretY: %v, caretX: %v\n", e.lineCount, e.lineWidth, e.carLine, e.carCol)
 			if e.command(ke) {
 				e.caretScroll = true
 				e.scroller.Stop()
+				e.CaretLine()
 			}
-			e.events = append(e.events, CommandEvent{Event: ke})
+			//e.events = append(e.events, CommandEvent{Event: ke})
 		case key.EditEvent:
 			e.caretScroll = true
 			e.scroller.Stop()
 			e.append(ke.Text)
+			e.CaretLine()
 		}
 		if e.rr.Changed() {
 			e.events = append(e.events, ChangeEvent{})
@@ -663,3 +671,6 @@ func (e *Editor) command(k key.Event) bool {
 
 func (s ChangeEvent) isEditorEvent()  {}
 func (s CommandEvent) isEditorEvent() {}
+func (s SubmitEvent) isEditorEvent()  {}
+func (s UpEvent) isEditorEvent()      {}
+func (s DownEvent) isEditorEvent()    {}
