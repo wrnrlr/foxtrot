@@ -15,6 +15,7 @@ gioui.org v0.0.0-20191111125045-2e0406802b84 h1:yK+9qzX4tGLiqpsA2019ONYpcJaiXjSU
 gioui.org v0.0.0-20191111125045-2e0406802b84/go.mod h1:KqFFi2Dq5gYA3FJ0sDOt8OBXoMsuxMtE8v2f0JExXAY=
 gioui.org v0.0.0-20191118143809-f8de7545f4f7 h1:mu4ahUHjMB/ROeALUq0iuWjJq+r646xkt7+E3XYaj2k=
 gioui.org v0.0.0-20191118143809-f8de7545f4f7/go.mod h1:KqFFi2Dq5gYA3FJ0sDOt8OBXoMsuxMtE8v2f0JExXAY=
+git.sr.ht/~wrnr/gio v0.0.0-20191123081017-da2e3cf61efc/go.mod h1:KqFFi2Dq5gYA3FJ0sDOt8OBXoMsuxMtE8v2f0JExXAY=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a h1:idn718Q4B6AGu/h5Sxe66HYVdqdGu2l9Iebqhi/AEoA=
 github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a/go.mod h1:lB+ZfQJz7igIIfQNfa7Ml4HSf2uFQQRzpGGRXenZAgY=

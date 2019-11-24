@@ -3,7 +3,7 @@ module github.com/wrnrlr/foxtrot
 go 1.13
 
 require (
-	gioui.org v0.0.0-20191118143809-f8de7545f4f7
+	gioui.org v0.0.0-20191124190138-726270ab2d84
 	github.com/corywalker/expreduce v0.0.0-20190902204200-0a346d0d4ef1
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/google/go-cmp v0.3.1 // indirect
@@ -18,4 +18,7 @@ require (
 	modernc.org/wl v1.0.0
 )
 
-replace github.com/corywalker/expreduce => ./expreduce
+replace (
+	gioui.org => ./gio
+	github.com/corywalker/expreduce => ./expreduce
+)

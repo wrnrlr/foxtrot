@@ -1,3 +1,6 @@
 [submodule "expreduce"]
 	path = expreduce
 	url = https://github.com/wrnrlr/expreduce
+[submodule "gio"]
+	path = gio
+	url = https://git.sr.ht/~wrnr/gio
