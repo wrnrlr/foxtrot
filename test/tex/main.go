@@ -50,19 +50,19 @@ func loop(w *app.Window) error {
 				theme.Label(unit.Sp(38), "Examples:").Layout(gtx)
 			})
 			c1 := f.Rigid(gtx, func() {
-				l := &tex.Label{Text: "A", MaxWidth: tex.FitContent}
+				l := &tex.Label{Text: "x", MaxWidth: tex.FitContent}
 				s1 := &tex.Label{Text: "2", MaxWidth: tex.FitContent}
 				den := &tex.Word{Content: l, Superscript: s1}
 				den.Layout(gtx, s, fnt)
 			})
 			c2 := f.Rigid(gtx, func() {
-				l := &tex.Label{Text: "A", MaxWidth: tex.FitContent}
-				s1 := &tex.Label{Text: "ij", MaxWidth: tex.FitContent}
+				l := &tex.Label{Text: "q", MaxWidth: tex.FitContent}
+				s1 := &tex.Label{Text: "2i", MaxWidth: tex.FitContent}
 				den := &tex.Word{Content: l, Subscript: s1}
 				den.Layout(gtx, s, fnt)
 			})
 			c3 := f.Rigid(gtx, func() {
-				l := &tex.Label{Text: "Abc", MaxWidth: tex.FitContent}
+				l := &tex.Label{Text: "Abg", MaxWidth: tex.FitContent}
 				s1 := &tex.Label{Text: "q", MaxWidth: tex.FitContent}
 				s2 := &tex.Label{Text: "nN", MaxWidth: tex.FitContent}
 				w := tex.Word{l, s2, s1}
