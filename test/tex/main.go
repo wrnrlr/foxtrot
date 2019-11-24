@@ -46,23 +46,51 @@ func loop(w *app.Window) error {
 			fnt := text.Font{Size: unit.Sp(20)}
 			f := layout.Flex{Axis: layout.Vertical}
 			paint.ColorOp{black}.Add(gtx.Ops)
-			c1 := f.Rigid(gtx, func() {
+			c0 := f.Rigid(gtx, func() {
 				theme.Label(unit.Sp(38), "Examples:").Layout(gtx)
 			})
+			c1 := f.Rigid(gtx, func() {
+				l := &tex.Label{Text: "A", MaxWidth: tex.FitContent}
+				s1 := &tex.Label{Text: "2", MaxWidth: tex.FitContent}
+				den := &tex.Word{Content: l, Superscript: s1}
+				den.Layout(gtx, s, fnt)
+			})
 			c2 := f.Rigid(gtx, func() {
+				l := &tex.Label{Text: "A", MaxWidth: tex.FitContent}
+				s1 := &tex.Label{Text: "ij", MaxWidth: tex.FitContent}
+				den := &tex.Word{Content: l, Subscript: s1}
+				den.Layout(gtx, s, fnt)
+			})
+			c3 := f.Rigid(gtx, func() {
 				l := &tex.Label{Text: "Abc", MaxWidth: tex.FitContent}
 				s1 := &tex.Label{Text: "q", MaxWidth: tex.FitContent}
 				s2 := &tex.Label{Text: "nN", MaxWidth: tex.FitContent}
 				w := tex.Word{l, s2, s1}
 				w.Layout(gtx, s, fnt)
 			})
-			c3 := f.Rigid(gtx, func() {
+			c4 := f.Rigid(gtx, func() {
 				num := &tex.Label{Text: "12", MaxWidth: tex.FitContent}
 				den := &tex.Label{Text: "100", MaxWidth: tex.FitContent}
 				fr := &tex.Fraction{num, den}
 				fr.Layout(gtx, s, fnt)
 			})
-			f.Layout(gtx, c1, c2, c3)
+			c5 := f.Rigid(gtx, func() {
+				num := &tex.Label{Text: "1", MaxWidth: tex.FitContent}
+				l := &tex.Label{Text: "n", MaxWidth: tex.FitContent}
+				s1 := &tex.Label{Text: "2", MaxWidth: tex.FitContent}
+				den := &tex.Word{Content: l, Superscript: s1}
+				fr := &tex.Fraction{num, den}
+				fr.Layout(gtx, s, fnt)
+			})
+			c6 := f.Rigid(gtx, func() {
+				x := &tex.Label{Text: "x", MaxWidth: tex.FitContent}
+				num := &tex.Label{Text: "1", MaxWidth: tex.FitContent}
+				den := &tex.Label{Text: "2", MaxWidth: tex.FitContent}
+				fr := &tex.Fraction{num, den}
+				power := &tex.Word{Content: x, Superscript: fr}
+				power.Layout(gtx, s, fnt)
+			})
+			f.Layout(gtx, c0, c1, c2, c3, c4, c5, c6)
 			e.Frame(gtx.Ops)
 		}
 	}

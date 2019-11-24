@@ -65,6 +65,8 @@ func (f *Fraction) Layout(gtx *layout.Context, s *text.Shaper, font text.Font) {
 	op.TransformOp{}.Offset(offset).Add(gtx.Ops)
 	f.Denominator.Layout(gtx, s, font)
 	stack.Pop()
+
+	gtx.Dimensions = dims
 }
 
 func max(x, y int) int {

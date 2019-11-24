@@ -35,17 +35,19 @@ func (w *Word) Layout(gtx *layout.Context, s *text.Shaper, font text.Font) {
 	scaledFont := scaleDownFont(font)
 	contentDimesions := w.Content.Dimensions(gtx, s, font)
 	if w.Superscript != nil {
+		superscriptDims := w.Superscript.Dimensions(gtx, s, scaledFont)
 		offset2 := f32.Point{X: float32(contentDimesions.Size.X), Y: 0}
 		stack.Push(gtx.Ops)
 		op.TransformOp{}.Offset(offset2).Add(gtx.Ops)
 		w.Superscript.Layout(gtx, s, scaledFont)
-		offset.Y = float32(gtx.Dimensions.Size.Y)
+		offset.Y = float32(superscriptDims.Size.Y)
 		stack.Pop()
-		op.TransformOp{}.Offset(offset).Add(gtx.Ops)
 	}
 	stack.Push(gtx.Ops)
+	op.TransformOp{}.Offset(offset).Add(gtx.Ops)
 	w.Content.Layout(gtx, s, font)
 	offset.X = float32(gtx.Dimensions.Size.X)
+	offset.Y += float32(w.Content.Dimensions(gtx, s, font).Size.Y)
 	stack.Pop()
 	if w.Subscript != nil {
 		stack.Push(gtx.Ops)
