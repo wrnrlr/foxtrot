@@ -1,4 +1,4 @@
-package tex
+package typeset
 
 import (
 	"gioui.org/f32"
