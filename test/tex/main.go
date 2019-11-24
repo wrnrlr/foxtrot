@@ -10,7 +10,7 @@ import (
 	"gioui.org/text"
 	"gioui.org/unit"
 	"gioui.org/widget/material"
-	"github.com/wrnrlr/foxtrot/tex"
+	"github.com/wrnrlr/foxtrot/typeset"
 	"image/color"
 	"log"
 )
@@ -50,44 +50,44 @@ func loop(w *app.Window) error {
 				theme.Label(unit.Sp(38), "Examples:").Layout(gtx)
 			})
 			c1 := f.Rigid(gtx, func() {
-				l := &tex.Label{Text: "x", MaxWidth: tex.FitContent}
-				s1 := &tex.Label{Text: "2", MaxWidth: tex.FitContent}
-				den := &tex.Word{Content: l, Superscript: s1}
+				l := &typeset.Label{Text: "x", MaxWidth: typeset.FitContent}
+				s1 := &typeset.Label{Text: "2", MaxWidth: typeset.FitContent}
+				den := &typeset.Word{Content: l, Superscript: s1}
 				den.Layout(gtx, s, fnt)
 			})
 			c2 := f.Rigid(gtx, func() {
-				l := &tex.Label{Text: "q", MaxWidth: tex.FitContent}
-				s1 := &tex.Label{Text: "2i", MaxWidth: tex.FitContent}
-				den := &tex.Word{Content: l, Subscript: s1}
+				l := &typeset.Label{Text: "q", MaxWidth: typeset.FitContent}
+				s1 := &typeset.Label{Text: "2i", MaxWidth: typeset.FitContent}
+				den := &typeset.Word{Content: l, Subscript: s1}
 				den.Layout(gtx, s, fnt)
 			})
 			c3 := f.Rigid(gtx, func() {
-				l := &tex.Label{Text: "Abg", MaxWidth: tex.FitContent}
-				s1 := &tex.Label{Text: "q", MaxWidth: tex.FitContent}
-				s2 := &tex.Label{Text: "nN", MaxWidth: tex.FitContent}
-				w := tex.Word{l, s2, s1}
+				l := &typeset.Label{Text: "Abg", MaxWidth: typeset.FitContent}
+				s1 := &typeset.Label{Text: "q", MaxWidth: typeset.FitContent}
+				s2 := &typeset.Label{Text: "nN", MaxWidth: typeset.FitContent}
+				w := typeset.Word{l, s2, s1}
 				w.Layout(gtx, s, fnt)
 			})
 			c4 := f.Rigid(gtx, func() {
-				num := &tex.Label{Text: "12", MaxWidth: tex.FitContent}
-				den := &tex.Label{Text: "100", MaxWidth: tex.FitContent}
-				fr := &tex.Fraction{num, den}
+				num := &typeset.Label{Text: "12", MaxWidth: typeset.FitContent}
+				den := &typeset.Label{Text: "100", MaxWidth: typeset.FitContent}
+				fr := &typeset.Fraction{num, den}
 				fr.Layout(gtx, s, fnt)
 			})
 			c5 := f.Rigid(gtx, func() {
-				num := &tex.Label{Text: "1", MaxWidth: tex.FitContent}
-				l := &tex.Label{Text: "n", MaxWidth: tex.FitContent}
-				s1 := &tex.Label{Text: "2", MaxWidth: tex.FitContent}
-				den := &tex.Word{Content: l, Superscript: s1}
-				fr := &tex.Fraction{num, den}
+				num := &typeset.Label{Text: "1", MaxWidth: typeset.FitContent}
+				l := &typeset.Label{Text: "n", MaxWidth: typeset.FitContent}
+				s1 := &typeset.Label{Text: "2", MaxWidth: typeset.FitContent}
+				den := &typeset.Word{Content: l, Superscript: s1}
+				fr := &typeset.Fraction{num, den}
 				fr.Layout(gtx, s, fnt)
 			})
 			c6 := f.Rigid(gtx, func() {
-				x := &tex.Label{Text: "x", MaxWidth: tex.FitContent}
-				num := &tex.Label{Text: "1", MaxWidth: tex.FitContent}
-				den := &tex.Label{Text: "2", MaxWidth: tex.FitContent}
-				fr := &tex.Fraction{num, den}
-				power := &tex.Word{Content: x, Superscript: fr}
+				x := &typeset.Label{Text: "x", MaxWidth: typeset.FitContent}
+				num := &typeset.Label{Text: "1", MaxWidth: typeset.FitContent}
+				den := &typeset.Label{Text: "2", MaxWidth: typeset.FitContent}
+				fr := &typeset.Fraction{num, den}
+				power := &typeset.Word{Content: x, Superscript: fr}
 				power.Layout(gtx, s, fnt)
 			})
 			f.Layout(gtx, c0, c1, c2, c3, c4, c5, c6)
