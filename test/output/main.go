@@ -6,6 +6,8 @@ import (
 	"gioui.org/font/gofont"
 	"gioui.org/io/system"
 	"gioui.org/layout"
+	"gioui.org/op/paint"
+	"gioui.org/text"
 	"gioui.org/unit"
 	"gioui.org/widget/material"
 	"github.com/corywalker/expreduce/expreduce"
@@ -40,12 +42,14 @@ func loop(w *app.Window) error {
 	theme.Color.Text = black
 	kernel := expreduce.NewEvalState()
 	expressions := []string{
+		"x+2",
 		//"Graphics[1]",
-		"Graphics[Rectange[]]",
-		"Graphics[{Red, Rectangle[{0, 0}], Blue, Rectangle[{0.5, 0.5}]}]",
-		"Graphics[{Red, Rectangle[{0, 0}, {1, 3}], Blue, Rectangle[{2, 1}, {4, 2}]}]",
-		"Sin[1/2]",
-		"Sqrt[2]",
+		//"Graphics[Rectange[]]",
+		//"Graphics[{Red, Rectangle[{0, 0}], Blue, Rectangle[{0.5, 0.5}]}]",
+		//"Graphics[{Red, Rectangle[{0, 0}, {1, 3}], Blue, Rectangle[{2, 1}, {4, 2}]}]",
+		//"Sin[1/2]",
+		//"Power[x,3]",
+		//"Sqrt[2]",
 	}
 	items := []Item{}
 	for i, inTxt := range expressions {
@@ -63,6 +67,7 @@ func loop(w *app.Window) error {
 			return e.Err
 		case system.FrameEvent:
 			gtx.Reset(e.Config, e.Size)
+			paint.ColorOp{black}.Add(gtx.Ops)
 			list.Layout(gtx, len(items), func(i int) {
 				layout.UniformInset(unit.Sp(10)).Layout(gtx, func() {
 					items[i].Layout(gtx)
@@ -89,7 +94,7 @@ func (i *Item) Layout(gtx *layout.Context) {
 	c3 := f.Rigid(gtx, func() {
 		st := graphics.NewStyle()
 		w := output.Ex(i.Ex, st, gtx)
-		w()
+		w.Layout(gtx, theme.Shaper, fnt)
 	})
 	f.Layout(gtx, c1, c2, c3)
 }
@@ -99,6 +104,7 @@ var (
 	lightBlue        = rgb(0x89cff0)
 	black            = rgb(0x000000)
 	_defaultFontSize = unit.Sp(20)
+	fnt              = text.Font{Size: unit.Sp(20)}
 )
 
 func rgb(c uint32) color.RGBA {

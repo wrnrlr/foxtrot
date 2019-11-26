@@ -8,12 +8,10 @@ import (
 	"github.com/wrnrlr/foxtrot/typeset"
 )
 
-func Rational(i *atoms.Rational, st *graphics.Style, gtx *layout.Context) layout.Widget {
-	return func() {
-		paint.ColorOp{black}.Add(gtx.Ops)
-		num := &typeset.Label{MaxWidth: typeset.FitContent, Text: i.Num.String()}
-		den := &typeset.Label{MaxWidth: typeset.FitContent, Text: i.Den.String()}
-		fr := typeset.Fraction{num, den}
-		fr.Layout(gtx, st.Shaper, st.Font)
-	}
+func Rational(i *atoms.Rational, st *graphics.Style, gtx *layout.Context) typeset.Shape {
+	paint.ColorOp{black}.Add(gtx.Ops)
+	num := &typeset.Label{MaxWidth: typeset.FitContent, Text: i.Num.String()}
+	den := &typeset.Label{MaxWidth: typeset.FitContent, Text: i.Den.String()}
+	fraction := typeset.Fraction{num, den}
+	return &fraction
 }

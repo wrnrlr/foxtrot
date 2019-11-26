@@ -19,10 +19,3 @@ func scaleDownFont(font text.Font) text.Font {
 		Style:    font.Style,
 		Weight:   font.Weight}
 }
-
-type Sqrt struct{}
-
-type Group struct {
-	Parts                  []Shape
-	Subscript, SuperScript *Shape
-}
