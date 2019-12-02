@@ -7,7 +7,6 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/text"
 	"gioui.org/unit"
-	"github.com/corywalker/expreduce/expreduce/atoms"
 	"github.com/corywalker/expreduce/pkg/expreduceapi"
 	"github.com/wrnrlr/foxtrot/editor"
 	"github.com/wrnrlr/foxtrot/graphics"
@@ -162,8 +161,6 @@ func (c *Cell) outputCell(gtx *layout.Context) {
 		c.labelLayout(gtx)
 	})
 	c2 := f.Flex(gtx, 1, func() {
-		txt := c.Out.StringForm(expreduceapi.ToStringParams{Context: atoms.NewString("Global`")})
-		fmt.Println(txt)
 		st := graphics.NewStyle()
 		var stack op.StackOp
 		stack.Push(gtx.Ops)
