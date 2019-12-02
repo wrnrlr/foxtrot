@@ -24,7 +24,7 @@ func NewBrowser() *Browser {
 	input := &editor.Editor{SingleLine: true}
 	shaper := font.Default()
 	st := editor.EditorStyle{
-		Font:       text.Font{Variant: "Mono", Size: unit.Sp(18)},
+		Font:       text.Font{Size: unit.Sp(18)},
 		Color:      util.LightGrey,
 		CaretColor: util.Black,
 		Hint:       "Temporary file",
