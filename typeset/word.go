@@ -5,7 +5,6 @@ import (
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/text"
-	"gioui.org/unit"
 )
 
 type Word struct {
@@ -13,7 +12,7 @@ type Word struct {
 	Subscript, Superscript Shape
 }
 
-func (w *Word) Dimensions(c unit.Converter, s *text.Shaper, font text.Font) layout.Dimensions {
+func (w *Word) Dimensions(c *layout.Context, s *text.Shaper, font text.Font) layout.Dimensions {
 	dims := w.Content.Dimensions(c, s, font)
 	metrics := s.Metrics(c, font)
 	xHeight := metrics.XHeight.Ceil()

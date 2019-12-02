@@ -18,4 +18,6 @@ var (
 	FactorSymbol     = &Label{Text: "!", MaxWidth: FitContent}
 	InterpunctSymbol = &Label{Text: "·", MaxWidth: FitContent}
 	ModuloSymbol     = &Label{Text: "%", MaxWidth: FitContent}
+
+	SqrtSymbol = &Label{Text: "√", MaxWidth: FitContent}
 )

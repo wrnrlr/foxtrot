@@ -2,17 +2,16 @@ package typeset
 
 import (
 	"gioui.org/f32"
-	"gioui.org/op/clip"
 	"gioui.org/text"
 	"golang.org/x/image/math/fixed"
 	"image"
 	"unicode/utf8"
 )
 
-type line struct {
-	offset f32.Point
-	clip   clip.Op
-}
+//type line struct {
+//	offset f32.Point
+//	clip   clip.Op
+//}
 
 type lineIterator struct {
 	Lines     []text.Line

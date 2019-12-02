@@ -90,7 +90,34 @@ func loop(w *app.Window) error {
 				power := &typeset.Word{Content: x, Superscript: fr}
 				power.Layout(gtx, s, fnt)
 			})
-			f.Layout(gtx, c0, c1, c2, c3, c4, c5, c6)
+			c7 := f.Rigid(gtx, func() {
+				a := &typeset.Label{Text: "a", MaxWidth: typeset.FitContent}
+				as := &typeset.Label{Text: "2", MaxWidth: typeset.FitContent}
+				d1 := &typeset.Word{Content: a, Superscript: as}
+				b := &typeset.Label{Text: "b", MaxWidth: typeset.FitContent}
+				bs := &typeset.Label{Text: "2", MaxWidth: typeset.FitContent}
+				d2 := &typeset.Word{Content: b, Superscript: bs}
+				p := typeset.Plus(d1, d2)
+				c := &typeset.Label{Text: "c", MaxWidth: typeset.FitContent}
+				cs := &typeset.Label{Text: "2", MaxWidth: typeset.FitContent}
+				d3 := &typeset.Word{Content: c, Superscript: cs}
+				p2 := typeset.Plus(d3, p)
+				p2.Layout(gtx, s, fnt)
+			})
+			c8 := f.Rigid(gtx, func() {
+				a := &typeset.Label{Text: "a", MaxWidth: typeset.FitContent}
+				d1 := &typeset.Word{Content: a}
+				l := &typeset.Label{Text: "b", MaxWidth: typeset.FitContent}
+				s1 := &typeset.Label{Text: "2", MaxWidth: typeset.FitContent}
+				b := &typeset.Word{Content: l, Superscript: s1}
+				d2 := &typeset.Word{Content: b}
+				p := typeset.Plus(d1, d2)
+				den := &typeset.Label{Text: "100", MaxWidth: typeset.FitContent}
+				fr := &typeset.Fraction{p, den}
+				fr.Layout(gtx, s, fnt)
+				p.Layout(gtx, s, fnt)
+			})
+			f.Layout(gtx, c0, c1, c2, c3, c4, c5, c6, c7, c8)
 			e.Frame(gtx.Ops)
 		}
 	}

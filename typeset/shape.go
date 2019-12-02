@@ -3,11 +3,10 @@ package typeset
 import (
 	"gioui.org/layout"
 	"gioui.org/text"
-	"gioui.org/unit"
 )
 
 type Shape interface {
-	Dimensions(c unit.Converter, s *text.Shaper, font text.Font) layout.Dimensions
+	Dimensions(c *layout.Context, s *text.Shaper, font text.Font) layout.Dimensions
 	Layout(gtx *layout.Context, s *text.Shaper, font text.Font)
 }
 

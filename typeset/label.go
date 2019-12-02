@@ -2,7 +2,6 @@ package typeset
 
 import (
 	"fmt"
-	"gioui.org/unit"
 	"image"
 
 	"gioui.org/f32"
@@ -61,7 +60,7 @@ func (l Label) Layout(gtx *layout.Context, s *text.Shaper, font text.Font) {
 	gtx.Dimensions = dims
 }
 
-func (l *Label) Dimensions(c unit.Converter, s *text.Shaper, font text.Font) layout.Dimensions {
+func (l *Label) Dimensions(c *layout.Context, s *text.Shaper, font text.Font) layout.Dimensions {
 	options := text.LayoutOptions{MaxWidth: l.MaxWidth}
 	textLayout := s.Layout(c, font, l.Text, options)
 	lines := textLayout.Lines

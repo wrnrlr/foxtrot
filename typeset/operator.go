@@ -5,7 +5,6 @@ import (
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/text"
-	"gioui.org/unit"
 )
 
 func Plus(left, right Shape) Shape {
@@ -13,7 +12,7 @@ func Plus(left, right Shape) Shape {
 }
 
 func Minus(left, right Shape) Shape {
-	return &Operator{PlusSymbol, left, right}
+	return &Operator{MinusSymbol, left, right}
 }
 
 func Multiply(left, right Shape) Shape {
@@ -22,10 +21,6 @@ func Multiply(left, right Shape) Shape {
 
 func Modulo(left, right Shape) Shape {
 	return &Operator{ModuloSymbol, left, right}
-}
-
-func Sqrt(body Shape) Shape {
-	return nil
 }
 
 func Factor(left, right Shape) Shape {
@@ -40,7 +35,7 @@ type Operator struct {
 	Symbol, Left, Right Shape
 }
 
-func (o *Operator) Dimensions(c unit.Converter, s *text.Shaper, font text.Font) layout.Dimensions {
+func (o *Operator) Dimensions(c *layout.Context, s *text.Shaper, font text.Font) layout.Dimensions {
 	dims := o.Left.Dimensions(c, s, font)
 	d := o.Symbol.Dimensions(c, s, font)
 	dims.Size.X += d.Size.X
@@ -54,15 +49,17 @@ func (o *Operator) Dimensions(c unit.Converter, s *text.Shaper, font text.Font) 
 }
 
 func (o *Operator) Layout(gtx *layout.Context, s *text.Shaper, font text.Font) {
+	dims := o.Dimensions(gtx, s, font)
 	var stack op.StackOp
 	offset := f32.Point{X: 0, Y: 0}
 	stack.Push(gtx.Ops)
 	o.Left.Layout(gtx, s, font)
 	offset.X += float32(gtx.Dimensions.Size.X)
-	offset.Y = 0
 	stack.Pop()
 
 	stack.Push(gtx.Ops)
+	od := o.Symbol.Dimensions(gtx, s, font)
+	offset.Y = float32((dims.Size.Y - od.Size.Y) / 2)
 	op.TransformOp{}.Offset(offset).Add(gtx.Ops)
 	o.Symbol.Layout(gtx, s, font)
 	offset.X += float32(gtx.Dimensions.Size.X)
@@ -71,6 +68,8 @@ func (o *Operator) Layout(gtx *layout.Context, s *text.Shaper, font text.Font) {
 
 	if o.Right != nil {
 		stack.Push(gtx.Ops)
+		rd := o.Right.Dimensions(gtx, s, font)
+		offset.Y = float32((dims.Size.Y - rd.Size.Y) / 2)
 		op.TransformOp{}.Offset(offset).Add(gtx.Ops)
 		o.Right.Layout(gtx, s, font)
 		//offset.X += float32(gtx.Dimensions.Size.X)
