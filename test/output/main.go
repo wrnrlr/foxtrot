@@ -42,14 +42,19 @@ func loop(w *app.Window) error {
 	theme.Color.Text = black
 	kernel := expreduce.NewEvalState()
 	expressions := []string{
+		//"1/c+a^2+b^2",
+		"Table[i,{i,0,100}]",
+		"Sin[x]",
+		"Blue",
 		"x+2",
+		"1/2",
+		"x^3",
+		"Sqrt[2]",
+		"Blue",
 		//"Graphics[1]",
 		//"Graphics[Rectange[]]",
 		//"Graphics[{Red, Rectangle[{0, 0}], Blue, Rectangle[{0.5, 0.5}]}]",
 		//"Graphics[{Red, Rectangle[{0, 0}, {1, 3}], Blue, Rectangle[{2, 1}, {4, 2}]}]",
-		//"Sin[1/2]",
-		//"Power[x,3]",
-		//"Sqrt[2]",
 	}
 	items := []Item{}
 	for i, inTxt := range expressions {
