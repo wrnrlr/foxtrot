@@ -1,4 +1,4 @@
-package notebook
+package cell
 
 import (
 	"gioui.org/f32"
@@ -10,6 +10,7 @@ import (
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
+	"github.com/wrnrlr/foxtrot/util"
 	"image"
 )
 
@@ -43,7 +44,7 @@ func (m *Margin) Layout(gtx *layout.Context, checked bool, widget layout.Widget)
 	stack.Push(gtx.Ops)
 	gtx.Constraints = layout.RigidConstraints(image.Point{X: marginWidth, Y: editorHeight})
 	offset := image.Point{X: editorWidth, Y: 0}
-	op.TransformOp{}.Offset(toPointF(offset)).Add(gtx.Ops)
+	op.TransformOp{}.Offset(util.ToPointF(offset)).Add(gtx.Ops)
 	m.layoutMargin(checked, gtx)
 	r := image.Rectangle{Max: image.Point{X: marginWidth, Y: editorHeight}}
 	pointer.Rect(r).Add(gtx.Ops)
@@ -63,7 +64,7 @@ func (m *Margin) layoutMargin(checked bool, gtx *layout.Context) {
 		dr := f32.Rectangle{
 			Max: f32.Point{X: float32(d.X), Y: float32(d.Y)},
 		}
-		paint.ColorOp{Color: selectedColor}.Add(gtx.Ops)
+		paint.ColorOp{Color: util.SelectedColor}.Add(gtx.Ops)
 		paint.PaintOp{Rect: dr}.Add(gtx.Ops)
 	}
 
@@ -82,7 +83,7 @@ func (m *Margin) layoutMargin(checked bool, gtx *layout.Context) {
 	p.Line(f32.Point{X: 5*s - w, Y: 0})
 	p.Line(f32.Point{X: 0, Y: -s})
 	p.End().Add(gtx.Ops)
-	paint.ColorOp{lightGrey}.Add(gtx.Ops)
+	paint.ColorOp{util.LightGrey}.Add(gtx.Ops)
 	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: w, Y: h}}}.Add(gtx.Ops)
 }
 
