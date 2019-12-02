@@ -15,7 +15,7 @@ type Fraction struct {
 	Numerator, Denominator Shape
 }
 
-func (f *Fraction) Dimensions(c unit.Converter, s *text.Shaper, font text.Font) layout.Dimensions {
+func (f *Fraction) Dimensions(c *layout.Context, s *text.Shaper, font text.Font) layout.Dimensions {
 	dN := f.Numerator.Dimensions(c, s, font)
 	dD := f.Denominator.Dimensions(c, s, font)
 	width := max(dN.Size.X, dD.Size.X)
