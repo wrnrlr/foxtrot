@@ -3,14 +3,17 @@ package notebook
 import (
 	"bytes"
 	"encoding/xml"
+	"fmt"
 	"gioui.org/layout"
 	"github.com/corywalker/expreduce/expreduce"
 	"github.com/corywalker/expreduce/expreduce/parser"
+	"github.com/wrnrlr/foxtrot/cell"
+	"github.com/wrnrlr/foxtrot/theme"
 	"io/ioutil"
 )
 
 type Notebook struct {
-	cells       []*Cell
+	cells       []*cell.Cell
 	slots       []*Slot
 	kernel      *expreduce.EvalState
 	promptCount int
@@ -18,16 +21,16 @@ type Notebook struct {
 	activeSlot int
 	list       layout.List
 	selection  *Selection
-	styles     *Styles
+	styles     *theme.Styles
 }
 
 func NewNotebook() *Notebook {
-	cells := make([]*Cell, 0)
+	cells := make([]*cell.Cell, 0)
 	kernel := expreduce.NewEvalState()
 	firstSlot := NewSlot()
 	adds := []*Slot{firstSlot}
 	selection := NewSelection()
-	styles := DefaultStyles()
+	styles := theme.DefaultStyles()
 	return &Notebook{cells, adds, kernel, 1, 0, layout.List{Axis: layout.Vertical}, selection, styles}
 }
 
@@ -35,17 +38,16 @@ func (nb *Notebook) Event(gtx *layout.Context) interface{} {
 	for i, c := range nb.cells {
 		e := c.Event(gtx)
 		switch e := e.(type) {
-		case EvalEvent:
+		case cell.EvalEvent:
 			nb.eval(i)
-			nb.focusSlot(i+1, gtx)
-		case SelectFirstCellEvent:
+		case cell.SelectFirstCellEvent:
 			nb.unfocusSlot()
 			nb.selection.SetFirst(i)
-		case SelectLastCellEvent:
+		case cell.SelectLastCellEvent:
 			nb.unfocusSlot()
 			nb.selection.SetLast(i)
-		case FocusPlaceholder:
-			nb.focusSlot(i+e.Offset, gtx)
+		case cell.FocusPlaceholder:
+			nb.focusSlot(i + e.Offset)
 		}
 	}
 	for i := range nb.slots {
@@ -53,7 +55,7 @@ func (nb *Notebook) Event(gtx *layout.Context) interface{} {
 		es := nb.slots[i].Event(isActive, gtx)
 		for _, e := range es {
 			if _, ok := e.(SelectSlotEvent); ok {
-				nb.focusSlot(i, gtx)
+				nb.focusSlot(i)
 			} else if ce, ok := e.(AddCellEvent); ok {
 				nb.InsertCell(i, ce.Type)
 				nb.focusCell(i)
@@ -76,7 +78,7 @@ func (nb *Notebook) Event(gtx *layout.Context) interface{} {
 		case DeleteSelected:
 			nb.DeleteSelected()
 		case FocusSlotEvent:
-			nb.focusSlot(e.Index, gtx)
+			nb.focusSlot(e.Index)
 		}
 	}
 	return nil
@@ -87,7 +89,7 @@ func (nb *Notebook) Layout(gtx *layout.Context) {
 	nb.list.Layout(gtx, n, func(i int) {
 		if i%2 == 0 {
 			i = i / 2
-			isActive := nb.activeSlot == i
+			isActive := nb.activeSlot == i && !nb.isOutputCell(i)
 			isLast := i == len(nb.slots)-1
 			nb.slots[i].Layout(isActive, isLast, gtx)
 		} else {
@@ -100,17 +102,31 @@ func (nb *Notebook) Layout(gtx *layout.Context) {
 
 func (nb *Notebook) eval(i int) {
 	c := nb.cells[i]
-	textIn := c.inEditor.Text()
+	textIn := c.Text()
 	if textIn == "" {
 		return
 	}
+	c.Label = fmt.Sprintf("In[%d]:= ", nb.promptCount)
 	src := parser.ReplaceSyms(textIn)
 	buf := bytes.NewBufferString(src)
 	expOut, err := parser.InterpBuf(buf, "nofile", nb.kernel)
 	expOut = nb.kernel.Eval(expOut)
-	c.out = &Out{Ex: expOut, Err: err}
-	c.promptNum = nb.promptCount
+	if nb.isOutputCell(i + 1) {
+		nb.DeleteCell(i + i)
+	}
+	nb.InsertCell(i+1, cell.OutputCell)
+	nb.cells[i+1].Out = expOut
+	nb.cells[i+1].Err = err
+	nb.cells[i+1].Label = fmt.Sprintf("Out[%d]= ", nb.promptCount)
 	nb.promptCount++
+	nb.focusSlot(i + 1)
+}
+
+func (nb *Notebook) isOutputCell(i int) bool {
+	if i >= 0 && i < len(nb.cells) {
+		return nb.cells[i].Type == cell.OutputCell
+	}
+	return false
 }
 
 func (nb *Notebook) focusCell(i int) {
@@ -121,11 +137,11 @@ func (nb *Notebook) focusCell(i int) {
 	}
 }
 
-func (nb *Notebook) focusSlot(i int, gtx *layout.Context) {
+func (nb *Notebook) focusSlot(i int) {
 	if i >= 0 && i < len(nb.slots) {
 		nb.activeSlot = i
 		nb.selection.Clear()
-		nb.slots[i].Focus(true, gtx)
+		nb.slots[i].Focus(true)
 	}
 }
 
@@ -133,12 +149,22 @@ func (nb *Notebook) unfocusSlot() {
 	nb.activeSlot = -1
 }
 
-func (nb *Notebook) InsertCell(index int, typ CellType) {
+func (nb *Notebook) InsertCell(index int, typ cell.CellType) {
 	nb.slots = append(nb.slots, NewSlot())
-	cell := NewCell(typ, -1, nb.styles)
+	cell := cell.NewCell(typ, "In[ ]:=", nb.styles)
 	nb.cells = append(nb.cells, cell)
 	copy(nb.cells[index+1:], nb.cells[index:])
 	nb.cells[index] = cell
+	nb.selection.Size = len(nb.cells)
+}
+
+func (nb *Notebook) DeleteCell(i int) {
+	if i < len(nb.cells)-1 {
+		copy(nb.cells[i:], nb.cells[i+1:])
+	}
+	nb.cells[len(nb.cells)-1] = nil // or the zero value of T
+	nb.cells = nb.cells[:len(nb.cells)-1]
+	nb.slots = nb.slots[:len(nb.cells)+1]
 	nb.selection.Size = len(nb.cells)
 }
 

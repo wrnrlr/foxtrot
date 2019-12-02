@@ -12,6 +12,8 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"gioui.org/widget"
+	"github.com/wrnrlr/foxtrot/cell"
+	"github.com/wrnrlr/foxtrot/util"
 	"image"
 	"time"
 )
@@ -56,10 +58,10 @@ func (s *Slot) Event(isActive bool, gtx *layout.Context) []interface{} {
 
 func (s *Slot) processEvents(isActive bool, gtx *layout.Context) {
 	for s.plusButton.Clicked(gtx) {
-		s.events = append(s.events, AddCellEvent{Type: FoxtrotCell})
+		s.events = append(s.events, AddCellEvent{Type: cell.InputCell})
 	}
 	for s.backgroundButton.Clicked(gtx) {
-		s.Focus(true, gtx)
+		s.Focus(true)
 		s.events = append(s.events, SelectSlotEvent{})
 	}
 	s.processKey(isActive, gtx)
@@ -99,23 +101,23 @@ func (s *Slot) processKey(isActive bool, gtx *layout.Context) {
 			} else if ke.Name == key.NameDownArrow && ke.Modifiers.Contain(key.ModShift) {
 				s.events = append(s.events, SelectNextCellEvent{})
 			} else if ke.Name == key.NameReturn || ke.Name == key.NameEnter {
-				s.events = append(s.events, AddCellEvent{Type: FoxtrotCell})
+				s.events = append(s.events, AddCellEvent{Type: cell.InputCell})
 			} else if ke.Name == key.NameUpArrow || ke.Name == key.NameLeftArrow {
 				s.events = append(s.events, FocusPreviousCellEvent{})
 			} else if ke.Name == key.NameDownArrow || ke.Name == key.NameRightArrow {
 				s.events = append(s.events, FocusNextCellEvent{})
 			} else if ke.Name == "1" && ke.Modifiers.Contain(key.ModCommand) {
-				s.events = append(s.events, AddCellEvent{Type: TitleCell})
+				s.events = append(s.events, AddCellEvent{Type: cell.TitleCell})
 			} else if ke.Name == "4" && ke.Modifiers.Contain(key.ModCommand) {
-				s.events = append(s.events, AddCellEvent{Type: SectionCell})
+				s.events = append(s.events, AddCellEvent{Type: cell.SectionCell})
 			} else if ke.Name == "5" && ke.Modifiers.Contain(key.ModCommand) {
-				s.events = append(s.events, AddCellEvent{Type: SubSectionCell})
+				s.events = append(s.events, AddCellEvent{Type: cell.SubSectionCell})
 			} else if ke.Name == "6" && ke.Modifiers.Contain(key.ModCommand) {
-				s.events = append(s.events, AddCellEvent{Type: SubSubSectionCell})
+				s.events = append(s.events, AddCellEvent{Type: cell.SubSubSectionCell})
 			} else if ke.Name == "7" && ke.Modifiers.Contain(key.ModCommand) {
-				s.events = append(s.events, AddCellEvent{Type: TextCell})
+				s.events = append(s.events, AddCellEvent{Type: cell.TextCell})
 			} else if ke.Name == "8" && ke.Modifiers.Contain(key.ModCommand) {
-				s.events = append(s.events, AddCellEvent{Type: CodeCell})
+				s.events = append(s.events, AddCellEvent{Type: cell.CodeCell})
 			}
 		case key.EditEvent:
 			fmt.Println("Slot: key.EditEvent")
@@ -123,7 +125,7 @@ func (s *Slot) processKey(isActive bool, gtx *layout.Context) {
 	}
 }
 
-func (s *Slot) Focus(requestFocus bool, gtx *layout.Context) {
+func (s *Slot) Focus(requestFocus bool) {
 	s.requestFocus = requestFocus
 }
 
@@ -167,7 +169,7 @@ func (s *Slot) placeholderLayout(gtx *layout.Context) {
 	dr := f32.Rectangle{
 		Max: f32.Point{X: float32(width), Y: float32(height)},
 	}
-	paint.ColorOp{Color: white}.Add(gtx.Ops)
+	paint.ColorOp{Color: util.White}.Add(gtx.Ops)
 	paint.PaintOp{Rect: dr}.Add(gtx.Ops)
 	gtx.Dimensions = layout.Dimensions{Size: image.Point{X: width, Y: height}}
 	r := image.Rectangle{Max: gtx.Dimensions.Size}
@@ -189,7 +191,7 @@ func (s *Slot) drawLine(gtx *layout.Context) {
 	path.Line(f32.Point{X: -lineLen, Y: 0})
 	path.Line(f32.Point{X: 0, Y: -width})
 	path.End().Add(gtx.Ops)
-	paint.ColorOp{lightGrey}.Add(gtx.Ops)
+	paint.ColorOp{util.LightGrey}.Add(gtx.Ops)
 	paint.PaintOp{
 		Rect: f32.Rectangle{
 			Max: f32.Point{X: lineLen, Y: merginTop + width},
@@ -230,7 +232,7 @@ func (s *Slot) drawCursor(gtx *layout.Context) {
 	path.Line(f32.Point{X: -length, Y: 0})
 	path.Line(f32.Point{X: 0, Y: -width})
 	path.End().Add(gtx.Ops)
-	paint.ColorOp{black}.Add(gtx.Ops)
+	paint.ColorOp{util.Black}.Add(gtx.Ops)
 	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: float32(length), Y: merginTop + width}}}.Add(gtx.Ops)
 	stack.Pop()
 }
@@ -257,7 +259,7 @@ func (b PlusButton) drawCircle(gtx *layout.Context) {
 	var stack op.StackOp
 	stack.Push(gtx.Ops)
 	rrect(gtx.Ops, size, size, rr, rr, rr, rr)
-	fill(gtx, lightGrey)
+	fill(gtx, util.LightGrey)
 	stack.Pop()
 }
 
@@ -277,7 +279,7 @@ func (b PlusButton) drawPlus(gtx *layout.Context) {
 	p1.Line(f32.Point{X: -length, Y: 0})
 	p1.Line(f32.Point{X: 0, Y: -width})
 	p1.End().Add(gtx.Ops)
-	paint.ColorOp{lightGrey}.Add(gtx.Ops)
+	paint.ColorOp{util.LightGrey}.Add(gtx.Ops)
 	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: length, Y: length}}}.Add(gtx.Ops)
 	stack.Pop()
 	stack.Push(gtx.Ops)
@@ -289,13 +291,13 @@ func (b PlusButton) drawPlus(gtx *layout.Context) {
 	p2.Line(f32.Point{X: 0, Y: -length})
 	p2.Line(f32.Point{X: -width, Y: 0})
 	p2.End().Add(gtx.Ops)
-	paint.ColorOp{lightGrey}.Add(gtx.Ops)
+	paint.ColorOp{util.LightGrey}.Add(gtx.Ops)
 	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: length, Y: length}}}.Add(gtx.Ops)
 	stack.Pop()
 }
 
 type AddCellEvent struct {
-	Type CellType
+	Type cell.CellType
 }
 
 type SelectSlotEvent struct{}
