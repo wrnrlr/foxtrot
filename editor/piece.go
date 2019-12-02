@@ -1,4 +1,4 @@
-package notebook
+package editor
 
 // https://www.geeksforgeeks.org/gap-buffer-data-structure/
 // https://darrenburns.net/posts/piece-table/
