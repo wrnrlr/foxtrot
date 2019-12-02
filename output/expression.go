@@ -27,7 +27,7 @@ func Ex(ex api.Ex, st *graphics.Style, gtx *layout.Context) typeset.Shape {
 		return Expression(ex, st, gtx)
 	default:
 		fmt.Println("unknown expression type")
-		return nil
+		return &typeset.Label{Text: "unknown expression type", MaxWidth: typeset.FitContent}
 	}
 }
 
@@ -36,9 +36,10 @@ func Expression(ex *atoms.Expression, st *graphics.Style, gtx *layout.Context) t
 	if special != nil {
 		return special
 	}
-	name := fmt.Sprintf("%s[", shortExpressionName(ex))
-	open := &typeset.Label{Text: name, MaxWidth: typeset.FitContent}
+	head := &typeset.Label{Text: shortExpressionName(ex), MaxWidth: typeset.FitContent}
+	open := &typeset.Label{Text: "[", MaxWidth: typeset.FitContent}
 	var parts []typeset.Shape
+	parts = append(parts, head)
 	parts = append(parts, open)
 	children := Parts(ex, st, gtx)
 	parts = append(parts, children...)
@@ -82,7 +83,11 @@ func binaryOperation(ex *atoms.Expression, st *graphics.Style, gtx *layout.Conte
 	case "System`Times":
 		return typeset.Multiply(left, right)
 	case "System`Power":
-		return typeset.Plus(left, right)
+		if isSqrt(ex) {
+			return typeset.Sqrt(left)
+		} else {
+			return typeset.Power(left, right)
+		}
 	default:
 		return nil
 	}

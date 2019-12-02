@@ -37,11 +37,13 @@ func Parts(ex *atoms.Expression, st *graphics.Style, gtx *layout.Context) []type
 		case *atoms.Complex:
 			shape = &typeset.Label{Text: ex.StringForm(api.ToStringParams{}), MaxWidth: typeset.FitContent}
 		case *atoms.Symbol:
-			shape = &typeset.Label{Text: ex.StringForm(api.ToStringParams{}), MaxWidth: typeset.FitContent}
+			shape = &typeset.Label{Text: ex.StringForm(api.ToStringParams{Context: atoms.NewString("Global`")}), MaxWidth: typeset.FitContent}
 		case *atoms.Expression:
-			shape = &typeset.Label{Text: ex.StringForm(api.ToStringParams{}), MaxWidth: typeset.FitContent}
+			shape = &typeset.Label{Text: ex.StringForm(api.ToStringParams{Context: atoms.NewString("Global`")}), MaxWidth: typeset.FitContent}
 		}
-		children = append(children, comma)
+		if comma != nil {
+			children = append(children, comma)
+		}
 		comma = &typeset.Label{Text: ",", MaxWidth: typeset.FitContent}
 		children = append(children, shape)
 	}

@@ -9,7 +9,7 @@ var bigOne = big.NewInt(1)
 var bigTwo = big.NewInt(2)
 
 func isSqrt(ex *atoms.Expression) bool {
-	if len(ex.Parts) != 2 {
+	if len(ex.Parts) < 2 {
 		return false
 	}
 	r, isRational := ex.Parts[2].(*atoms.Rational)
