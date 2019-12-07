@@ -1,20 +1,22 @@
 package app
 
 import (
+	"fmt"
 	"gioui.org/app"
 	"gioui.org/font/gofont"
 	"gioui.org/io/system"
 	"gioui.org/layout"
-	"github.com/wrnrlr/foxtrot/browser"
+	"gioui.org/unit"
+	"github.com/wrnrlr/foxtrot/nbx"
 	"github.com/wrnrlr/foxtrot/notebook"
 	"log"
 )
 
-func RunUI() {
+func RunUI(p string) {
 	gofont.Register()
 	go func() {
 		w := app.NewWindow(app.Title("Foxtrot"))
-		a := NewApp()
+		a := NewApp(p)
 		if err := a.loop(w); err != nil {
 			log.Fatal(err)
 		}
@@ -23,14 +25,19 @@ func RunUI() {
 }
 
 type App struct {
-	nb *notebook.Notebook
-	br *browser.Browser
+	path string
+	nb   *notebook.Notebook
+	//br *browser.Browser
 }
 
-func NewApp() *App {
-	nb := notebook.NewNotebook()
-	br := browser.NewBrowser()
-	return &App{nb, br}
+func NewApp(p string) *App {
+	cells, err := nbx.ReadNBX(p)
+	if err != nil {
+		fmt.Printf("failed to open file")
+	}
+	nb := notebook.NewNotebook(cells)
+	//br := browser.NewBrowser()
+	return &App{p, nb}
 }
 
 func (a *App) loop(w *app.Window) error {
@@ -41,6 +48,7 @@ func (a *App) loop(w *app.Window) error {
 		e := <-w.Events()
 		switch e := e.(type) {
 		case system.DestroyEvent:
+			a.save()
 			return e.Err
 		case system.FrameEvent:
 			gtx.Reset(e.Config, e.Size)
@@ -57,12 +65,27 @@ func (a *App) Event(gtx *layout.Context) interface{} {
 
 func (a *App) Layout(gtx *layout.Context) {
 	a.Event(gtx)
-	f := layout.Flex{Axis: layout.Vertical}
-	c1 := f.Rigid(gtx, func() {
-		a.br.Layout(gtx)
+	margin := unit.Sp(2)
+	i := layout.Inset{Top: margin}
+	i.Layout(gtx, func() {
+		f := layout.Flex{Axis: layout.Vertical}
+		//c1 := f.Rigid(gtx, func() {
+		//	a.br.Layout(gtx)
+		//})
+		c2 := f.Flex(gtx, 1, func() {
+			a.nb.Layout(gtx)
+		})
+		f.Layout(gtx, c2)
 	})
-	c2 := f.Flex(gtx, 1, func() {
-		a.nb.Layout(gtx)
-	})
-	f.Layout(gtx, c1, c2)
+}
+
+func (a *App) save() {
+	fmt.Println("Quiting Foxtrot, Save notebook")
+	if a.path == "" {
+		return
+	}
+	err := nbx.WriteNBX(a.path, a.nb.Cells)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
