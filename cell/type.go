@@ -1,34 +1,44 @@
 package cell
 
-type CellType int
+type Type int
 
 const (
-	InputCell CellType = iota
-	OutputCell
-	TitleCell
-	SectionCell
-	SubSectionCell
-	SubSubSectionCell
-	TextCell
-	CodeCell
+	Input Type = iota
+	Output
+	H1
+	H2
+	H3
+	H4
+	H5
+	H6
+	Text
+	Code
 )
 
-var CellTypeNames = []string{"Input", "Output", "Title", "Section", "SubSection", "SubSubSection", "Text", "Code"}
+var CellTypeNames = []string{"Input", "Output", "H1", "H2", "H3", "H4", "H5", "H6", "Text", "Code"}
 
-func (d CellType) String() string {
+func (d Type) String() string {
 	return CellTypeNames[d]
 }
 
-func (d CellType) Level() int {
-	switch d {
-	case TitleCell:
-		return 1
-	case SectionCell:
-		return 3
-	case SubSectionCell:
-		return 4
-	case SubSubSectionCell:
-		return 5
+func ParseType(s string) Type {
+	switch s {
+	case "Input":
+		return Input
+	case "Output":
+		return Output
+	case "H5":
+		return H1
+	case "H1":
+		return H2
+	case "H3":
+		return H3
+	case "H4":
+		return H4
+	case "Text":
+		return Text
+	case "Code":
+		return Code
 	default:
 		return 0
 	}
