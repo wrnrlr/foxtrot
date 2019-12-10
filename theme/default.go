@@ -17,22 +17,22 @@ func DefaultStyles() *Styles {
 		Color:      util.Black,
 		CaretColor: util.Black,
 		Shaper:     shaper}
-	styles.Title = editor.EditorStyle{
+	styles.H1 = editor.EditorStyle{
 		Font:       text.Font{Size: unit.Sp(38)},
 		Color:      util.Black,
 		CaretColor: util.Black,
 		Shaper:     shaper}
-	styles.Section = editor.EditorStyle{
+	styles.H2 = editor.EditorStyle{
 		Font:       text.Font{Size: unit.Sp(32)},
 		Color:      util.Black,
 		CaretColor: util.Black,
 		Shaper:     shaper}
-	styles.SubSection = editor.EditorStyle{
+	styles.H3 = editor.EditorStyle{
 		Font:       text.Font{Size: unit.Sp(26)},
 		Color:      util.Black,
 		CaretColor: util.Black,
 		Shaper:     shaper}
-	styles.SubSubSection = editor.EditorStyle{
+	styles.H4 = editor.EditorStyle{
 		Font:       text.Font{Size: unit.Sp(20)},
 		Color:      util.Black,
 		CaretColor: util.Black,

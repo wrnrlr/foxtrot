@@ -7,7 +7,7 @@ import (
 )
 
 type Styles struct {
-	Foxtrot, Title, Section, SubSection, SubSubSection, Text, Code editor.EditorStyle
-	Theme                                                          *material.Theme
-	shaper                                                         *text.Shaper
+	Foxtrot, H1, H2, H3, H4, H5, H6, Text, Code editor.EditorStyle
+	Theme                                       *material.Theme
+	shaper                                      *text.Shaper
 }
