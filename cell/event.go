@@ -6,6 +6,6 @@ type FocusPlaceholder struct {
 	Offset int
 }
 
-type FocusPreviousPlaceholder struct{}
+type SelectFirstCellEvent struct{}
 
-type FocusNextPlaceholder struct{}
+type SelectLastCellEvent struct{}
