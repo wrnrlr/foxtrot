@@ -6,42 +6,11 @@ import (
 	"gioui.org/f32"
 	"gioui.org/layout"
 	"gioui.org/op"
-	"gioui.org/op/paint"
+	"gioui.org/text"
 	"github.com/corywalker/expreduce/expreduce/atoms"
-	api "github.com/corywalker/expreduce/pkg/expreduceapi"
+	"github.com/corywalker/expreduce/pkg/expreduceapi"
 	"image"
 )
-
-func drawCanvas(ex *atoms.Expression, gtx *layout.Context) {
-	w := float32(400)
-	h := float32(300)
-	dr := f32.Rectangle{
-		Max: f32.Point{X: w, Y: h},
-	}
-	paint.ColorOp{Color: lightPink}.Add(gtx.Ops)
-	paintRect(w, h, gtx)
-	paint.PaintOp{Rect: dr}.Add(gtx.Ops)
-	gtx.Dimensions = layout.Dimensions{
-		Size: image.Point{X: int(w), Y: int(h)}}
-}
-
-type Primitive interface {
-	Draw(ctx *context, ops *op.Ops)
-	BoundingBox() (bbox f32.Rectangle)
-}
-
-type context struct {
-	BBox  f32.Rectangle
-	style *Style
-}
-
-func (c context) x() float32 {
-	return 0
-}
-
-func (c context) y() float32 {
-	return 0
-}
 
 type Graphics struct {
 	BBox     f32.Rectangle
@@ -51,19 +20,25 @@ type Graphics struct {
 	options  Options
 }
 
-func newGraphics(ex api.Ex) Graphics {
-	return Graphics{}
-}
-
-func (g Graphics) dimentions() image.Rectangle {
-	return image.Rectangle{Max: image.Point{X: 300, Y: 200}}
-}
-
-func (g Graphics) Layout(gtx *layout.Context) {
-	for _, e := range g.elements {
-		e.Draw(g.ctx, gtx.Ops)
+func (g *Graphics) Dimensions(c *layout.Context, s *text.Shaper, font text.Font) layout.Dimensions {
+	p := image.Point{X: 300, Y: 200}
+	dims := layout.Dimensions{
+		Size:     p,
+		Baseline: p.Y / 2,
 	}
-	g.drawAxis(gtx)
+	return dims
+}
+
+func (g *Graphics) Layout(gtx *layout.Context, s *text.Shaper, font text.Font) {
+	dims := g.Dimensions(gtx, s, font)
+	ctx := &context{}
+	var stack op.StackOp
+	for _, p := range g.elements {
+		stack.Push(gtx.Ops)
+		p.Draw(ctx, gtx.Ops)
+		stack.Pop()
+	}
+	gtx.Dimensions = dims
 }
 
 func (g Graphics) drawAxis(gtx *layout.Context) {
@@ -81,6 +56,31 @@ func FromEx(expr *atoms.Expression) (error, *Graphics) {
 	}
 
 	g := Graphics{}
+	for _, ex := range expr.GetParts()[1:] {
+		primetive, err := toPrimetive(ex)
+		if err != nil {
+			continue
+		}
+		if primetive != nil {
+			g.elements = append(g.elements, primetive)
+		}
+	}
 
 	return nil, &g
+}
+
+func toPrimetive(ex expreduceapi.Ex) (p Primitive, err error) {
+	expr, isExpr := ex.(*atoms.Expression)
+	if !isExpr {
+		return nil, errors.New("primetive needs to be an expression")
+	}
+	switch expr.HeadStr() {
+	case "System`Circle":
+		p, err = toCircle(expr)
+	case "System`Rectangle":
+		p, err = toRectangle(expr)
+	default:
+		return nil, errors.New("Unknown graphics primetive")
+	}
+	return p, err
 }
