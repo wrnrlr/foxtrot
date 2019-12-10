@@ -1,23 +1,45 @@
 package nbx
 
+import (
+	"encoding/xml"
+	"github.com/wrnrlr/foxtrot/cell"
+	"os"
+)
+
 const (
-	title       = `Cell["\<Hello\>","Title"]`
-	aPlusOneIn  = `Cell[BoxData[RowBox[{"a","+","1"}]],"Input",CellLabel -> "In[1]:= "]`
-	aPlusOneOut = `Cell[BoxData[RowBox[{"1","+","a"}],StandardForm],"Output",CellLabel -> "Out[1]= "]`
+	title       = `cell["\<Hello\>","H5"]`
+	aPlusOneIn  = `cell[BoxData[RowBox[{"a","+","1"}]],"Input",CellLabel -> "In[1]:= "]`
+	aPlusOneOut = `cell[BoxData[RowBox[{"1","+","a"}],StandardForm],"Output",CellLabel -> "Out[1]= "]`
 	inAndOut    = `CompoundExpression[
-		Cell[BoxData[RowBox[List["a", "+", "1"]]], "Input", Rule[CellLabel, "In[1]:= "]],
-		Cell[BoxData[RowBox[List["1", "+", "a"]], StandardForm], "Output", Rule[CellLabel, "Out[1]= "]]]
+		cell[BoxData[RowBox[List["a", "+", "1"]]], "Input", Rule[CellLabel, "In[1]:= "]],
+		cell[BoxData[RowBox[List["1", "+", "a"]], StandardForm], "Output", Rule[CellLabel, "Out[1]= "]]]
 `
 )
 
 const temp = `<cell type="%s">"%s"</cell>`
 
-func Read2(data []byte) error {
-	//cells := make([]*cell.Cell, 0)
-	//nb := &notebookTag{}
-	//return xml.Unmarshal(data, nb)
-	//for _, c := range cells {
-	//	nb.cells = append(nb.cells, cellTag{c.Type.String(), c.Text()})
-	//}
-	return nil
+// Write cells to filename.nbx
+func WriteNBX(filename string, cells cell.Cells) error {
+	file, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0660)
+	defer file.Close()
+	if err != nil {
+		return err
+	}
+	file.Truncate(0)
+	file.Seek(0, 0)
+	nb := &notebookTag{}
+	nb.XMLName = xml.Name{Local: "notebook"}
+	for _, c := range cells {
+		cell := cellTag{}
+		cell.Type = c.Type().String()
+		cell.Content = c.Text()
+		cell.XMLName = xml.Name{Local: "cell"}
+		nb.Cells = append(nb.Cells, cell)
+	}
+	b, err := xml.MarshalIndent(nb, "", "  ")
+	if err != nil {
+		return err
+	}
+	_, err = file.Write(b)
+	return err
 }
