@@ -86,7 +86,3 @@ func (m *Margin) layoutMargin(checked bool, gtx *layout.Context) {
 	paint.ColorOp{util.LightGrey}.Add(gtx.Ops)
 	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: w, Y: h}}}.Add(gtx.Ops)
 }
-
-type SelectFirstCellEvent struct{}
-
-type SelectLastCellEvent struct{}

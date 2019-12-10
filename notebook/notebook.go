@@ -13,7 +13,7 @@ import (
 )
 
 type Notebook struct {
-	cells       []*cell.Cell
+	Cells       cell.Cells
 	slots       []*Slot
 	kernel      *expreduce.EvalState
 	promptCount int
@@ -24,8 +24,7 @@ type Notebook struct {
 	styles     *theme.Styles
 }
 
-func NewNotebook() *Notebook {
-	cells := make([]*cell.Cell, 0)
+func NewNotebook(cells cell.Cells) *Notebook {
 	kernel := expreduce.NewEvalState()
 	firstSlot := NewSlot()
 	adds := []*Slot{firstSlot}
@@ -35,7 +34,7 @@ func NewNotebook() *Notebook {
 }
 
 func (nb *Notebook) Event(gtx *layout.Context) interface{} {
-	for i, c := range nb.cells {
+	for i, c := range nb.Cells {
 		e := c.Event(gtx)
 		switch e := e.(type) {
 		case cell.EvalEvent:
@@ -60,8 +59,14 @@ func (nb *Notebook) Event(gtx *layout.Context) interface{} {
 				nb.InsertCell(i, ce.Type)
 				nb.focusCell(i)
 			} else if _, ok := e.(FocusPreviousCellEvent); ok {
+				if nb.isOutputCell(i - 1) {
+					i -= 1
+				}
 				nb.focusCell(i - 1)
 			} else if _, ok := e.(FocusNextCellEvent); ok {
+				if nb.isOutputCell(i) {
+					i += 1
+				}
 				nb.focusCell(i)
 			} else if _, ok := e.(SelectPreviousCellEvent); ok {
 				nb.unfocusSlot()
@@ -85,7 +90,7 @@ func (nb *Notebook) Event(gtx *layout.Context) interface{} {
 }
 
 func (nb *Notebook) Layout(gtx *layout.Context) {
-	n := len(nb.cells)*2 + 1 // Their is one more Slot then cells
+	n := len(nb.Cells)*2 + 1 // Their is one more Slot then Cells
 	nb.list.Layout(gtx, n, func(i int) {
 		if i%2 == 0 {
 			i = i / 2
@@ -95,18 +100,18 @@ func (nb *Notebook) Layout(gtx *layout.Context) {
 		} else {
 			i := (i - 1) / 2
 			isSelected := nb.selection.IsSelected(i)
-			nb.cells[i].Layout(isSelected, gtx)
+			nb.Cells[i].Layout(isSelected, gtx)
 		}
 	})
 }
 
 func (nb *Notebook) eval(i int) {
-	c := nb.cells[i]
+	c := nb.Cells[i]
 	textIn := c.Text()
 	if textIn == "" {
 		return
 	}
-	c.Label = fmt.Sprintf("In[%d]:= ", nb.promptCount)
+	c.SetLabel(fmt.Sprintf("In[%d]:= ", nb.promptCount))
 	src := parser.ReplaceSyms(textIn)
 	buf := bytes.NewBufferString(src)
 	expOut, err := parser.InterpBuf(buf, "nofile", nb.kernel)
@@ -114,26 +119,26 @@ func (nb *Notebook) eval(i int) {
 	if nb.isOutputCell(i + 1) {
 		nb.DeleteCell(i + i)
 	}
-	nb.InsertCell(i+1, cell.OutputCell)
-	nb.cells[i+1].Out = expOut
-	nb.cells[i+1].Err = err
-	nb.cells[i+1].Label = fmt.Sprintf("Out[%d]= ", nb.promptCount)
+	nb.InsertCell(i+1, cell.Output)
+	nb.Cells[i+1].SetOut(expOut)
+	nb.Cells[i+1].SetErr(err)
+	nb.Cells[i+1].SetLabel(fmt.Sprintf("Out[%d]= ", nb.promptCount))
 	nb.promptCount++
 	nb.focusSlot(i + 1)
 }
 
 func (nb *Notebook) isOutputCell(i int) bool {
-	if i >= 0 && i < len(nb.cells) {
-		return nb.cells[i].Type == cell.OutputCell
+	if i >= 0 && i < len(nb.Cells) {
+		return nb.Cells[i].Type() == cell.Output
 	}
 	return false
 }
 
 func (nb *Notebook) focusCell(i int) {
-	if i >= 0 && i < len(nb.cells) {
+	if i >= 0 && i < len(nb.Cells) {
 		nb.activeSlot = -1
 		nb.selection.Clear()
-		nb.cells[i].Focus()
+		nb.Cells[i].Focus()
 	}
 }
 
@@ -149,36 +154,40 @@ func (nb *Notebook) unfocusSlot() {
 	nb.activeSlot = -1
 }
 
-func (nb *Notebook) InsertCell(index int, typ cell.CellType) {
+func (nb *Notebook) InsertCell(index int, typ cell.Type) {
 	nb.slots = append(nb.slots, NewSlot())
 	cell := cell.NewCell(typ, "In[ ]:=", nb.styles)
-	nb.cells = append(nb.cells, cell)
-	copy(nb.cells[index+1:], nb.cells[index:])
-	nb.cells[index] = cell
-	nb.selection.Size = len(nb.cells)
+	nb.Cells = append(nb.Cells, cell)
+	copy(nb.Cells[index+1:], nb.Cells[index:])
+	nb.Cells[index] = cell
+	nb.selection.Size = len(nb.Cells)
 }
 
 func (nb *Notebook) DeleteCell(i int) {
-	if i < len(nb.cells)-1 {
-		copy(nb.cells[i:], nb.cells[i+1:])
+	if i < len(nb.Cells)-1 {
+		copy(nb.Cells[i:], nb.Cells[i+1:])
 	}
-	nb.cells[len(nb.cells)-1] = nil // or the zero value of T
-	nb.cells = nb.cells[:len(nb.cells)-1]
-	nb.slots = nb.slots[:len(nb.cells)+1]
-	nb.selection.Size = len(nb.cells)
+	nb.Cells[len(nb.Cells)-1] = nil // or the zero value of T
+	nb.Cells = nb.Cells[:len(nb.Cells)-1]
+	nb.slots = nb.slots[:len(nb.Cells)+1]
+	nb.selection.Size = len(nb.Cells)
 }
 
 func (nb *Notebook) DeleteSelected() {
 	unselectedCount := 0
-	for i, c := range nb.cells {
+	for i, c := range nb.Cells {
 		if !nb.selection.IsSelected(i) {
-			nb.cells[unselectedCount] = c
+			nb.Cells[unselectedCount] = c
 			unselectedCount++
 		}
 	}
-	nb.cells = nb.cells[:unselectedCount]
+	nb.Cells = nb.Cells[:unselectedCount]
 	nb.slots = nb.slots[:unselectedCount+1]
 	nb.selection.Size = unselectedCount
+}
+
+func (nb *Notebook) Size() int {
+	return len(nb.Cells)
 }
 
 func ReadNotebookFile() (*Notebook, error) {

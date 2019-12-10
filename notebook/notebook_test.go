@@ -1,87 +1,64 @@
 package notebook
 
 import (
-	"bytes"
-	"fmt"
-	"github.com/corywalker/expreduce/expreduce"
-	"github.com/corywalker/expreduce/expreduce/atoms"
-	"github.com/corywalker/expreduce/expreduce/parser"
+	"gioui.org/io/event"
+	"gioui.org/layout"
+	"github.com/stretchr/testify/assert"
 	"github.com/wrnrlr/foxtrot/cell"
+	"github.com/wrnrlr/foxtrot/theme"
 	"testing"
 )
 
 func TestNewNotebook(t *testing.T) {
+	nb := NewNotebook(nil)
+	assert.Equal(t, 0, nb.Size())
+}
 
+func TestNewNotebookWithCells(t *testing.T) {
+	style := theme.DefaultStyles()
+	var cells cell.Cells
+	c := cell.NewCell(cell.Input, "In[0]:=", style)
+	cells = append(cells, c)
+	nb := NewNotebook(nil)
+	assert.Equal(t, 1, nb.Size())
 }
 
 func TestDeleteCell(t *testing.T) {
-
+	style := theme.DefaultStyles()
+	var cells cell.Cells
+	c := cell.NewCell(cell.Input, "In[0]:=", style)
+	cells = append(cells, c)
+	nb := NewNotebook(nil)
+	nb.DeleteCell(0)
+	assert.Equal(t, 0, nb.Size())
 }
 
-const (
-	helloTitle  = `Cell["\<Hello\>","Title"]`
-	aPlusOneIn  = `Cell[BoxData[RowBox[{"a","+","1"}]],"Input",CellLabel -> "In[1]:= "]`
-	aPlusOneOut = `Cell[BoxData[RowBox[{"1","+","a"}],StandardForm],"Output",CellLabel -> "Out[1]= "]`
-	inAndOut    = `CompoundExpression[
-		Cell[BoxData[RowBox[List["a", "+", "1"]]], "Input", Rule[CellLabel, "In[1]:= "]],
-		Cell[BoxData[RowBox[List["1", "+", "a"]], StandardForm], "Output", Rule[CellLabel, "Out[1]= "]]]
-`
-)
-
-func TestRead(t *testing.T) {
-	src := parser.ReplaceSyms(aPlusOneIn + ";" + aPlusOneOut)
-	buf := bytes.NewBufferString(src)
-	kernel := expreduce.NewEvalState()
-	expOut, _ := parser.InterpBuf(buf, "nofile", kernel)
-	fmt.Printf("%v\n", expOut)
-	// get cells
-	ex, _ := expOut.(*atoms.Expression)
-	if isCompoundExpression(ex.HeadStr()) {
-		// data box
-
-		// rowbox
-
-		// cell type
-
-		// cell label
-	}
+type evalCell struct {
+	cell.Cell
+	event interface{}
 }
 
-func isCompoundExpression(s string) bool {
-	return s == "System`CompoundExpression"
+func (c *evalCell) Event(gtx *layout.Context) interface{} {
+	return c.event
 }
 
-func isCell(s string) bool {
-	return s == "System`Cell"
+type queue struct{}
+
+func (queue) Events(k event.Key) []event.Event {
+	return nil
 }
 
-func isDataBox(s string) bool {
-	return s == "System`DataBox"
-}
+var q queue
 
-func isRule(s string) bool {
-	return s == "System`Rule"
-}
-
-func cellType(s string) cell.CellType {
-	switch s {
-	case "Input":
-		return cell.InputCell
-	case "Output":
-		return cell.InputCell
-	case "Title":
-		return cell.TitleCell
-	case "Section":
-		return cell.SectionCell
-	case "Subsection":
-		return cell.SubSectionCell
-	case "Subsubsection":
-		return cell.SubSubSectionCell
-	case "Code":
-		return cell.CodeCell
-	case "Text":
-		return cell.TextCell
-	default:
-		return cell.InputCell
-	}
+func TestEvalCell(t *testing.T) {
+	gtx := &layout.Context{Queue: q}
+	style := theme.DefaultStyles()
+	var cells cell.Cells
+	c := cell.NewCell(cell.Input, "In[0]:=", style)
+	c.SetText("1+1")
+	ec := &evalCell{Cell: c, event: cell.EvalEvent{}}
+	cells = append(cells, ec)
+	nb := NewNotebook(cells)
+	nb.Event(gtx)
+	assert.Equal(t, 2, nb.Size())
 }

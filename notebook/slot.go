@@ -23,7 +23,7 @@ const (
 	maxBlinkDuration = 10 * time.Second
 )
 
-// Every cell has a slot above and below it that allow new cells to be inserted insert.
+// Every cell has a slot above and below it that allow new Cells to be inserted insert.
 type Slot struct {
 	Active           bool
 	plusButton       *widget.Button
@@ -58,7 +58,7 @@ func (s *Slot) Event(isActive bool, gtx *layout.Context) []interface{} {
 
 func (s *Slot) processEvents(isActive bool, gtx *layout.Context) {
 	for s.plusButton.Clicked(gtx) {
-		s.events = append(s.events, AddCellEvent{Type: cell.InputCell})
+		s.events = append(s.events, AddCellEvent{Type: cell.Input})
 	}
 	for s.backgroundButton.Clicked(gtx) {
 		s.Focus(true)
@@ -101,23 +101,23 @@ func (s *Slot) processKey(isActive bool, gtx *layout.Context) {
 			} else if ke.Name == key.NameDownArrow && ke.Modifiers.Contain(key.ModShift) {
 				s.events = append(s.events, SelectNextCellEvent{})
 			} else if ke.Name == key.NameReturn || ke.Name == key.NameEnter {
-				s.events = append(s.events, AddCellEvent{Type: cell.InputCell})
+				s.events = append(s.events, AddCellEvent{Type: cell.Input})
 			} else if ke.Name == key.NameUpArrow || ke.Name == key.NameLeftArrow {
 				s.events = append(s.events, FocusPreviousCellEvent{})
 			} else if ke.Name == key.NameDownArrow || ke.Name == key.NameRightArrow {
 				s.events = append(s.events, FocusNextCellEvent{})
 			} else if ke.Name == "1" && ke.Modifiers.Contain(key.ModCommand) {
-				s.events = append(s.events, AddCellEvent{Type: cell.TitleCell})
+				s.events = append(s.events, AddCellEvent{Type: cell.H1})
+			} else if ke.Name == "2" && ke.Modifiers.Contain(key.ModCommand) {
+				s.events = append(s.events, AddCellEvent{Type: cell.H2})
+			} else if ke.Name == "3" && ke.Modifiers.Contain(key.ModCommand) {
+				s.events = append(s.events, AddCellEvent{Type: cell.H3})
 			} else if ke.Name == "4" && ke.Modifiers.Contain(key.ModCommand) {
-				s.events = append(s.events, AddCellEvent{Type: cell.SectionCell})
+				s.events = append(s.events, AddCellEvent{Type: cell.H4})
 			} else if ke.Name == "5" && ke.Modifiers.Contain(key.ModCommand) {
-				s.events = append(s.events, AddCellEvent{Type: cell.SubSectionCell})
+				s.events = append(s.events, AddCellEvent{Type: cell.Text})
 			} else if ke.Name == "6" && ke.Modifiers.Contain(key.ModCommand) {
-				s.events = append(s.events, AddCellEvent{Type: cell.SubSubSectionCell})
-			} else if ke.Name == "7" && ke.Modifiers.Contain(key.ModCommand) {
-				s.events = append(s.events, AddCellEvent{Type: cell.TextCell})
-			} else if ke.Name == "8" && ke.Modifiers.Contain(key.ModCommand) {
-				s.events = append(s.events, AddCellEvent{Type: cell.CodeCell})
+				s.events = append(s.events, AddCellEvent{Type: cell.Code})
 			}
 		case key.EditEvent:
 			fmt.Println("Slot: key.EditEvent")
@@ -297,7 +297,7 @@ func (b PlusButton) drawPlus(gtx *layout.Context) {
 }
 
 type AddCellEvent struct {
-	Type cell.CellType
+	Type cell.Type
 }
 
 type SelectSlotEvent struct{}
