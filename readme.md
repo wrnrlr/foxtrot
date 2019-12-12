@@ -6,6 +6,8 @@ Foxtrot is an open-source development environment designed for exploratory progr
 
 ## Installation
 
+To install Foxtrot, Git and Go are required.
+
 ```bash
 # Clone Foxtrot repository and its submodules.
 git clone --recurse-submodules https://github.com/wrnrlr/foxtrot
@@ -26,7 +28,6 @@ go run cmd/main.go
 ## TODO
 
 This software is very much still a work in progress.
-
 
 * Copy/Paste text from cells
 * Open/Save notebooks
