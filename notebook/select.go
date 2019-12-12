@@ -5,7 +5,7 @@ import (
 	"gioui.org/layout"
 )
 
-// Select a range of cells from first to last
+// Select a range of Cells from first to last
 type Selection struct {
 	eventKey     int
 	count        int
@@ -76,7 +76,7 @@ func (s *Selection) SetLast(i int) {
 	}
 	if i < 0 {
 		i = 0
-	} else if i > s.Size-1 {
+	} else if i > s.Size {
 		i = s.Size - 1
 	}
 	s.last = i
