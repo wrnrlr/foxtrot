@@ -15,7 +15,7 @@ import (
 	"github.com/corywalker/expreduce/expreduce/parser"
 	api "github.com/corywalker/expreduce/pkg/expreduceapi"
 	"github.com/wrnrlr/foxtrot/output"
-	"image/color"
+	"github.com/wrnrlr/foxtrot/util"
 	"log"
 )
 
@@ -38,19 +38,19 @@ func loop(w *app.Window) error {
 	gofont.Register()
 	theme = material.NewTheme()
 	theme.TextSize = unit.Sp(12)
-	theme.Color.Text = black
+	theme.Color.Text = util.Black
 	kernel := expreduce.NewEvalState()
 	expressions := []string{
 		//"1/c+a^2+b^2",
-		"Graphics[Rectangle[{1,1}]]",
+		"Graphics[Rectangle[{1,1}], Red, Circle[0,0]]",
 		"Graphics[Red, Circle[0,0]]",
-		"Table[i,{i,0,100}]",
 		"Sin[x]",
 		"Blue",
 		"x+2",
 		"1/2",
 		"x^3",
 		"Sqrt[2]",
+		"Table[i,{i,0,100}]",
 	}
 	items := []Item{}
 	for i, inTxt := range expressions {
@@ -68,7 +68,7 @@ func loop(w *app.Window) error {
 			return e.Err
 		case system.FrameEvent:
 			gtx.Reset(e.Config, e.Size)
-			paint.ColorOp{black}.Add(gtx.Ops)
+			paint.ColorOp{util.Black}.Add(gtx.Ops)
 			list.Layout(gtx, len(items), func(i int) {
 				layout.UniformInset(unit.Sp(10)).Layout(gtx, func() {
 					items[i].Layout(gtx)
@@ -100,20 +100,9 @@ func (i *Item) Layout(gtx *layout.Context) {
 }
 
 var (
-	lightPink        = rgb(0xffb6c1)
-	lightBlue        = rgb(0x89cff0)
-	black            = rgb(0x000000)
 	_defaultFontSize = unit.Sp(20)
 	fnt              = text.Font{Size: unit.Sp(20)}
 )
-
-func rgb(c uint32) color.RGBA {
-	return argb(0xff000000 | c)
-}
-
-func argb(c uint32) color.RGBA {
-	return color.RGBA{A: uint8(c >> 24), R: uint8(c >> 16), G: uint8(c >> 8), B: uint8(c)}
-}
 
 func formattedOutput(es *expreduce.EvalState, res api.Ex, promptNum int) (s string) {
 	isNull := false
