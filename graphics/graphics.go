@@ -9,12 +9,12 @@ import (
 	"gioui.org/text"
 	"github.com/corywalker/expreduce/expreduce/atoms"
 	"github.com/corywalker/expreduce/pkg/expreduceapi"
+	"github.com/wrnrlr/foxtrot/util"
 	"image"
 )
 
 type Graphics struct {
 	BBox     f32.Rectangle
-	style    *Style
 	ctx      *context
 	elements []Primitive
 	options  Options
@@ -31,11 +31,12 @@ func (g *Graphics) Dimensions(c *layout.Context, s *text.Shaper, font text.Font)
 
 func (g *Graphics) Layout(gtx *layout.Context, s *text.Shaper, font text.Font) {
 	dims := g.Dimensions(gtx, s, font)
-	ctx := &context{}
+	//paint.ColorOp{Color: util.Black}.Add(gtx.Ops)
+	*g.ctx.style.StrokeColor = util.Black
 	var stack op.StackOp
 	for _, p := range g.elements {
 		stack.Push(gtx.Ops)
-		p.Draw(ctx, gtx.Ops)
+		p.Draw(g.ctx, gtx.Ops)
 		stack.Pop()
 	}
 	gtx.Dimensions = dims
@@ -44,7 +45,7 @@ func (g *Graphics) Layout(gtx *layout.Context, s *text.Shaper, font text.Font) {
 func (g Graphics) drawAxis(gtx *layout.Context) {
 }
 
-func FromEx(expr *atoms.Expression) (error, *Graphics) {
+func FromEx(expr *atoms.Expression, st *Style) (error, *Graphics) {
 	graphics, ok := atoms.HeadAssertion(expr, "System`Graphics")
 	if !ok {
 		return errors.New("trying to render a non-Graphics[] expression"), nil
@@ -55,7 +56,8 @@ func FromEx(expr *atoms.Expression) (error, *Graphics) {
 		return errors.New("the Graphics[] expression must have at least one argument"), nil
 	}
 
-	g := Graphics{}
+	ctx := &context{style: st}
+	g := Graphics{ctx: ctx}
 	for _, ex := range expr.GetParts()[1:] {
 		primetive, err := toPrimetive(ex)
 		if err != nil {
@@ -75,6 +77,8 @@ func toPrimetive(ex expreduceapi.Ex) (p Primitive, err error) {
 		return nil, errors.New("primetive needs to be an expression")
 	}
 	switch expr.HeadStr() {
+	case "System`RGBColor":
+		p, err = toColor(expr)
 	case "System`Circle":
 		p, err = toCircle(expr)
 	case "System`Rectangle":

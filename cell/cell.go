@@ -4,15 +4,12 @@ import (
 	"fmt"
 	"gioui.org/layout"
 	"gioui.org/op"
-	"gioui.org/op/paint"
 	"gioui.org/text"
 	"gioui.org/unit"
 	"github.com/corywalker/expreduce/pkg/expreduceapi"
 	"github.com/wrnrlr/foxtrot/editor"
-	"github.com/wrnrlr/foxtrot/graphics"
 	"github.com/wrnrlr/foxtrot/output"
 	"github.com/wrnrlr/foxtrot/theme"
-	"github.com/wrnrlr/foxtrot/util"
 )
 
 type Cells []Cell
@@ -146,11 +143,10 @@ func (c *cell) output(gtx *layout.Context) {
 		c.labelLayout(gtx)
 	})
 	c2 := f.Flex(gtx, 1, func() {
-		st := graphics.NewStyle()
 		var stack op.StackOp
 		stack.Push(gtx.Ops)
-		paint.ColorOp{Color: util.Black}.Add(gtx.Ops)
-		w := output.Ex(c.Out, st, gtx)
+		//paint.ColorOp{Color: util.Black}.Add(gtx.Ops)
+		w := output.FromEx(c.Out, gtx)
 		w.Layout(gtx, c.styles.Theme.Shaper, text.Font{Size: unit.Sp(16)})
 		stack.Pop()
 	})

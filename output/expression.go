@@ -7,7 +7,13 @@ import (
 	api "github.com/corywalker/expreduce/pkg/expreduceapi"
 	"github.com/wrnrlr/foxtrot/graphics"
 	"github.com/wrnrlr/foxtrot/typeset"
+	"github.com/wrnrlr/foxtrot/util"
 )
+
+func FromEx(ex api.Ex, gtx *layout.Context) typeset.Shape {
+	st := &graphics.Style{StrokeColor: &util.LightPink}
+	return Ex(ex, st, gtx)
+}
 
 func Ex(ex api.Ex, st *graphics.Style, gtx *layout.Context) typeset.Shape {
 	switch ex := ex.(type) {
@@ -57,12 +63,13 @@ func drawSpecialExpression(ex *atoms.Expression, st *graphics.Style, gtx *layout
 	switch ex.HeadStr() {
 	case "System`List":
 		return List(ex, st, gtx)
-	//case "System`Graphics":
-	//	err, g := graphics.FromEx(ex)
-	//	if err != nil {
-	//		fmt.Printf("Error rendering Graphics output: %v", err)
-	//		return nil
-	//	}
+	case "System`Graphics":
+		err, g := graphics.FromEx(ex, st)
+		if err != nil {
+			fmt.Printf("Error rendering Graphics output: %v", err)
+			return nil
+		}
+		return g
 	default:
 		return nil
 	}

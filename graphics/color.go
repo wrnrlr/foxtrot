@@ -1,19 +1,16 @@
 package graphics
 
 import (
+	"errors"
+	"gioui.org/f32"
+	"gioui.org/op"
+	"github.com/corywalker/expreduce/expreduce/atoms"
+	"github.com/corywalker/expreduce/pkg/expreduceapi"
 	"image/color"
 )
 
 var (
-	lightGrey     = rgb(0xbbbbbb)
-	lightPink     = rgb(0xffb6c1)
-	lightBlue     = rgb(0x039be5)
-	lightGreen    = rgb(0x7cb342)
-	white         = rgb(0xffffff)
-	black         = rgb(0x000000)
-	red           = rgb(0xe53935)
-	blue          = rgb(0x1e88e5)
-	selectedColor = rgb(0xe1f5fe)
+	black = rgb(0x000000)
 )
 
 func rgb(c uint32) color.RGBA {
@@ -22,4 +19,59 @@ func rgb(c uint32) color.RGBA {
 
 func argb(c uint32) color.RGBA {
 	return color.RGBA{A: uint8(c >> 24), R: uint8(c >> 16), G: uint8(c >> 8), B: uint8(c)}
+}
+
+type RGBColor struct {
+	color     color.RGBA
+	thickness float32
+}
+
+func (c RGBColor) Draw(ctx *context, ops *op.Ops) {
+	*ctx.style.StrokeColor = c.color
+}
+
+func (c RGBColor) BoundingBox() (bbox f32.Rectangle) {
+	return bbox
+}
+
+func toColor(e *atoms.Expression) (*RGBColor, error) {
+	if len(e.Parts) != 4 {
+		return nil, errors.New("Color[] should have 3 floats arguments")
+	}
+	r, err := toFloat(e.GetPart(1))
+	if err != nil {
+		return nil, err
+	}
+	g, err := toFloat(e.GetPart(2))
+	if err != nil {
+		return nil, err
+	}
+	b, err := toFloat(e.GetPart(3))
+	if err != nil {
+		return nil, err
+	}
+	c := &RGBColor{color: rgbFromFlts(r, g, b)}
+	return c, nil
+}
+
+func rgbFromFlts(r, g, b float32) color.RGBA {
+	return color.RGBA{
+		A: 255,
+		R: uint8(r * 255),
+		G: uint8(g * 255),
+		B: uint8(b * 255)}
+}
+
+func toFloat(e expreduceapi.Ex) (float32, error) {
+	i, isInt := e.(*atoms.Integer)
+	if isInt {
+		f := float32(i.Val.Int64())
+		return f, nil
+	}
+	f, isFlt := e.(*atoms.Flt)
+	if !isFlt {
+		i, _ := f.Val.Int64()
+		return float32(i), nil
+	}
+	return 0, errors.New("Connot be converted to a float")
 }

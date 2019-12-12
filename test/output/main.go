@@ -14,7 +14,6 @@ import (
 	"github.com/corywalker/expreduce/expreduce/atoms"
 	"github.com/corywalker/expreduce/expreduce/parser"
 	api "github.com/corywalker/expreduce/pkg/expreduceapi"
-	"github.com/wrnrlr/foxtrot/graphics"
 	"github.com/wrnrlr/foxtrot/output"
 	"image/color"
 	"log"
@@ -44,18 +43,14 @@ func loop(w *app.Window) error {
 	expressions := []string{
 		//"1/c+a^2+b^2",
 		"Graphics[Rectangle[{1,1}]]",
-		"Graphics[Circle[0,0]]",
-		//"Table[i,{i,0,100}]",
-		//"Sin[x]",
-		//"Blue",
-		//"x+2",
-		//"1/2",
-		//"x^3",
-		//"Sqrt[2]",
-		//"Blue",
-		//"Graphics[1]",
-		//"Graphics[{Red, Rectangle[{0, 0}], Blue, Rectangle[{0.5, 0.5}]}]",
-		//"Graphics[{Red, Rectangle[{0, 0}, {1, 3}], Blue, Rectangle[{2, 1}, {4, 2}]}]",
+		"Graphics[Red, Circle[0,0]]",
+		"Table[i,{i,0,100}]",
+		"Sin[x]",
+		"Blue",
+		"x+2",
+		"1/2",
+		"x^3",
+		"Sqrt[2]",
 	}
 	items := []Item{}
 	for i, inTxt := range expressions {
@@ -98,8 +93,7 @@ func (i *Item) Layout(gtx *layout.Context) {
 		theme.Label(unit.Sp(16), i.OutTxt).Layout(gtx)
 	})
 	c3 := f.Rigid(gtx, func() {
-		st := graphics.NewStyle()
-		w := output.Ex(i.Ex, st, gtx)
+		w := output.FromEx(i.Ex, gtx)
 		w.Layout(gtx, theme.Shaper, fnt)
 	})
 	f.Layout(gtx, c1, c2, c3)

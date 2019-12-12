@@ -6,7 +6,6 @@ import (
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"github.com/corywalker/expreduce/expreduce/atoms"
-	"github.com/wrnrlr/foxtrot/util"
 )
 
 func toRectangle(e *atoms.Expression) (*Rectangle, error) {
@@ -27,7 +26,7 @@ func (r Rectangle) Draw(ctx *context, ops *op.Ops) {
 	p.Line(f32.Point{X: -100, Y: 0})
 	p.Line(f32.Point{X: 0, Y: -100})
 	p.End().Add(ops)
-	paint.ColorOp{util.Black}.Add(ops)
+	paint.ColorOp{*ctx.style.StrokeColor}.Add(ops)
 	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: float32(100), Y: 100}}}.Add(ops)
 }
 

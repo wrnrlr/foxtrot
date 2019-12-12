@@ -109,22 +109,22 @@ func setAbsoluteThickness(thicknessExpr *atoms.Expression, thickness *float32, g
 }
 
 func setDirective(dir api.Ex, style *Style, gtx *layout.Context) error {
-	rgbColor, isRgbColor := atoms.HeadAssertion(dir, "System`RGBColor")
-	if isRgbColor {
-		err := setColor(rgbColor, &style.StrokeColor, gtx)
-		return err
-	}
-	opacity, isOpacity := atoms.HeadAssertion(dir, "System`Opacity")
-	if isOpacity {
-		err := setOpacity(opacity, &style.StrokeColor)
-		return err
-	}
-	thickness, isThickness := atoms.HeadAssertion(dir, "System`AbsoluteThickness")
-	if isThickness {
-		err := setAbsoluteThickness(thickness, &style.StrokeWidth, gtx)
-		return err
-	}
-	fmt.Printf("Skipping over unknown Directive: %v\n", dir)
+	//rgbColor, isRgbColor := atoms.HeadAssertion(dir, "System`RGBColor")
+	//if isRgbColor {
+	//	err := setColor(rgbColor, style.StrokeColor, gtx)
+	//	return err
+	//}
+	//opacity, isOpacity := atoms.HeadAssertion(dir, "System`Opacity")
+	//if isOpacity {
+	//	err := setOpacity(opacity, style.StrokeColor)
+	//	return err
+	//}
+	//thickness, isThickness := atoms.HeadAssertion(dir, "System`AbsoluteThickness")
+	//if isThickness {
+	//	err := setAbsoluteThickness(thickness, &style.StrokeWidth, gtx)
+	//	return err
+	//}
+	//fmt.Printf("Skipping over unknown Directive: %v\n", dir)
 	return nil
 }
 

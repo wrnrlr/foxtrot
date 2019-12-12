@@ -6,7 +6,6 @@ import (
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"github.com/corywalker/expreduce/expreduce/atoms"
-	"github.com/wrnrlr/foxtrot/util"
 )
 
 func toCircle(e *atoms.Expression) (*Circle, error) {
@@ -21,10 +20,9 @@ type Circle struct {
 
 func (c Circle) Draw(ctx *context, ops *op.Ops) {
 	w, h := float32(100), float32(100)
-	const curve = 0.55228475 // 4*(sqrt(2)-1)/3
 	rr := float32(100) * .5
 	rrect(ops, w, h, rr, rr, rr, rr)
-	paint.ColorOp{util.Black}.Add(ops)
+	paint.ColorOp{*ctx.style.StrokeColor}.Add(ops)
 	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: float32(100), Y: 100}}}.Add(ops)
 }
 
