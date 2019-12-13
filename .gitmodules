@@ -3,4 +3,4 @@
 	url = https://github.com/wrnrlr/expreduce
 [submodule "gio"]
 	path = gio
-	url = https://git.sr.ht/~wrnr/gio
+	url = git@git.sr.ht:~wrnr/gio
