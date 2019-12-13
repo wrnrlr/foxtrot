@@ -126,10 +126,10 @@ func (c *cell) cellLayout(gtx *layout.Context) {
 
 func (c *cell) input(gtx *layout.Context) {
 	f := layout.Flex{Alignment: layout.Middle}
-	c1 := f.Rigid(gtx, func() {
+	c1 := layout.Rigid(func() {
 		c.labelLayout(gtx)
 	})
-	c2 := f.Flex(gtx, 1, func() {
+	c2 := layout.Flexed(1, func() {
 		c.styles.Foxtrot.Layout(gtx, c.Editor)
 	})
 	layout.Inset{Bottom: unit.Dp(8)}.Layout(gtx, func() {
@@ -139,10 +139,10 @@ func (c *cell) input(gtx *layout.Context) {
 
 func (c *cell) output(gtx *layout.Context) {
 	f := layout.Flex{Alignment: layout.Middle}
-	c1 := f.Rigid(gtx, func() {
+	c1 := layout.Rigid(func() {
 		c.labelLayout(gtx)
 	})
-	c2 := f.Flex(gtx, 1, func() {
+	c2 := layout.Flexed(1, func() {
 		var stack op.StackOp
 		stack.Push(gtx.Ops)
 		//paint.ColorOp{Color: util.Black}.Add(gtx.Ops)
@@ -193,7 +193,7 @@ func (c *cell) code(gtx *layout.Context) {
 
 func (c *cell) labelLayout(gtx *layout.Context) {
 	layout.Inset{Right: unit.Sp(10)}.Layout(gtx, func() {
-		px := gtx.Config.Px(unit.Sp(50))
+		px := gtx.Px(unit.Sp(50))
 		constraint := layout.Constraint{Min: px, Max: px}
 		gtx.Constraints.Width = constraint
 		label := c.styles.Theme.Label(unit.Sp(12), c.Label)

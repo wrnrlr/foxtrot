@@ -38,14 +38,14 @@ func (f *Fraction) Layout(gtx *layout.Context, s *text.Shaper, font text.Font) {
 	f.Numerator.Layout(gtx, s, font)
 	stack.Pop()
 
-	topOffset := float32(dN.Size.Y + gtx.Config.Px(unit.Sp(1)))
-	height := gtx.Config.Px(unit.Sp(1))
+	topOffset := float32(dN.Size.Y + gtx.Px(unit.Sp(1)))
+	height := gtx.Px(unit.Sp(1))
 	w := float32(dims.Size.X)
 	h := float32(height)
 	stack.Push(gtx.Ops)
 	offset = f32.Point{X: 0, Y: topOffset}
 	op.TransformOp{}.Offset(offset).Add(gtx.Ops)
-	size := float32(gtx.Config.Px(unit.Sp(1)))
+	size := float32(gtx.Px(unit.Sp(1)))
 	var p clip.Path
 	p.Begin(gtx.Ops)
 	p.Move(f32.Point{X: 0, Y: 0})
@@ -57,7 +57,7 @@ func (f *Fraction) Layout(gtx *layout.Context, s *text.Shaper, font text.Font) {
 	paint.PaintOp{f32.Rectangle{Max: f32.Point{X: w, Y: h}}}.Add(gtx.Ops)
 	stack.Pop()
 
-	topOffset += float32(gtx.Config.Px(unit.Sp(1)))
+	topOffset += float32(gtx.Px(unit.Sp(1)))
 	stack.Push(gtx.Ops)
 	dD := f.Denominator.Dimensions(gtx, s, font)
 	leftOffset = float32(dims.Size.X-dD.Size.X) / 2

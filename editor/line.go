@@ -2,7 +2,7 @@ package editor
 
 import (
 	"gioui.org/f32"
-	"gioui.org/op/clip"
+	"gioui.org/op"
 	"gioui.org/text"
 	"golang.org/x/image/math/fixed"
 	"image"
@@ -11,7 +11,7 @@ import (
 
 type line struct {
 	offset f32.Point
-	clip   clip.Op
+	clip   op.CallOp
 }
 
 type lineIterator struct {

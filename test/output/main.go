@@ -32,9 +32,7 @@ func main() {
 }
 
 func loop(w *app.Window) error {
-	gtx := &layout.Context{
-		Queue: w.Queue(),
-	}
+	gtx := layout.NewContext(w.Queue())
 	gofont.Register()
 	theme = material.NewTheme()
 	theme.TextSize = unit.Sp(12)
@@ -85,18 +83,18 @@ type Item struct {
 }
 
 func (i *Item) Layout(gtx *layout.Context) {
-	f := layout.Flex{Axis: layout.Vertical}
-	c1 := f.Rigid(gtx, func() {
-		theme.Label(unit.Sp(16), i.InTxt).Layout(gtx)
-	})
-	c2 := f.Rigid(gtx, func() {
-		theme.Label(unit.Sp(16), i.OutTxt).Layout(gtx)
-	})
-	c3 := f.Rigid(gtx, func() {
-		w := output.FromEx(i.Ex, gtx)
-		w.Layout(gtx, theme.Shaper, fnt)
-	})
-	f.Layout(gtx, c1, c2, c3)
+	layout.Flex{Axis: layout.Vertical}.Layout(gtx,
+		layout.Rigid(func() {
+			theme.Label(unit.Sp(16), i.InTxt).Layout(gtx)
+		}),
+		layout.Rigid(func() {
+			theme.Label(unit.Sp(16), i.OutTxt).Layout(gtx)
+		}),
+		layout.Rigid(func() {
+			w := output.FromEx(i.Ex, gtx)
+			w.Layout(gtx, theme.Shaper, fnt)
+		}),
+	)
 }
 
 var (

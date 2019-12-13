@@ -34,7 +34,7 @@ func (m *Margin) Event(gtx *layout.Context) interface{} {
 func (m *Margin) Layout(gtx *layout.Context, checked bool, widget layout.Widget) {
 	dim := gtx.Dimensions
 
-	marginWidth := gtx.Config.Px(unit.Sp(15))
+	marginWidth := gtx.Px(unit.Sp(15))
 	editorWidth := gtx.Constraints.Width.Max - marginWidth
 	gtx.Constraints.Width.Max = editorWidth
 	widget()
@@ -68,7 +68,7 @@ func (m *Margin) layoutMargin(checked bool, gtx *layout.Context) {
 		paint.PaintOp{Rect: dr}.Add(gtx.Ops)
 	}
 
-	s := float32(gtx.Config.Px(unit.Sp(1)))
+	s := float32(gtx.Px(unit.Sp(1)))
 	w := float32(gtx.Constraints.Width.Max)
 	h := float32(gtx.Constraints.Height.Max)
 	var p clip.Path

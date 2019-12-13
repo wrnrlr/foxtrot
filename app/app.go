@@ -41,9 +41,7 @@ func NewApp(p string) *App {
 }
 
 func (a *App) loop(w *app.Window) error {
-	gtx := &layout.Context{
-		Queue: w.Queue(),
-	}
+	gtx := layout.NewContext(w.Queue())
 	for {
 		e := <-w.Events()
 		switch e := e.(type) {
@@ -72,7 +70,7 @@ func (a *App) Layout(gtx *layout.Context) {
 		//c1 := f.Rigid(gtx, func() {
 		//	a.br.Layout(gtx)
 		//})
-		c2 := f.Flex(gtx, 1, func() {
+		c2 := layout.Flexed(1, func() {
 			a.nb.Layout(gtx)
 		})
 		f.Layout(gtx, c2)

@@ -43,7 +43,7 @@ func (o *sqrt) Layout(gtx *layout.Context, s *text.Shaper, font text.Font) {
 	offset.Y = 0
 	stack.Pop()
 
-	width := float32(gtx.Config.Px(unit.Sp(1)))
+	width := float32(gtx.Px(unit.Sp(1)))
 	var p clip.Path
 	var lineLen = float32(gtx.Constraints.Width.Max)
 	var merginTop = float32(gtx.Constraints.Height.Min / 2)

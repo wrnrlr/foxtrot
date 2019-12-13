@@ -142,18 +142,18 @@ func (s *Slot) layout(isActive, isLast bool, gtx *layout.Context) {
 	key.InputOp{Key: &s.eventKey, Focus: s.requestFocus}.Add(gtx.Ops)
 	s.requestFocus = false
 	if isLast {
-		gtx.Constraints.Height.Min = gtx.Constraints.Height.Max
+		gtx.Constraints.Height.Min = 2000
 	} else {
-		px := gtx.Config.Px(unit.Dp(20))
+		px := gtx.Px(unit.Dp(20))
 		constraint := layout.Constraint{Min: px, Max: px}
 		gtx.Constraints.Height = constraint
 	}
 	if isActive {
 		st := layout.Stack{Alignment: layout.NW}
-		c := st.Expand(gtx, func() {
+		c := layout.Expanded(func() {
 			PlusButton{}.Layout(gtx, s.plusButton)
 		})
-		l := st.Expand(gtx, func() {
+		l := layout.Expanded(func() {
 			s.drawLine(gtx)
 			s.drawCursor(gtx)
 		})
@@ -178,10 +178,11 @@ func (s *Slot) placeholderLayout(gtx *layout.Context) {
 }
 
 func (s *Slot) drawLine(gtx *layout.Context) {
-	width := float32(gtx.Config.Px(unit.Sp(1)))
+	width := float32(gtx.Px(unit.Sp(1)))
 	var path clip.Path
+	px := gtx.Px(unit.Dp(20))
 	var lineLen = float32(gtx.Constraints.Width.Max)
-	var merginTop = float32(gtx.Constraints.Height.Min / 2)
+	var merginTop = float32(px / 2)
 	var stack op.StackOp
 	stack.Push(gtx.Ops)
 	path.Begin(gtx.Ops)
@@ -218,11 +219,11 @@ func (s *Slot) drawCursor(gtx *layout.Context) {
 	if !s.caretOn {
 		return
 	}
-	length := float32(gtx.Config.Px(unit.Sp(100)))
-	width := float32(gtx.Config.Px(unit.Sp(1)))
+	length := float32(gtx.Px(unit.Sp(100)))
+	width := float32(gtx.Px(unit.Sp(1)))
 	var path clip.Path
 	var merginTop = float32(gtx.Constraints.Height.Min / 2)
-	var merginLeft = float32(gtx.Config.Px(unit.Sp(60)))
+	var merginLeft = float32(gtx.Px(unit.Sp(60)))
 	var stack op.StackOp
 	stack.Push(gtx.Ops)
 	path.Begin(gtx.Ops)
@@ -242,7 +243,7 @@ type PlusButton struct{}
 func (b PlusButton) Layout(gtx *layout.Context, button *widget.Button) {
 	inset := layout.Inset{Left: unit.Sp(20)}
 	inset.Layout(gtx, func() {
-		size := gtx.Config.Px(unit.Sp(20))
+		size := gtx.Px(unit.Sp(20))
 		gtx.Constraints = layout.RigidConstraints(image.Point{size, size})
 		b.drawCircle(gtx)
 		b.drawPlus(gtx)
@@ -253,7 +254,7 @@ func (b PlusButton) Layout(gtx *layout.Context, button *widget.Button) {
 }
 
 func (b PlusButton) drawCircle(gtx *layout.Context) {
-	px := gtx.Config.Px(unit.Sp(20))
+	px := gtx.Px(unit.Sp(20))
 	size := float32(px)
 	rr := float32(size) * .5
 	var stack op.StackOp
@@ -264,12 +265,12 @@ func (b PlusButton) drawCircle(gtx *layout.Context) {
 }
 
 func (b PlusButton) drawPlus(gtx *layout.Context) {
-	width := float32(gtx.Config.Px(unit.Sp(2)))
+	width := float32(gtx.Px(unit.Sp(2)))
 	offset := float32(gtx.Constraints.Width.Min) / 4
 	length := float32(gtx.Constraints.Width.Min) - offset
 	var p1 clip.Path
-	var xcenter = float32(gtx.Constraints.Width.Min/2) - float32(gtx.Config.Px(unit.Sp(1)))
-	var ycenter = float32(gtx.Constraints.Height.Min/2) - float32(gtx.Config.Px(unit.Sp(1)))
+	var xcenter = float32(gtx.Constraints.Width.Min/2) - float32(gtx.Px(unit.Sp(1)))
+	var ycenter = float32(gtx.Constraints.Height.Min/2) - float32(gtx.Px(unit.Sp(1)))
 	var stack op.StackOp
 	stack.Push(gtx.Ops)
 	p1.Begin(gtx.Ops)
