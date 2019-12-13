@@ -4,6 +4,7 @@ package editor
 
 import (
 	"fmt"
+	"image"
 	"io"
 	"strings"
 	"unicode/utf8"
@@ -49,6 +50,17 @@ func (e *editBuffer) deleteRune() {
 	e.gapstart -= s
 	e.caret -= s
 	e.changed = e.changed || s > 0
+	e.dump()
+}
+
+func (e *editBuffer) deleteRunes(selected image.Point) {
+	l := e.caret + selected.X
+	for i := 0; i < l; i++ {
+		_, s := utf8.DecodeLastRune(e.text[:e.gapstart])
+		e.gapstart -= s
+		e.caret -= s
+		e.changed = e.changed || s > 0
+	}
 	e.dump()
 }
 

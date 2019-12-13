@@ -54,6 +54,10 @@ type Editor struct {
 	// position when moving between lines.
 	carXOff fixed.Int26_6
 
+	// is the offset of the select caret
+	// position when selecting text
+	selected *image.Point
+
 	// Track the number of lines and length of current line
 	lineCount, lineWidth, carLine, carCol int
 
@@ -143,10 +147,13 @@ func (e *Editor) processPointer(gtx *layout.Context) {
 		case evt.Type == gesture.TypePress && evt.Source == pointer.Mouse,
 			evt.Type == gesture.TypeClick && evt.Source == pointer.Touch:
 			e.blinkStart = gtx.Now()
-			e.moveCoord(gtx, image.Point{
+			if e.selected == nil && evt.Modifiers.Contain(key.ModShift) {
+				e.selected = &image.Point{X: e.carCol, Y: e.carLine}
+			}
+			p := image.Point{
 				X: int(math.Round(float64(evt.Position.X))),
-				Y: int(math.Round(float64(evt.Position.Y))),
-			})
+				Y: int(math.Round(float64(evt.Position.Y)))}
+			e.moveCoord(gtx, p)
 			e.requestFocus = true
 			if e.scroller.State() != gesture.StateFlinging {
 				e.caretScroll = true
@@ -577,11 +584,13 @@ func (e *Editor) moveToLine(carX fixed.Int26_6, carLine2 int) fixed.Int26_6 {
 func (e *Editor) moveLeft() {
 	e.rr.moveLeft()
 	e.carXOff = 0
+	e.selected = nil
 }
 
 func (e *Editor) moveRight() {
 	e.rr.moveRight()
 	e.carXOff = 0
+	e.selected = nil
 }
 
 func (e *Editor) moveStart() {
@@ -637,6 +646,10 @@ func (e *Editor) scrollToCaret() {
 	}
 }
 
+func (e *Editor) hasSelection(k key.Event) bool {
+	return false
+}
+
 func (e *Editor) command(k key.Event) bool {
 	switch k.Name {
 	case key.NameReturn, key.NameEnter:
@@ -646,15 +659,27 @@ func (e *Editor) command(k key.Event) bool {
 	case key.NameDeleteForward:
 		e.deleteRuneForward()
 	case key.NameUpArrow:
-		line, _, carX, _ := e.LayoutCaret()
+		line, carCol, carX, _ := e.LayoutCaret()
 		e.carXOff = e.moveToLine(carX+e.carXOff, line-1)
+		if k.Modifiers.Contain(key.ModShift) && e.selected != nil {
+			e.selected = &image.Point{X: carCol, Y: line}
+		}
 	case key.NameDownArrow:
-		line, _, carX, _ := e.LayoutCaret()
+		line, carCol, carX, _ := e.LayoutCaret()
 		e.carXOff = e.moveToLine(carX+e.carXOff, line+1)
+		if k.Modifiers.Contain(key.ModShift) && e.selected != nil {
+			e.selected = &image.Point{X: carCol, Y: line}
+		}
 	case key.NameLeftArrow:
 		e.moveLeft()
+		if k.Modifiers.Contain(key.ModShift) && e.selected != nil {
+			e.selected = &image.Point{X: e.carCol, Y: e.carLine}
+		}
 	case key.NameRightArrow:
 		e.moveRight()
+		if k.Modifiers.Contain(key.ModShift) && e.selected != nil {
+			e.selected = &image.Point{X: e.carCol, Y: e.carLine}
+		}
 	case key.NamePageUp:
 		e.movePages(-1)
 	case key.NamePageDown:
