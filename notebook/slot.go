@@ -222,7 +222,8 @@ func (s *Slot) drawCursor(gtx *layout.Context) {
 	length := float32(gtx.Px(unit.Sp(100)))
 	width := float32(gtx.Px(unit.Sp(1)))
 	var path clip.Path
-	var merginTop = float32(gtx.Constraints.Height.Min / 2)
+	px := gtx.Px(unit.Dp(20))
+	var merginTop = float32(px / 2)
 	var merginLeft = float32(gtx.Px(unit.Sp(60)))
 	var stack op.StackOp
 	stack.Push(gtx.Ops)
