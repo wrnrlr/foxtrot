@@ -82,7 +82,7 @@ func (a *App) save() {
 	if a.path == "" {
 		return
 	}
-	err := nbx.WriteNBX(a.path, a.nb.Cells)
+	err := nbx.WriteFile(a.path, a.nb.Cells)
 	if err != nil {
 		fmt.Println(err)
 	}

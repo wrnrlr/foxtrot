@@ -3,6 +3,7 @@ package nbx
 import (
 	"encoding/xml"
 	"github.com/wrnrlr/foxtrot/cell"
+	"io"
 	"os"
 )
 
@@ -19,7 +20,7 @@ const (
 const temp = `<cell type="%s">"%s"</cell>`
 
 // Write cells to filename.nbx
-func WriteNBX(filename string, cells cell.Cells) error {
+func WriteFile(filename string, cells cell.Cells) error {
 	file, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0660)
 	defer file.Close()
 	if err != nil {
@@ -27,6 +28,10 @@ func WriteNBX(filename string, cells cell.Cells) error {
 	}
 	file.Truncate(0)
 	file.Seek(0, 0)
+	return Write(file, cells)
+}
+
+func Write(w io.Writer, cells cell.Cells) error {
 	nb := &notebookTag{}
 	nb.XMLName = xml.Name{Local: "notebook"}
 	for _, c := range cells {
@@ -40,6 +45,6 @@ func WriteNBX(filename string, cells cell.Cells) error {
 	if err != nil {
 		return err
 	}
-	_, err = file.Write(b)
+	_, err = w.Write(b)
 	return err
 }
