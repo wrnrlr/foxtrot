@@ -3,7 +3,6 @@ package output
 import (
 	"gioui.org/layout"
 	"github.com/corywalker/expreduce/expreduce/atoms"
-	api "github.com/corywalker/expreduce/pkg/expreduceapi"
 	"github.com/wrnrlr/foxtrot/graphics"
 	"github.com/wrnrlr/foxtrot/typeset"
 )
@@ -24,24 +23,7 @@ func Parts(ex *atoms.Expression, st *graphics.Style, gtx *layout.Context) []type
 	var children []typeset.Shape
 	var comma typeset.Shape
 	for _, e := range ex.Parts[1:] {
-		var shape typeset.Shape
-		switch ex := e.(type) {
-		case *atoms.String:
-			shape = &typeset.Label{Text: ex.Val, MaxWidth: typeset.FitContent}
-		case *atoms.Integer:
-			shape = &typeset.Label{Text: ex.String(), MaxWidth: typeset.FitContent}
-		case *atoms.Flt:
-			shape = &typeset.Label{Text: ex.StringForm(api.ToStringParams{}), MaxWidth: typeset.FitContent}
-		case *atoms.Rational:
-			Rational(ex, st, gtx)
-		case *atoms.Complex:
-			shape = &typeset.Label{Text: ex.StringForm(api.ToStringParams{}), MaxWidth: typeset.FitContent}
-		case *atoms.Symbol:
-			shape = &typeset.Label{Text: ex.StringForm(api.ToStringParams{Context: atoms.NewString("Global`")}), MaxWidth: typeset.FitContent}
-		case *atoms.Expression:
-			txt := e.StringForm(atoms.DefaultStringParams())
-			shape = &typeset.Label{Text: txt, MaxWidth: typeset.FitContent}
-		}
+		shape := Ex(e, st, gtx)
 		if comma != nil {
 			children = append(children, comma)
 		}

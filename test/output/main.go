@@ -40,6 +40,7 @@ func loop(w *app.Window) error {
 	kernel := expreduce.NewEvalState()
 	expressions := []string{
 		//"1/c+a^2+b^2",
+		"{Graphics[Red, Circle[0,0]], Graphics[Green, Circle[0,0]]}",
 		"Graphics[Rectangle[{1,1}], Red, Circle[0,0]]",
 		"Graphics[Red, Circle[0,0]]",
 		"Sin[x]",
@@ -49,6 +50,7 @@ func loop(w *app.Window) error {
 		"x^3",
 		"Sqrt[2]",
 		"Table[i,{i,0,100}]",
+		"{}",
 	}
 	items := []Item{}
 	for i, inTxt := range expressions {
