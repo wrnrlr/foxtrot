@@ -31,5 +31,7 @@ func (r Rectangle) Draw(ctx *context, ops *op.Ops) {
 }
 
 func (r Rectangle) BoundingBox() (bbox f32.Rectangle) {
-	return bbox
+	min := f32.Point{X: 0, Y: 0}
+	max := f32.Point{X: 1, Y: 1}
+	return f32.Rectangle{Min: min, Max: max}
 }

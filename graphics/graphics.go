@@ -21,7 +21,9 @@ type Graphics struct {
 }
 
 func (g *Graphics) Dimensions(c *layout.Context, s *text.Shaper, font text.Font) layout.Dimensions {
-	p := image.Point{X: 300, Y: 200}
+	width := g.BBox.Min.X*-1 + g.BBox.Max.X
+	height := g.BBox.Min.Y*-1 + g.BBox.Max.Y
+	p := image.Point{X: int(width * 100), Y: int(height * 100)}
 	dims := layout.Dimensions{
 		Size:     p,
 		Baseline: p.Y / 2,
@@ -45,6 +47,26 @@ func (g *Graphics) Layout(gtx *layout.Context, s *text.Shaper, font text.Font) {
 func (g Graphics) drawAxis(gtx *layout.Context) {
 }
 
+func (g *Graphics) calculateBoundingBox() {
+	bb := f32.Rectangle{}
+	for _, e := range g.elements {
+		b := e.BoundingBox()
+		if bb.Min.X > b.Min.X {
+			bb.Min.X = b.Min.X
+		}
+		if bb.Min.Y > b.Min.Y {
+			bb.Min.Y = b.Min.Y
+		}
+		if bb.Max.X < b.Max.X {
+			bb.Max.X = b.Max.X
+		}
+		if bb.Max.Y < b.Max.Y {
+			bb.Max.Y = b.Max.Y
+		}
+	}
+	g.BBox = bb
+}
+
 func FromEx(expr *atoms.Expression, st *Style) (*Graphics, error) {
 	graphics, ok := atoms.HeadAssertion(expr, "System`Graphics")
 	if !ok {
@@ -63,6 +85,7 @@ func FromEx(expr *atoms.Expression, st *Style) (*Graphics, error) {
 		return nil, err
 	}
 	g.elements = primitives
+	g.calculateBoundingBox()
 	return &g, err
 }
 
