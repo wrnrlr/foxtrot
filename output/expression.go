@@ -64,7 +64,7 @@ func drawSpecialExpression(ex *atoms.Expression, st *graphics.Style, gtx *layout
 	case "System`List":
 		return List(ex, st, gtx)
 	case "System`Graphics":
-		err, g := graphics.FromEx(ex, st)
+		g, err := graphics.FromEx(ex, st)
 		if err != nil {
 			fmt.Printf("Error rendering Graphics output: %v", err)
 			return nil
