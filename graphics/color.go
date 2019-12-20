@@ -5,7 +5,6 @@ import (
 	"gioui.org/f32"
 	"gioui.org/op"
 	"github.com/corywalker/expreduce/expreduce/atoms"
-	"github.com/corywalker/expreduce/pkg/expreduceapi"
 	"image/color"
 )
 
@@ -60,18 +59,4 @@ func rgbFromFlts(r, g, b float32) color.RGBA {
 		R: uint8(r * 255),
 		G: uint8(g * 255),
 		B: uint8(b * 255)}
-}
-
-func toFloat(e expreduceapi.Ex) (float32, error) {
-	i, isInt := e.(*atoms.Integer)
-	if isInt {
-		f := float32(i.Val.Int64())
-		return f, nil
-	}
-	f, isFlt := e.(*atoms.Flt)
-	if !isFlt {
-		i, _ := f.Val.Int64()
-		return float32(i), nil
-	}
-	return 0, errors.New("Connot be converted to a float")
 }

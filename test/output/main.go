@@ -40,8 +40,9 @@ func loop(w *app.Window) error {
 	kernel := expreduce.NewEvalState()
 	expressions := []string{
 		//"1/c+a^2+b^2",
-		"{Graphics[{Red, Circle[0,0]}], Graphics[{Green, Circle[0,0]}]}",
+		"{Graphics[{Red, Circle[0,0]}], Graphics[{Green, Rectangle[]}]}",
 		"Graphics[{Rectangle[{1,1}], Red, Circle[0,0]}]",
+		"Graphics[{Orange, Rectangle[{0.5,1}]}]",
 		"Graphics[{Red, Circle[0,0]}]",
 		"{1/2,x^2,y}",
 		"Sin[x]",
