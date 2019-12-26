@@ -8,18 +8,6 @@ import (
 	"image/color"
 )
 
-var (
-	black = rgb(0x000000)
-)
-
-func rgb(c uint32) color.RGBA {
-	return argb(0xff000000 | c)
-}
-
-func argb(c uint32) color.RGBA {
-	return color.RGBA{A: uint8(c >> 24), R: uint8(c >> 16), G: uint8(c >> 8), B: uint8(c)}
-}
-
 type RGBColor struct {
 	color     color.RGBA
 	thickness float32
@@ -35,7 +23,7 @@ func (c RGBColor) BoundingBox() (bbox f32.Rectangle) {
 
 func toColor(e *atoms.Expression) (*RGBColor, error) {
 	if len(e.Parts) != 4 {
-		return nil, errors.New("Color[] should have 3 floats arguments")
+		return nil, errors.New("RGBColor[] should have 3 floats arguments")
 	}
 	r, err := toFloat(e.GetPart(1))
 	if err != nil {
@@ -50,6 +38,10 @@ func toColor(e *atoms.Expression) (*RGBColor, error) {
 		return nil, err
 	}
 	c := &RGBColor{color: rgbFromFlts(r, g, b)}
+	//c.color = rgbFromFlts(0.733, 0.733, 0.733)
+	//c.color = util.LightGrey
+	//c.color = color.RGBA{186, 186, 186, 255}
+	//c.color = color.RGBA{127, 127, 127, 255}
 	return c, nil
 }
 

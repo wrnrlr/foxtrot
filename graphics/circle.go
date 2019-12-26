@@ -9,7 +9,26 @@ import (
 )
 
 func toCircle(e *atoms.Expression) (*Circle, error) {
-	c := &Circle{}
+	var err error
+	center := f32.Point{}
+	radius := float32(1)
+	length := e.Len()
+	if length == 1 {
+		center, err = toPoint(e.GetPart(1))
+		if err != nil {
+			return nil, err
+		}
+	} else if length == 2 {
+		center, err = toPoint(e.GetPart(1))
+		if err != nil {
+			return nil, err
+		}
+		radius, err = toFloat(e.GetPart(2))
+		if err != nil {
+			return nil, err
+		}
+	}
+	c := &Circle{center, radius}
 	return c, nil
 }
 
@@ -42,16 +61,13 @@ func rrect(ops *op.Ops, width, height, se, sw, nw, ne float32) {
 	var b clip.Path
 	b.Begin(ops)
 	b.Move(f32.Point{X: w, Y: h - se})
-	b.Cube(f32.Point{X: 0, Y: se * c}, f32.Point{X: -se + se*c, Y: se}, f32.Point{X: -se, Y: se}) // SE
-	b.Line(f32.Point{X: sw - w + se, Y: 0})
+	b.Cube(f32.Point{X: 0, Y: se * c}, f32.Point{X: -se + se*c, Y: se}, f32.Point{X: -se, Y: se})    // SE
 	b.Cube(f32.Point{X: -sw * c, Y: 0}, f32.Point{X: -sw, Y: -sw + sw*c}, f32.Point{X: -sw, Y: -sw}) // SW
-	b.Line(f32.Point{X: 0, Y: nw - h + sw})
-	b.Cube(f32.Point{X: 0, Y: -nw * c}, f32.Point{X: nw - nw*c, Y: -nw}, f32.Point{X: nw, Y: -nw}) // NW
-	b.Line(f32.Point{X: w - ne - nw, Y: 0})
-	b.Cube(f32.Point{X: ne * c, Y: 0}, f32.Point{X: ne, Y: ne - ne*c}, f32.Point{X: ne, Y: ne}) // NE
+	b.Cube(f32.Point{X: 0, Y: -nw * c}, f32.Point{X: nw - nw*c, Y: -nw}, f32.Point{X: nw, Y: -nw})   // NW
+	b.Cube(f32.Point{X: ne * c, Y: 0}, f32.Point{X: ne, Y: ne - ne*c}, f32.Point{X: ne, Y: ne})      // NE
 	// Return to origin
 	b.Move(f32.Point{X: -w, Y: -ne})
-	const scale = 0.85
+	const scale = 0.95
 	b.Move(f32.Point{X: w * (1 - scale) * .5, Y: h * (1 - scale) * .5})
 	w *= scale
 	h *= scale
@@ -59,13 +75,10 @@ func rrect(ops *op.Ops, width, height, se, sw, nw, ne float32) {
 	sw *= scale
 	nw *= scale
 	ne *= scale
-	b.Move(f32.Point{X: w, Y: h - se})
-	b.Cube(f32.Point{X: 0, Y: se * c}, f32.Point{X: -se + se*c, Y: se}, f32.Point{X: -se, Y: se}) // SE
-	b.Line(f32.Point{X: sw - w + se, Y: 0})
-	b.Cube(f32.Point{X: -sw * c, Y: 0}, f32.Point{X: -sw, Y: -sw + sw*c}, f32.Point{X: -sw, Y: -sw}) // SW
-	b.Line(f32.Point{X: 0, Y: nw - h + sw})
-	b.Cube(f32.Point{X: 0, Y: -nw * c}, f32.Point{X: nw - nw*c, Y: -nw}, f32.Point{X: nw, Y: -nw}) // NW
-	b.Line(f32.Point{X: w - ne - nw, Y: 0})
-	b.Cube(f32.Point{X: ne * c, Y: 0}, f32.Point{X: ne, Y: ne - ne*c}, f32.Point{X: ne, Y: ne}) // NE
+	b.Move(f32.Point{X: 0, Y: h - se})
+	b.Cube(f32.Point{X: 0, Y: se * c}, f32.Point{X: +se - se*c, Y: se}, f32.Point{X: +se, Y: se})      // SW
+	b.Cube(f32.Point{X: +sw * c, Y: 0}, f32.Point{X: +sw, Y: -sw + sw*c}, f32.Point{X: +sw, Y: -sw})   // SE
+	b.Cube(f32.Point{X: 0, Y: -nw * c}, f32.Point{X: -(nw - nw*c), Y: -nw}, f32.Point{X: -nw, Y: -nw}) // NE
+	b.Cube(f32.Point{X: -ne * c, Y: 0}, f32.Point{X: -ne, Y: ne - ne*c}, f32.Point{X: -ne, Y: ne})     // NW
 	b.End().Add(ops)
 }
