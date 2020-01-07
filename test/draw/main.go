@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"gioui.org/app"
 	"gioui.org/f32"
+	"gioui.org/font/gofont"
 	"gioui.org/io/system"
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
+	"gioui.org/unit"
+	"gioui.org/widget/material"
 	"image"
 	"image/color"
 	"math"
@@ -20,15 +23,18 @@ const (
 	rad315 = float32(315 * math.Pi / 180)
 	rad225 = float32(225 * math.Pi / 180)
 	rad90  = float32(90 * math.Pi / 180)
+	rad180 = float32(180 * math.Pi / 180)
 )
+
+var theme *material.Theme
 
 var (
 	red   = color.RGBA{255, 0, 0, 255}
 	black = color.RGBA{0, 0, 0, 255}
 	lines = [][]f32.Point{
 		{{X: 10, Y: 10}, {X: 110, Y: 10}},
-		//{{X: 110, Y: 10}, {X: 10, Y: 10}},
-		//{{X: 10, Y: 10}, {X: 110, Y: 110}},
+		{{X: 110, Y: 10}, {X: 10, Y: 10}},
+		{{X: 10, Y: 10}, {X: 110, Y: 110}},
 		//{{X: 110, Y: 110}, {X: 10, Y: 10}},
 		//{{X: 10, Y: 10}, {X: 110, Y: 110}, {X: 210, Y: 10}},
 	}
@@ -36,10 +42,13 @@ var (
 
 func main() {
 	go func() {
-		//var col uint8 = 127
 		w := app.NewWindow()
 		gtx := layout.NewContext(w.Queue())
-		//list := &layout.List{Axis: layout.Vertical}
+		gofont.Register()
+		theme = material.NewTheme()
+		theme.TextSize = unit.Sp(12)
+		theme.Color.Text = black
+		list := &layout.List{Axis: layout.Vertical}
 		for {
 			e := <-w.Events()
 			switch e := e.(type) {
@@ -47,11 +56,14 @@ func main() {
 				return
 			case system.FrameEvent:
 				gtx.Reset(e.Config, e.Size)
-				paint.ColorOp{black}.Add(gtx.Ops)
-				drawLine(lines[0], gtx)
-				//list.Layout(gtx, len(lines), func(i int) {
-				//	drawLine(lines[i], gtx)
-				//})
+				//paint.ColorOp{black}.Add(gtx.Ops)
+				//drawLine(lines[0], gtx)
+				list.Layout(gtx, len(lines), func(i int) {
+					layout.UniformInset(unit.Sp(10)).Layout(gtx, func() {
+						//theme.Label(unit.Sp(16), "hello").Layout(gtx)
+						drawLine(lines[i], gtx)
+					})
+				})
 				e.Frame(gtx.Ops)
 			}
 		}
@@ -60,11 +72,12 @@ func main() {
 }
 
 func drawLine(points []f32.Point, gtx *layout.Context) {
+	//theme.Label(unit.Sp(16), "hello").Layout(gtx)
 	var stack op.StackOp
 	stack.Push(gtx.Ops)
 	line(gtx.Ops, points)
 	paint.ColorOp{red}.Add(gtx.Ops)
-	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: float32(600), Y: 200}}}.Add(gtx.Ops)
+	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: float32(200), Y: 600}}}.Add(gtx.Ops)
 	stack.Pop()
 	gtx.Constraints = layout.RigidConstraints(image.Point{X: 200, Y: 600})
 }
@@ -76,19 +89,23 @@ func line(ops *op.Ops, points []f32.Point) {
 	var path clip.Path
 	path.Begin(ops)
 	distance := float32(5)
+	var angles []float32
 	var offsetPoints, originalPoints, deltaPoints []f32.Point
 	var tilt float32
 	var prevDelta f32.Point
 	for i, point := range points {
 		if i == 0 {
-			tilt = rad225
+			nextPoint := points[i+1]
+			tilt = angle(point, nextPoint) + rad225
 		} else if i == len(points)-1 {
-			tilt = rad315
+			prevPoint := points[i-1]
+			tilt = angle(prevPoint, point) + rad315
 		} else {
 			prevPoint := points[i-1]
 			nextPoint := points[i+1]
 			tilt = across(point, nextPoint, prevPoint)
 		}
+		angles = append(angles, tilt)
 		originalPoints = append(originalPoints, point)
 		point = offsetPoint(point, distance, tilt)
 		offsetPoints = append(offsetPoints, point)
@@ -104,15 +121,18 @@ func line(ops *op.Ops, points []f32.Point) {
 	for i := len(points) - 1; i >= 0; i-- {
 		point := points[i]
 		if i == 0 {
-			tilt = rad135
+			nextPoint := points[i+1]
+			tilt = angle(point, nextPoint) + rad135
 		} else if i == len(points)-1 {
-			tilt = rad45
+			prevPoint := points[i-1]
+			tilt = angle(prevPoint, point) + rad45
 		} else {
 			point := points[i]
 			prevPoint := points[i-1]
 			nextPoint := points[i+1]
 			tilt = across(point, nextPoint, prevPoint)
 		}
+		angles = append(angles, tilt)
 		originalPoints = append(originalPoints, point)
 		point = offsetPoint(point, distance, tilt)
 		offsetPoints = append(offsetPoints, point)
@@ -122,13 +142,17 @@ func line(ops *op.Ops, points []f32.Point) {
 		path.Line(newPoint)
 	}
 	point := points[0]
+	nextPoint := points[1]
+	tilt = angle(point, nextPoint) + rad225
+	angles = append(angles, tilt)
 	originalPoints = append(originalPoints, point)
-	point = offsetPoint(point, distance, rad225)
+	point = offsetPoint(point, distance, tilt)
 	offsetPoints = append(offsetPoints, point)
 	point = point.Sub(prevDelta)
 	path.Line(point)
 	deltaPoints = append(deltaPoints, point)
 	fmt.Printf("Original Points: %v\n", originalPoints)
+	printDegrees(angles)
 	fmt.Printf("Offset Points:   %v\n", offsetPoints)
 	fmt.Printf("Delta Points:    %v\n", deltaPoints)
 	path.End().Add(ops)
@@ -146,9 +170,9 @@ func slope(p1, p2 f32.Point) float32 {
 	return (p2.Y - p1.Y) / (p2.X - p1.X)
 }
 
-//func angle(p1, p2 f32.Point) float32 {
-//	return float32(math.Atan2(float64(p2.Y-p1.Y), float64(p2.X-p1.X)))
-//}
+func angle(p1, p2 f32.Point) float32 {
+	return float32(math.Atan2(float64(p2.Y-p1.Y), float64(p2.X-p1.X)))
+}
 
 func cos(v float32) float32 {
 	return float32(math.Cos(float64(v)))
@@ -232,4 +256,16 @@ func across(p, q, r f32.Point) float32 {
 
 func atan2(y, x float32) float32 {
 	return float32(math.Atan2(float64(y), float64(x)))
+}
+
+func mod(x, y float32) float32 {
+	return float32(math.Mod(float64(x), float64(y)))
+}
+
+func printDegrees(radials []float32) {
+	var degrees []float32
+	for _, a := range radials {
+		degrees = append(degrees, mod(a*180/math.Pi, 360))
+	}
+	fmt.Printf("Angles: %v\n", degrees)
 }
