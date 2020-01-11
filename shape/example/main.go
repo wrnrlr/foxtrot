@@ -85,4 +85,9 @@ func painting(ops *op.Ops) {
 	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: 600, Y: 600}}}.Add(ops)
 	stack.Pop()
 
+	stack.Push(ops)
+	shape.FillTriangle(f32.Point{300, 10}, f32.Point{360, 10}, f32.Point{340, 60}, ops)
+	paint.ColorOp{red}.Add(ops)
+	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: 600, Y: 600}}}.Add(ops)
+	stack.Pop()
 }
