@@ -20,9 +20,9 @@ func StrokeCircle(p f32.Point, r, lineWidth float32, ops *op.Ops) {
 
 	var path clip.Path
 	path.Begin(ops)
-	path.Move(f32.Point{X: p.X, Y: p.Y})
+	path.Move(f32.Point{X: p.X + w, Y: p.Y + r})
 
-	path.Move(f32.Point{X: w, Y: h - r})
+	//path.Move(f32.Point{X: w, Y: h - r})
 	path.Cube(f32.Point{X: 0, Y: r * c}, f32.Point{X: -r + r*c, Y: r}, f32.Point{X: -r, Y: r})    // SE
 	path.Cube(f32.Point{X: -r * c, Y: 0}, f32.Point{X: -r, Y: -r + r*c}, f32.Point{X: -r, Y: -r}) // SW
 	path.Cube(f32.Point{X: 0, Y: -r * c}, f32.Point{X: r - r*c, Y: -r}, f32.Point{X: r, Y: -r})   // NW
@@ -43,7 +43,6 @@ func StrokeCircle(p f32.Point, r, lineWidth float32, ops *op.Ops) {
 
 func FillCircle(p f32.Point, r float32, ops *op.Ops) {
 	w, h := r*2, r*2
-
 	var path clip.Path
 	path.Begin(ops)
 	path.Move(f32.Point{X: p.X, Y: p.Y})

@@ -61,15 +61,28 @@ func painting(ops *op.Ops) {
 	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: 600, Y: 600}}}.Add(ops)
 	stack.Pop()
 
-	//stack.Push(ops)
-	//shape.FillRectangle(f32.Point{40,70}, f32.Point{30,60}, ops)
-	//paint.ColorOp{green}.Add(ops)
-	//paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: 600, Y: 600}}}.Add(ops)
-	//stack.Pop()
-
 	stack.Push(ops)
 	shape.StrokeRectangle(f32.Point{40, 160}, f32.Point{100, 60}, 10, ops)
 	paint.ColorOp{green}.Add(ops)
 	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: 600, Y: 600}}}.Add(ops)
 	stack.Pop()
+
+	stack.Push(ops)
+	shape.StrokeRectangle(f32.Point{200, 160}, f32.Point{300, 300}, 10, ops)
+	paint.ColorOp{green}.Add(ops)
+	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: 600, Y: 600}}}.Add(ops)
+	stack.Pop()
+
+	stack.Push(ops)
+	shape.StrokeRectangle(f32.Point{40, 360}, f32.Point{100, 100}, 10, ops)
+	paint.ColorOp{green}.Add(ops)
+	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: 600, Y: 600}}}.Add(ops)
+	stack.Pop()
+
+	stack.Push(ops)
+	shape.FillRectangle(f32.Point{40, 240}, f32.Point{30, 60}, ops)
+	paint.ColorOp{green}.Add(ops)
+	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: 600, Y: 600}}}.Add(ops)
+	stack.Pop()
+
 }
