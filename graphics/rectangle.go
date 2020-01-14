@@ -3,9 +3,9 @@ package graphics
 import (
 	"gioui.org/f32"
 	"gioui.org/op"
-	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"github.com/corywalker/expreduce/expreduce/atoms"
+	"github.com/wrnrlr/foxtrot/shape"
 )
 
 func toRectangle(e *atoms.Expression) (*Rectangle, error) {
@@ -37,18 +37,9 @@ type Rectangle struct {
 }
 
 func (r Rectangle) Draw(ctx *context, ops *op.Ops) {
-	x0 := float32(0)
-	y0 := float32(0)
-	x1 := r.max.X * 100
-	y1 := r.max.Y * 100
-	var p clip.Path
-	p.Begin(ops)
-	p.Move(f32.Point{X: x0, Y: y0})
-	p.Line(f32.Point{X: x1, Y: 0})
-	p.Line(f32.Point{X: 0, Y: y1})
-	p.Line(f32.Point{X: -x1, Y: 0})
-	p.Line(f32.Point{X: 0, Y: -y1})
-	p.End().Add(ops)
+	p1 := r.min.Mul(100)
+	p2 := r.max.Mul(100)
+	shape.StrokeRectangle(p1, p2, ctx.style.Thickness, ops)
 	paint.ColorOp{*ctx.style.StrokeColor}.Add(ops)
 	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: float32(100), Y: 100}}}.Add(ops)
 }
