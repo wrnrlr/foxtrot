@@ -6,7 +6,9 @@ Foxtrot is an open-source development environment designed for exploratory progr
 
 ## Installation
 
-To install Foxtrot, the [Go programming language](https://golang.org/doc/install) and [Git](https://git-lfs.github.com/) with the [Large File Storage](https://git-lfs.github.com/) extension are required.
+To install Foxtrot, first  [install Go](https://golang.org/doc/install),
+then [Git](https://git-lfs.github.com/)
+with the [Large File Storage](https://git-lfs.github.com/) extension.
 
 ```bash
 # Clone Foxtrot repository and its submodules.
