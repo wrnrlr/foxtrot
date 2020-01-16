@@ -2,10 +2,11 @@ package graphics
 
 import (
 	"gioui.org/f32"
-	"gioui.org/op"
-	"gioui.org/op/clip"
+	"gioui.org/layout"
 	"gioui.org/op/paint"
+	"gioui.org/unit"
 	"github.com/corywalker/expreduce/expreduce/atoms"
+	"github.com/wrnrlr/foxtrot/shape"
 )
 
 func toCircle(e *atoms.Expression) (*Circle, error) {
@@ -37,17 +38,17 @@ type Circle struct {
 	radius float32
 }
 
-func (c Circle) Draw(ctx *context, ops *op.Ops) {
-	w, h := float32(100), float32(100)
-	rr := float32(100) * .5
-	rrect(ops, w, h, rr, rr, rr, rr)
-	paint.ColorOp{*ctx.style.StrokeColor}.Add(ops)
-	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: float32(100), Y: 100}}}.Add(ops)
+func (c Circle) Draw(ctx *context, gtx *layout.Context) {
+	center := ctx.transformPoint(c.center)
+	radius := c.radius * float32(gtx.Px(unit.Sp(50)))
+	shape.StrokeCircle(center, radius, ctx.style.Thickness, gtx.Ops)
+	paint.ColorOp{*ctx.style.StrokeColor}.Add(gtx.Ops)
+	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: radius * 2, Y: radius * 2}}}.Add(gtx.Ops)
 }
 
 func (c Circle) BoundingBox() (bbox f32.Rectangle) {
-	min := f32.Point{X: 0, Y: 0}
-	max := f32.Point{X: 1, Y: 1}
+	min := f32.Point{X: c.center.X - c.radius, Y: c.center.Y - c.radius}
+	max := f32.Point{X: c.center.X + c.radius, Y: c.center.Y + c.radius}
 	return f32.Rectangle{Min: min, Max: max}
 }
 
@@ -55,30 +56,8 @@ type Ellipse struct{}
 
 type Arc struct{}
 
-func rrect(ops *op.Ops, width, height, se, sw, nw, ne float32) {
-	w, h := float32(width), float32(height)
-	const c = 0.55228475 // 4*(sqrt(2)-1)/3
-	var b clip.Path
-	b.Begin(ops)
-	b.Move(f32.Point{X: w, Y: h - se})
-	b.Cube(f32.Point{X: 0, Y: se * c}, f32.Point{X: -se + se*c, Y: se}, f32.Point{X: -se, Y: se})    // SE
-	b.Cube(f32.Point{X: -sw * c, Y: 0}, f32.Point{X: -sw, Y: -sw + sw*c}, f32.Point{X: -sw, Y: -sw}) // SW
-	b.Cube(f32.Point{X: 0, Y: -nw * c}, f32.Point{X: nw - nw*c, Y: -nw}, f32.Point{X: nw, Y: -nw})   // NW
-	b.Cube(f32.Point{X: ne * c, Y: 0}, f32.Point{X: ne, Y: ne - ne*c}, f32.Point{X: ne, Y: ne})      // NE
-	// Return to origin
-	b.Move(f32.Point{X: -w, Y: -ne})
-	const scale = 0.95
-	b.Move(f32.Point{X: w * (1 - scale) * .5, Y: h * (1 - scale) * .5})
-	w *= scale
-	h *= scale
-	se *= scale
-	sw *= scale
-	nw *= scale
-	ne *= scale
-	b.Move(f32.Point{X: 0, Y: h - se})
-	b.Cube(f32.Point{X: 0, Y: se * c}, f32.Point{X: +se - se*c, Y: se}, f32.Point{X: +se, Y: se})      // SW
-	b.Cube(f32.Point{X: +sw * c, Y: 0}, f32.Point{X: +sw, Y: -sw + sw*c}, f32.Point{X: +sw, Y: -sw})   // SE
-	b.Cube(f32.Point{X: 0, Y: -nw * c}, f32.Point{X: -(nw - nw*c), Y: -nw}, f32.Point{X: -nw, Y: -nw}) // NE
-	b.Cube(f32.Point{X: -ne * c, Y: 0}, f32.Point{X: -ne, Y: ne - ne*c}, f32.Point{X: -ne, Y: ne})     // NW
-	b.End().Add(ops)
-}
+//func scaleRectangle(r f32.Rectangle) f32.Rectangle {
+//	min := r.Min.Mul(100)
+//	min := r.Min.Mul(100)
+//	rs := f32.Rectangle{}
+//}

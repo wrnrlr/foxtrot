@@ -6,9 +6,12 @@ import (
 	"gioui.org/f32"
 	"gioui.org/layout"
 	"gioui.org/op"
+	"gioui.org/op/paint"
 	"gioui.org/text"
+	"gioui.org/unit"
 	"github.com/corywalker/expreduce/expreduce/atoms"
 	"github.com/corywalker/expreduce/pkg/expreduceapi"
+	"github.com/wrnrlr/foxtrot/shape"
 	"github.com/wrnrlr/foxtrot/util"
 	"image"
 )
@@ -16,14 +19,31 @@ import (
 type Graphics struct {
 	BBox     f32.Rectangle
 	ctx      *context
-	elements []Primitive
+	elements primetives
 	options  Options
 }
 
+type primetives []Primitive
+
+func (ps primetives) bbox() (bbox f32.Rectangle) {
+	for _, e := range ps {
+		b := e.BoundingBox()
+		bbox.Min.X = min(b.Min.X, bbox.Min.X)
+		bbox.Min.Y = min(b.Min.Y, bbox.Min.Y)
+		bbox.Max.X = max(b.Max.X, bbox.Max.X)
+		bbox.Max.Y = max(b.Max.Y, bbox.Max.Y)
+	}
+	return bbox
+}
+
 func (g *Graphics) Dimensions(c *layout.Context, s *text.Shaper, font text.Font) layout.Dimensions {
-	width := g.BBox.Min.X*-1 + g.BBox.Max.X
-	height := g.BBox.Min.Y*-1 + g.BBox.Max.Y
-	p := image.Point{X: int(width * 100), Y: int(height * 100)}
+	//width := g.BBox.Min.X*-1 + g.BBox.Max.X
+	//height := g.BBox.Min.Y*-1 + g.BBox.Max.Y
+	g.BBox = g.elements.bbox()
+	r := g.size()
+	f := float32(c.Px(unit.Sp(100)))
+	r = r.Mul(f)
+	p := image.Point{X: int(r.X), Y: int(r.Y)}
 	dims := layout.Dimensions{
 		Size:     p,
 		Baseline: p.Y / 2,
@@ -32,39 +52,66 @@ func (g *Graphics) Dimensions(c *layout.Context, s *text.Shaper, font text.Font)
 }
 
 func (g *Graphics) Layout(gtx *layout.Context, s *text.Shaper, font text.Font) {
+	// X Axis
 	dims := g.Dimensions(gtx, s, font)
-	//paint.ColorOp{Color: util.Black}.Add(gtx.Ops)
+	g.drawAxis(gtx, s, font)
+	g.drawYAxis(gtx, s, font)
 	*g.ctx.style.StrokeColor = util.Black
+	g.ctx.style.Thickness = float32(0.95)
 	var stack op.StackOp
 	for _, p := range g.elements {
 		stack.Push(gtx.Ops)
-		p.Draw(g.ctx, gtx.Ops)
+		p.Draw(g.ctx, gtx)
 		stack.Pop()
 	}
 	gtx.Dimensions = dims
 }
 
-func (g Graphics) drawAxis(gtx *layout.Context) {
+func (g Graphics) drawAxis(gtx *layout.Context, s *text.Shaper, font text.Font) {
+	var stack op.StackOp
+	stack.Push(gtx.Ops)
+	dims := g.Dimensions(gtx, s, font)
+	paint.ColorOp{Color: util.Black}.Add(gtx.Ops)
+	w := float32(dims.Size.X)
+	h := float32(dims.Size.Y)
+	xAxis := []f32.Point{{0, h / 2}, {w, h / 2}}
+	shape.StrokeLine(xAxis, gtx.Px(unit.Sp(1)), gtx.Ops)
+	d := f32.Point{X: w, Y: h}
+	r := f32.Rectangle{Max: d}
+	paint.PaintOp{Rect: r}.Add(gtx.Ops)
+	stack.Pop()
 }
 
-func (g *Graphics) calculateBoundingBox() {
-	bb := f32.Rectangle{}
+func (g Graphics) drawYAxis(gtx *layout.Context, s *text.Shaper, font text.Font) {
+	var stack op.StackOp
+	stack.Push(gtx.Ops)
+	dims := g.Dimensions(gtx, s, font)
+	paint.ColorOp{Color: util.Black}.Add(gtx.Ops)
+	w := float32(dims.Size.X)
+	h := float32(dims.Size.Y)
+	yAxis := []f32.Point{{w / 2, 0}, {w / 2, h}}
+	shape.StrokeLine(yAxis, gtx.Px(unit.Sp(1)), gtx.Ops)
+	d := f32.Point{X: w, Y: h}
+	r := f32.Rectangle{Max: d}
+	paint.PaintOp{Rect: r}.Add(gtx.Ops)
+	stack.Pop()
+}
+
+func (g *Graphics) size() (bbox f32.Point) {
+	width := g.BBox.Min.X*-1 + g.BBox.Max.X
+	height := g.BBox.Min.Y*-1 + g.BBox.Max.Y
+	return f32.Point{width, height}
+}
+
+func (g *Graphics) calculateBoundingBox() (bbox f32.Rectangle) {
 	for _, e := range g.elements {
 		b := e.BoundingBox()
-		if bb.Min.X > b.Min.X {
-			bb.Min.X = b.Min.X
-		}
-		if bb.Min.Y > b.Min.Y {
-			bb.Min.Y = b.Min.Y
-		}
-		if bb.Max.X < b.Max.X {
-			bb.Max.X = b.Max.X
-		}
-		if bb.Max.Y < b.Max.Y {
-			bb.Max.Y = b.Max.Y
-		}
+		bbox.Min.X = min(b.Min.X, bbox.Min.X)
+		bbox.Min.Y = min(b.Min.Y, bbox.Min.Y)
+		bbox.Max.X = max(b.Max.X, bbox.Max.X)
+		bbox.Max.Y = max(b.Max.Y, bbox.Max.Y)
 	}
-	g.BBox = bb
+	return bbox
 }
 
 func FromEx(expr *atoms.Expression, st *Style) (*Graphics, error) {
@@ -118,7 +165,7 @@ func toPrimetives(ex expreduceapi.Ex) (ps []Primitive, err error) {
 func toPrimetive(ex expreduceapi.Ex) (p Primitive, err error) {
 	expr, isExpr := ex.(*atoms.Expression)
 	if !isExpr {
-		return nil, errors.New("primetive needs to be an expression")
+		return nil, errors.New("primitive needs to be an expression")
 	}
 	switch expr.HeadStr() {
 	case "System`RGBColor":
@@ -127,8 +174,12 @@ func toPrimetive(ex expreduceapi.Ex) (p Primitive, err error) {
 		p, err = toCircle(expr)
 	case "System`Rectangle":
 		p, err = toRectangle(expr)
+	case "System`Line":
+		p, err = toLine(expr)
+	case "System`Triangle":
+		p, err = toTriangle(expr)
 	default:
-		return nil, errors.New("Unknown graphics primetive")
+		return nil, errors.New("unknown graphics primitive")
 	}
 	return p, err
 }

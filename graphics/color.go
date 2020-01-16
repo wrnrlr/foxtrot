@@ -3,7 +3,7 @@ package graphics
 import (
 	"errors"
 	"gioui.org/f32"
-	"gioui.org/op"
+	"gioui.org/layout"
 	"github.com/corywalker/expreduce/expreduce/atoms"
 	"image/color"
 )
@@ -13,7 +13,7 @@ type RGBColor struct {
 	thickness float32
 }
 
-func (c RGBColor) Draw(ctx *context, ops *op.Ops) {
+func (c RGBColor) Draw(ctx *context, gtx *layout.Context) {
 	*ctx.style.StrokeColor = c.color
 }
 

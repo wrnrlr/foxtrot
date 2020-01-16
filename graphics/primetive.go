@@ -2,10 +2,10 @@ package graphics
 
 import (
 	"gioui.org/f32"
-	"gioui.org/op"
+	"gioui.org/layout"
 )
 
 type Primitive interface {
-	Draw(ctx *context, ops *op.Ops)
+	Draw(ctx *context, gtx *layout.Context)
 	BoundingBox() (bbox f32.Rectangle)
 }

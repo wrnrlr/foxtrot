@@ -11,6 +11,7 @@ import (
 //}
 
 type context struct {
+	//
 	BBox  f32.Rectangle
 	style *Style
 }
@@ -37,4 +38,8 @@ func (c context) y(y float32) float32 {
 	} else {
 		return y - c.BBox.Min.Y
 	}
+}
+
+func (c context) transformPoint(p f32.Point) f32.Point {
+	return f32.Point{X: c.x(p.X), Y: c.y(p.Y)}
 }

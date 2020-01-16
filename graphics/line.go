@@ -2,8 +2,9 @@ package graphics
 
 import (
 	"gioui.org/f32"
-	"gioui.org/op"
+	"gioui.org/layout"
 	"gioui.org/op/paint"
+	"gioui.org/unit"
 	"github.com/corywalker/expreduce/expreduce/atoms"
 	"github.com/wrnrlr/foxtrot/shape"
 )
@@ -21,11 +22,13 @@ func toLine(e *atoms.Expression) (*Line, error) {
 	return &line, nil
 }
 
-func (l Line) Draw(ctx *context, ops *op.Ops) {
-	points := l.transformedPoints(ctx)
-	shape.StrokeLine(points, ops)
-	paint.ColorOp{*ctx.style.StrokeColor}.Add(ops)
-	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: 600, Y: 600}}}.Add(ops)
+func (l Line) Draw(ctx *context, gtx *layout.Context) {
+	points := l.transformePoints(l.points, ctx)
+	points = l.scalePoints(points, float32(gtx.Px(unit.Sp(100))))
+	shape.StrokeLine(points, gtx.Px(unit.Sp(1)), gtx.Ops)
+	paint.ColorOp{*ctx.style.StrokeColor}.Add(gtx.Ops)
+	//p := f32.Point{}
+	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: 600, Y: 600}}}.Add(gtx.Ops)
 }
 
 func (l Line) BoundingBox() (bb f32.Rectangle) {
@@ -46,14 +49,18 @@ func (l Line) BoundingBox() (bb f32.Rectangle) {
 	return bb
 }
 
-func (l Line) transformedPoints(ctx *context) []f32.Point {
-	points := make([]f32.Point, len(l.points))
-	for i, p := range l.points {
-		points[i] = scale(ctx.transform(p))
+func (l Line) scalePoints(points []f32.Point, factor float32) []f32.Point {
+	ps := make([]f32.Point, len(points))
+	for i, p := range points {
+		ps[i] = p.Mul(factor)
 	}
-	return points
+	return ps
 }
 
-func scale(p f32.Point) f32.Point {
-	return f32.Point{X: p.X * 100, Y: p.Y * 100}
+func (l Line) transformePoints(points []f32.Point, ctx *context) []f32.Point {
+	ps := make([]f32.Point, len(points))
+	for i, p := range points {
+		ps[i] = ctx.transformPoint(p)
+	}
+	return ps
 }
