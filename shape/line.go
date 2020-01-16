@@ -28,13 +28,13 @@ func (l Line) Stroke(width float32, style StrokeType, rgba color.RGBA, ops *op.O
 
 }
 
-func StrokeLine(points []f32.Point, ops *op.Ops) {
+func StrokeLine(points []f32.Point, lineWidth int, ops *op.Ops) {
 	if len(points) < 2 {
 		return
 	}
 	var path clip.Path
 	path.Begin(ops)
-	distance := float32(5)
+	distance := float32(lineWidth)
 	var angles []float32
 	var offsetPoints, originalPoints, deltaPoints []f32.Point
 	var tilt float32

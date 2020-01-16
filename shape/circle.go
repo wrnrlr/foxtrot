@@ -14,7 +14,7 @@ type Circle struct {
 }
 
 func StrokeCircle(p f32.Point, r, lineWidth float32, ops *op.Ops) {
-	scale := float32(0.85) // base value on lineWidth and r
+	scale := lineWidth // base value on lineWidth and r
 
 	w, h := r*2, r*2
 
