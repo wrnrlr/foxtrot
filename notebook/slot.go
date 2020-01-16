@@ -13,6 +13,7 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"github.com/wrnrlr/foxtrot/cell"
+	"github.com/wrnrlr/foxtrot/shape"
 	"github.com/wrnrlr/foxtrot/util"
 	"image"
 	"time"
@@ -178,24 +179,18 @@ func (s *Slot) placeholderLayout(gtx *layout.Context) {
 }
 
 func (s *Slot) drawLine(gtx *layout.Context) {
-	width := float32(gtx.Px(unit.Sp(1)))
-	var path clip.Path
+	lineWidth := gtx.Px(unit.Sp(1))
 	px := gtx.Px(unit.Dp(20))
 	var lineLen = float32(gtx.Constraints.Width.Max)
 	var merginTop = float32(px / 2)
 	var stack op.StackOp
+	line := []f32.Point{{0, merginTop}, {lineLen, merginTop}}
 	stack.Push(gtx.Ops)
-	path.Begin(gtx.Ops)
-	path.Move(f32.Point{X: 0, Y: merginTop})
-	path.Line(f32.Point{X: lineLen, Y: 0})
-	path.Line(f32.Point{X: 0, Y: width})
-	path.Line(f32.Point{X: -lineLen, Y: 0})
-	path.Line(f32.Point{X: 0, Y: -width})
-	path.End().Add(gtx.Ops)
+	shape.StrokeLine(line, lineWidth, gtx.Ops)
 	paint.ColorOp{util.LightGrey}.Add(gtx.Ops)
 	paint.PaintOp{
 		Rect: f32.Rectangle{
-			Max: f32.Point{X: lineLen, Y: merginTop + width},
+			Max: f32.Point{X: lineLen, Y: merginTop + float32(lineWidth)},
 		},
 	}.Add(gtx.Ops)
 	stack.Pop()
