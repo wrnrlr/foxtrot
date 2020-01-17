@@ -3,6 +3,7 @@ package shape
 import (
 	"fmt"
 	"gioui.org/f32"
+	"github.com/wrnrlr/foxtrot/util"
 	"math"
 )
 
@@ -131,4 +132,15 @@ func printDegrees(radials []float32) {
 		degrees = append(degrees, mod(a*180/math.Pi, 360))
 	}
 	fmt.Printf("Angles: %v\n", degrees)
+}
+
+func Overlay(rs ...f32.Rectangle) f32.Rectangle {
+	rr := rs[0]
+	for _, r := range rs[1:] {
+		rr = f32.Rectangle{
+			Min: f32.Point{util.Min(rr.Min.Y, r.Min.Y), util.Min(rr.Min.Y, r.Min.Y)},
+			Max: f32.Point{util.Max(rr.Max.Y, r.Max.Y), util.Max(rr.Max.Y, r.Max.Y)},
+		}
+	}
+	return rr
 }

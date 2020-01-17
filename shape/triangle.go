@@ -2,9 +2,18 @@ package shape
 
 import (
 	"gioui.org/f32"
+	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
 )
+
+type Triangle struct {
+	A, B, C f32.Point
+}
+
+func (t Triangle) Fill(width float32, gtx *layout.Context) (bbox f32.Rectangle) {
+	return bbox
+}
 
 func StrokeTriangle(p1, p2, p3 f32.Point, lineWidth float32, ops *op.Ops) {
 	p2 = p2.Sub(p1)

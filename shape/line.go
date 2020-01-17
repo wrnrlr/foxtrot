@@ -3,9 +3,10 @@ package shape
 import (
 	"fmt"
 	"gioui.org/f32"
-	"gioui.org/op"
+	"gioui.org/layout"
 	"gioui.org/op/clip"
-	"image/color"
+	"gioui.org/unit"
+	"github.com/wrnrlr/foxtrot/util"
 	"math"
 )
 
@@ -20,35 +21,27 @@ const (
 
 type Line []f32.Point
 
-func (l Line) Add(ops *op.Ops) {
-
-}
-
-func (l Line) Stroke(width float32, style StrokeType, rgba color.RGBA, ops *op.Ops) {
-
-}
-
-func StrokeLine(points []f32.Point, lineWidth int, ops *op.Ops) {
-	if len(points) < 2 {
-		return
+func (l Line) Stroke(width unit.Value, gtx *layout.Context) (box f32.Rectangle) {
+	if len(l) < 2 {
+		return box
 	}
 	var path clip.Path
-	path.Begin(ops)
-	distance := float32(lineWidth)
+	path.Begin(gtx.Ops)
+	distance := float32(gtx.Px(width))
 	var angles []float32
 	var offsetPoints, originalPoints, deltaPoints []f32.Point
 	var tilt float32
 	var prevDelta f32.Point
-	for i, point := range points {
+	for i, point := range l {
 		if i == 0 {
-			nextPoint := points[i+1]
+			nextPoint := l[i+1]
 			tilt = angle(point, nextPoint) + rad225
-		} else if i == len(points)-1 {
-			prevPoint := points[i-1]
+		} else if i == len(l)-1 {
+			prevPoint := l[i-1]
 			tilt = angle(prevPoint, point) + rad315
 		} else {
-			prevPoint := points[i-1]
-			nextPoint := points[i+1]
+			prevPoint := l[i-1]
+			nextPoint := l[i+1]
 			tilt = bezel(point, prevPoint, nextPoint)
 		}
 		angles = append(angles, tilt)
@@ -64,18 +57,18 @@ func StrokeLine(points []f32.Point, lineWidth int, ops *op.Ops) {
 			path.Line(newPoint)
 		}
 	}
-	for i := len(points) - 1; i >= 0; i-- {
-		point := points[i]
+	for i := len(l) - 1; i >= 0; i-- {
+		point := l[i]
 		if i == 0 {
-			nextPoint := points[i+1]
+			nextPoint := l[i+1]
 			tilt = angle(point, nextPoint) + rad135
-		} else if i == len(points)-1 {
-			prevPoint := points[i-1]
+		} else if i == len(l)-1 {
+			prevPoint := l[i-1]
 			tilt = angle(prevPoint, point) + rad45
 		} else {
-			point := points[i]
-			prevPoint := points[i-1]
-			nextPoint := points[i+1]
+			point := l[i]
+			prevPoint := l[i-1]
+			nextPoint := l[i+1]
 			tilt = bezel(point, nextPoint, prevPoint)
 		}
 		angles = append(angles, tilt)
@@ -87,8 +80,8 @@ func StrokeLine(points []f32.Point, lineWidth int, ops *op.Ops) {
 		prevDelta = point
 		path.Line(newPoint)
 	}
-	point := points[0]
-	nextPoint := points[1]
+	point := l[0]
+	nextPoint := l[1]
 	tilt = angle(point, nextPoint) + rad225
 	angles = append(angles, tilt)
 	originalPoints = append(originalPoints, point)
@@ -100,6 +93,14 @@ func StrokeLine(points []f32.Point, lineWidth int, ops *op.Ops) {
 	fmt.Printf("Original Points: %v\n", originalPoints)
 	printDegrees(angles)
 	fmt.Printf("Offset Points:   %v\n", offsetPoints)
+	for _, p := range offsetPoints {
+		box.Min.X = util.Min(box.Min.X, p.X)
+		box.Min.Y = util.Min(box.Min.Y, p.Y)
+		box.Max.X = util.Max(box.Max.X, p.X)
+		box.Max.Y = util.Max(box.Max.Y, p.Y)
+	}
+	fmt.Printf("Min and Max:   %v\n", box)
 	fmt.Printf("Delta Points:    %v\n", deltaPoints)
-	path.End().Add(ops)
+	path.End().Add(gtx.Ops)
+	return box
 }
