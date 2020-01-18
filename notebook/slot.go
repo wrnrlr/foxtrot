@@ -96,34 +96,55 @@ func (s *Slot) processKey(isActive bool, gtx *layout.Context) {
 			if !s.focused {
 				break
 			}
-
-			if ke.Name == key.NameUpArrow && ke.Modifiers.Contain(key.ModShift) {
-				s.events = append(s.events, SelectPreviousCellEvent{})
-			} else if ke.Name == key.NameDownArrow && ke.Modifiers.Contain(key.ModShift) {
-				s.events = append(s.events, SelectNextCellEvent{})
-			} else if ke.Name == key.NameReturn || ke.Name == key.NameEnter {
-				s.events = append(s.events, AddCellEvent{Type: cell.Input})
-			} else if ke.Name == key.NameUpArrow || ke.Name == key.NameLeftArrow {
-				s.events = append(s.events, FocusPreviousCellEvent{})
-			} else if ke.Name == key.NameDownArrow || ke.Name == key.NameRightArrow {
-				s.events = append(s.events, FocusNextCellEvent{})
-			} else if ke.Name == "1" && ke.Modifiers.Contain(key.ModCommand) {
-				s.events = append(s.events, AddCellEvent{Type: cell.H1})
-			} else if ke.Name == "2" && ke.Modifiers.Contain(key.ModCommand) {
-				s.events = append(s.events, AddCellEvent{Type: cell.H2})
-			} else if ke.Name == "3" && ke.Modifiers.Contain(key.ModCommand) {
-				s.events = append(s.events, AddCellEvent{Type: cell.H3})
-			} else if ke.Name == "4" && ke.Modifiers.Contain(key.ModCommand) {
-				s.events = append(s.events, AddCellEvent{Type: cell.H4})
-			} else if ke.Name == "5" && ke.Modifiers.Contain(key.ModCommand) {
-				s.events = append(s.events, AddCellEvent{Type: cell.Text})
-			} else if ke.Name == "6" && ke.Modifiers.Contain(key.ModCommand) {
-				s.events = append(s.events, AddCellEvent{Type: cell.Code})
+			e := s.switchKey(ke)
+			if e != nil {
+				s.events = append(s.events, e)
 			}
 		case key.EditEvent:
 			fmt.Println("Slot: key.EditEvent")
 		}
 	}
+}
+
+func (s *Slot) switchKey(ke key.Event) (e interface{}) {
+	switch {
+	case isKey(ke, key.NameUpArrow, key.ModShift):
+		e = SelectPreviousCellEvent{}
+	case isKey(ke, key.NameDownArrow, key.ModShift):
+		e = SelectNextCellEvent{}
+	case isKey(ke, key.NameReturn), isKey(ke, key.NameEnter):
+		e = AddCellEvent{Type: cell.Input}
+	case isKey(ke, key.NameUpArrow), isKey(ke, key.NameLeftArrow):
+		e = FocusPreviousCellEvent{}
+	case isKey(ke, key.NameDownArrow), isKey(ke, key.NameRightArrow):
+		e = FocusNextCellEvent{}
+	case isKey(ke, "1", key.ModCommand):
+		e = AddCellEvent{Type: cell.H1}
+	case isKey(ke, "2", key.ModCommand):
+		e = AddCellEvent{Type: cell.H2}
+	case isKey(ke, "3", key.ModCommand):
+		e = AddCellEvent{Type: cell.H3}
+	case isKey(ke, "4", key.ModCommand):
+		e = AddCellEvent{Type: cell.H4}
+	case isKey(ke, "5", key.ModCommand):
+		e = AddCellEvent{Type: cell.Text}
+	case isKey(ke, "6", key.ModCommand):
+		e = AddCellEvent{Type: cell.Code}
+	}
+	return e
+}
+
+func isKey(e key.Event, k string, ms ...key.Modifiers) bool {
+	return e.Name == k && hasMod(e, ms)
+}
+
+func hasMod(e key.Event, ms []key.Modifiers) bool {
+	for _, m := range ms {
+		if !e.Modifiers.Contain(m) {
+			return false
+		}
+	}
+	return true
 }
 
 func (s *Slot) Focus(requestFocus bool) {
@@ -179,20 +200,16 @@ func (s *Slot) placeholderLayout(gtx *layout.Context) {
 }
 
 func (s *Slot) drawLine(gtx *layout.Context) {
-	lineWidth := gtx.Px(unit.Sp(1))
+	width := unit.Sp(1)
 	px := gtx.Px(unit.Dp(20))
 	var lineLen = float32(gtx.Constraints.Width.Max)
 	var merginTop = float32(px / 2)
 	var stack op.StackOp
-	line := []f32.Point{{0, merginTop}, {lineLen, merginTop}}
 	stack.Push(gtx.Ops)
-	shape.StrokeLine(line, lineWidth, gtx.Ops)
+	line := shape.Line{{0, merginTop}, {lineLen, merginTop}}
+	box := line.Stroke(width, shape.Solid, gtx)
 	paint.ColorOp{util.LightGrey}.Add(gtx.Ops)
-	paint.PaintOp{
-		Rect: f32.Rectangle{
-			Max: f32.Point{X: lineLen, Y: merginTop + float32(lineWidth)},
-		},
-	}.Add(gtx.Ops)
+	paint.PaintOp{box}.Add(gtx.Ops)
 	stack.Pop()
 }
 
@@ -255,6 +272,8 @@ func (b PlusButton) drawCircle(gtx *layout.Context) {
 	rr := float32(size) * .5
 	var stack op.StackOp
 	stack.Push(gtx.Ops)
+	//shape.StrokeCircle(f32.Point{rr,rr}, rr, float32(gtx.Px(unit.Sp(0.01))), gtx.Ops)
+	//paint.ColorOp{util.LightGrey}.Add(gtx.Ops)
 	rrect(gtx.Ops, size, size, rr, rr, rr, rr)
 	fill(gtx, util.LightGrey)
 	stack.Pop()
