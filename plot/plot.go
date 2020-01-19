@@ -7,8 +7,16 @@ type Plotter interface {
 }
 
 type Plot struct {
-	Title struct {
-		Text string
+	XAxis, YXXis Axis
+	Plots        []Plotter
+}
+
+func (p *Plot) Add(plotter Plotter) {
+	p.Plots = append(p.Plots, plotter)
+}
+
+func (p Plot) Layout(gtx *layout.Context) {
+	for _, p := range p.Plots {
+
 	}
-	Plots []Plotter
 }
