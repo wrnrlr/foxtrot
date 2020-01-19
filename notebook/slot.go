@@ -106,7 +106,7 @@ func (s *Slot) processKey(isActive bool, gtx *layout.Context) {
 	}
 }
 
-func (s *Slot) switchKey(ke key.Event) (e interface{}) {
+func (Slot) switchKey(ke key.Event) (e interface{}) {
 	switch {
 	case isKey(ke, key.NameUpArrow, key.ModShift):
 		e = SelectPreviousCellEvent{}
@@ -185,7 +185,7 @@ func (s *Slot) layout(isActive, isLast bool, gtx *layout.Context) {
 	}
 }
 
-func (s *Slot) placeholderLayout(gtx *layout.Context) {
+func (s Slot) placeholderLayout(gtx *layout.Context) {
 	width := gtx.Constraints.Width.Max
 	height := gtx.Constraints.Height.Max
 	dr := f32.Rectangle{
@@ -199,18 +199,13 @@ func (s *Slot) placeholderLayout(gtx *layout.Context) {
 	s.backgroundButton.Layout(gtx)
 }
 
-func (s *Slot) drawLine(gtx *layout.Context) {
+func (s Slot) drawLine(gtx *layout.Context) {
 	width := unit.Sp(1)
 	px := gtx.Px(unit.Dp(20))
 	var lineLen = float32(gtx.Constraints.Width.Max)
 	var merginTop = float32(px / 2)
-	var stack op.StackOp
-	stack.Push(gtx.Ops)
 	line := shape.Line{{0, merginTop}, {lineLen, merginTop}}
-	box := line.Stroke(width, shape.Solid, gtx)
-	paint.ColorOp{util.LightGrey}.Add(gtx.Ops)
-	paint.PaintOp{box}.Add(gtx.Ops)
-	stack.Pop()
+	line.Stroke(util.LightGrey, width, gtx)
 }
 
 func (s *Slot) drawCursor(gtx *layout.Context) {
