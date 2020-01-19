@@ -16,6 +16,26 @@ import (
 	"image"
 )
 
+type Box f32.Rectangle
+
+func (b Box) Width() (w float32) {
+	if b.Min.X < 0 {
+		w += util.Absf32(b.Min.X)
+	} else {
+		w -= b.Min.X
+	}
+	return w + b.Max.X
+}
+
+func (b Box) Height() (h float32) {
+	if b.Min.Y < 0 {
+		h += util.Absf32(b.Min.Y)
+	} else {
+		h -= b.Min.Y
+	}
+	return h + b.Max.Y
+}
+
 type Graphics struct {
 	BBox     f32.Rectangle
 	ctx      *context
@@ -36,12 +56,12 @@ func (ps primetives) bbox() (bbox f32.Rectangle) {
 	return bbox
 }
 
-func (g *Graphics) Dimensions(c *layout.Context, s *text.Shaper, font text.Font) layout.Dimensions {
+func (g *Graphics) Dimensions(gtx *layout.Context, _ *text.Shaper, font text.Font) layout.Dimensions {
 	//width := g.BBox.Min.X*-1 + g.BBox.Max.X
 	//height := g.BBox.Min.Y*-1 + g.BBox.Max.Y
 	g.BBox = g.elements.bbox()
 	r := g.size()
-	f := float32(c.Px(unit.Sp(100)))
+	f := float32(gtx.Px(unit.Sp(100)))
 	r = r.Mul(f)
 	p := image.Point{X: int(r.X), Y: int(r.Y)}
 	dims := layout.Dimensions{
@@ -72,10 +92,10 @@ func (g Graphics) drawAxis(gtx *layout.Context, s *text.Shaper, font text.Font) 
 	stack.Push(gtx.Ops)
 	dims := g.Dimensions(gtx, s, font)
 	paint.ColorOp{Color: util.Black}.Add(gtx.Ops)
-	w := float32(dims.Size.X)
+	w := float32(gtx.Constraints.Width.Max)
 	h := float32(dims.Size.Y)
-	xAxis := []f32.Point{{0, h / 2}, {w, h / 2}}
-	shape.StrokeLine(xAxis, gtx.Px(unit.Sp(1)), gtx.Ops)
+	xAxis := shape.Line{{0, h / 2}, {w, h / 2}}
+	xAxis.Stroke(unit.Sp(1), gtx)
 	d := f32.Point{X: w, Y: h}
 	r := f32.Rectangle{Max: d}
 	paint.PaintOp{Rect: r}.Add(gtx.Ops)

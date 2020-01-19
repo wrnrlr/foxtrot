@@ -109,12 +109,12 @@ func exToNumber(ex api.Ex) float32 {
 	}
 }
 
-type Canvas struct {
-	Bounds f32.Rectangle
-}
-
-func (c *Canvas) drawRect() {}
-
-func (c *Canvas) drawCircle() {}
-
-func (c *Canvas) drawDisk() {}
+//type Canvas struct {
+//	Bounds f32.Rectangle
+//}
+//
+//func (c *Canvas) drawRect() {}
+//
+//func (c *Canvas) drawCircle() {}
+//
+//func (c *Canvas) drawDisk() {}
