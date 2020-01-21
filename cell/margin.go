@@ -34,13 +34,11 @@ func (m *Margin) Event(gtx *layout.Context) interface{} {
 
 func (m *Margin) Layout(gtx *layout.Context, checked bool, widget layout.Widget) {
 	dim := gtx.Dimensions
-
 	marginWidth := gtx.Px(unit.Sp(15))
 	editorWidth := gtx.Constraints.Width.Max - marginWidth
 	gtx.Constraints.Width.Max = editorWidth
 	widget()
 	editorHeight := gtx.Dimensions.Size.Y
-
 	var stack op.StackOp
 	stack.Push(gtx.Ops)
 	gtx.Constraints = layout.RigidConstraints(image.Point{X: marginWidth, Y: editorHeight})
@@ -52,22 +50,26 @@ func (m *Margin) Layout(gtx *layout.Context, checked bool, widget layout.Widget)
 	m.scroller.Add(gtx.Ops)
 	m.click.Add(gtx.Ops)
 	stack.Pop()
-
 	dim.Size.Y = editorHeight
 	gtx.Dimensions = dim
 }
 
 func (m *Margin) layoutMargin(checked bool, gtx *layout.Context) {
+	s := float32(gtx.Px(unit.Sp(1)))
 	cs := gtx.Constraints
-
+	w := float32(cs.Width.Max)
+	h := float32(cs.Height.Max)
 	if checked {
-		a, b := f32.Point{}, f32.Point{float32(cs.Width.Min), float32(cs.Height.Min)}
+		a, b := f32.Point{}, f32.Point{w, h}
 		shape.Rectangle{a, b}.Fill(util.SelectedColor, gtx)
 	}
-
-	s := float32(gtx.Px(unit.Sp(1)))
-	w := float32(gtx.Constraints.Width.Max)
-	h := float32(gtx.Constraints.Height.Max)
+	// Todo: Use shape api
+	//margin := float32(s*2)
+	//p1 := f32.Point{X: margin, Y: margin}
+	//p2 := f32.Point{X: w - 2*margin, Y: margin}
+	//p3 := f32.Point{X: w - 2*margin, Y: h - margin}
+	//p4 := f32.Point{X: margin, Y: h - margin}
+	//shape.Line{p1, p2, p3, p4}.Stroke(util.LightGrey, s, gtx)
 	var p clip.Path
 	p.Begin(gtx.Ops)
 	p.Move(f32.Point{X: 2 * s, Y: 2 * s})
