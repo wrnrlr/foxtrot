@@ -228,22 +228,11 @@ func (s *Slot) drawCursor(gtx *layout.Context) {
 	}
 	length := float32(gtx.Px(unit.Sp(100)))
 	width := float32(gtx.Px(unit.Sp(1)))
-	var path clip.Path
 	px := gtx.Px(unit.Dp(20))
 	var merginTop = float32(px / 2)
 	var merginLeft = float32(gtx.Px(unit.Sp(60)))
-	var stack op.StackOp
-	stack.Push(gtx.Ops)
-	path.Begin(gtx.Ops)
-	path.Move(f32.Point{X: merginLeft, Y: merginTop})
-	path.Line(f32.Point{X: length, Y: 0})
-	path.Line(f32.Point{X: 0, Y: width})
-	path.Line(f32.Point{X: -length, Y: 0})
-	path.Line(f32.Point{X: 0, Y: -width})
-	path.End().Add(gtx.Ops)
-	paint.ColorOp{util.Black}.Add(gtx.Ops)
-	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: float32(length), Y: merginTop + width}}}.Add(gtx.Ops)
-	stack.Pop()
+	line := shape.Line{{merginLeft, merginTop}, {length, merginTop}}
+	line.Stroke(util.Black, width, gtx)
 }
 
 type PlusButton struct{}
