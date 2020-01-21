@@ -25,7 +25,7 @@ require (
 	github.com/stretchr/testify v1.4.0
 	github.com/syndtr/goleveldb v1.0.0 // indirect
 	github.com/tecbot/gorocksdb v0.0.0-20191122205208-eb0a0d0d32b3 // indirect
-	github.com/wrnrlr/shape v0.0.0-20200118210408-71c41767a3ba
+	github.com/wrnrlr/shape v0.0.0-20200121081426-1d8ea43316c1
 	go.etcd.io/bbolt v1.3.3 // indirect
 	golang.org/x/exp v0.0.0-20191030013958-a1ab85dbe136 // indirect
 	golang.org/x/image v0.0.0-20191009234506-e7c1f5e7dbb8

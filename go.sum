@@ -126,8 +126,8 @@ github.com/wcharczuk/go-chart v2.0.1+incompatible h1:0pz39ZAycJFF7ju/1mepnk26RLV
 github.com/wcharczuk/go-chart v2.0.1+incompatible/go.mod h1:PF5tmL4EIx/7Wf+hEkpCqYi5He4u90sw+0+6FhrryuE=
 github.com/willf/bitset v1.1.10 h1:NotGKqX0KwQ72NUzqrjZq5ipPNDQex9lo3WpaS8L2sc=
 github.com/willf/bitset v1.1.10/go.mod h1:RjeCKbqT1RxIR/KWY6phxZiaY1IyutSBfGjNPySAYV4=
-github.com/wrnrlr/shape v0.0.0-20200118210408-71c41767a3ba h1:0Cv5tqfi7Efr0fTYZLFSjjS/I6FumqAOaAuWYwY0QYE=
-github.com/wrnrlr/shape v0.0.0-20200118210408-71c41767a3ba/go.mod h1:SMCXh0gIQ0cxpqsERRdnE1BTC61hdFUGTUipJeYEcEY=
+github.com/wrnrlr/shape v0.0.0-20200121081426-1d8ea43316c1 h1:4s+wdRfFADTg2dYI1CBIk3F92VWNDCc8HrWeiXy6TOs=
+github.com/wrnrlr/shape v0.0.0-20200121081426-1d8ea43316c1/go.mod h1:SMCXh0gIQ0cxpqsERRdnE1BTC61hdFUGTUipJeYEcEY=
 github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:aYKd//L2LvnjZzWKhF00oedf4jCCReLcmhLdhm1A27Q=
 go.etcd.io/bbolt v1.3.3 h1:MUGmc65QhB3pIlaQ5bB4LwqSj6GIonVJXpZiaKNyaKk=
 go.etcd.io/bbolt v1.3.3/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
