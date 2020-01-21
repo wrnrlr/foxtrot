@@ -250,16 +250,13 @@ func (b PlusButton) Layout(gtx *layout.Context, button *widget.Button) {
 }
 
 func (b PlusButton) drawCircle(gtx *layout.Context) {
+	width := float32(gtx.Px(unit.Sp(1)))
 	px := gtx.Px(unit.Sp(20))
 	size := float32(px)
 	rr := float32(size) * .5
-	var stack op.StackOp
-	stack.Push(gtx.Ops)
-	//shape.StrokeCircle(f32.Point{rr,rr}, rr, float32(gtx.Px(unit.Sp(0.01))), gtx.Ops)
-	//paint.ColorOp{util.LightGrey}.Add(gtx.Ops)
-	rrect(gtx.Ops, size, size, rr, rr, rr, rr)
-	fill(gtx, util.LightGrey)
-	stack.Pop()
+	c1 := shape.Circle{f32.Point{rr / 2, rr / 2}, rr}
+	c1.Fill(util.White, gtx)
+	c1.Stroke(util.LightGrey, width, gtx)
 }
 
 func (b PlusButton) drawPlus(gtx *layout.Context) {
