@@ -8,7 +8,6 @@ import (
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/op"
-	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"gioui.org/widget"
@@ -264,36 +263,16 @@ func (b PlusButton) drawCircle(gtx *layout.Context) {
 }
 
 func (b PlusButton) drawPlus(gtx *layout.Context) {
-	width := float32(gtx.Px(unit.Sp(2)))
-	offset := float32(gtx.Constraints.Width.Min) / 4
+	size := gtx.Constraints
+	width := float32(gtx.Px(unit.Sp(1)))
+	ycenter := float32(size.Height.Min / 2)
+	xcenter := float32(size.Width.Min / 2)
+	offset := float32(size.Width.Min) / 4
 	length := float32(gtx.Constraints.Width.Min) - offset
-	var p1 clip.Path
-	var xcenter = float32(gtx.Constraints.Width.Min/2) - float32(gtx.Px(unit.Sp(1)))
-	var ycenter = float32(gtx.Constraints.Height.Min/2) - float32(gtx.Px(unit.Sp(1)))
-	var stack op.StackOp
-	stack.Push(gtx.Ops)
-	p1.Begin(gtx.Ops)
-	p1.Move(f32.Point{X: offset, Y: ycenter})
-	p1.Line(f32.Point{X: length, Y: 0})
-	p1.Line(f32.Point{X: 0, Y: width})
-	p1.Line(f32.Point{X: -length, Y: 0})
-	p1.Line(f32.Point{X: 0, Y: -width})
-	p1.End().Add(gtx.Ops)
-	paint.ColorOp{util.LightGrey}.Add(gtx.Ops)
-	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: length, Y: length}}}.Add(gtx.Ops)
-	stack.Pop()
-	stack.Push(gtx.Ops)
-	var p2 clip.Path
-	p2.Begin(gtx.Ops)
-	p2.Move(f32.Point{X: xcenter, Y: offset})
-	p2.Line(f32.Point{X: 0, Y: length})
-	p2.Line(f32.Point{X: width, Y: 0})
-	p2.Line(f32.Point{X: 0, Y: -length})
-	p2.Line(f32.Point{X: -width, Y: 0})
-	p2.End().Add(gtx.Ops)
-	paint.ColorOp{util.LightGrey}.Add(gtx.Ops)
-	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: length, Y: length}}}.Add(gtx.Ops)
-	stack.Pop()
+	line1 := shape.Line{{offset, ycenter}, {length, ycenter}}
+	line1.Stroke(util.LightGrey, width, gtx)
+	line2 := shape.Line{{xcenter, offset}, {xcenter, length}}
+	line2.Stroke(util.LightGrey, width, gtx)
 }
 
 type AddCellEvent struct {
