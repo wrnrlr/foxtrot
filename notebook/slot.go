@@ -228,8 +228,8 @@ func (s *Slot) drawCursor(gtx *layout.Context) {
 	length := float32(gtx.Px(unit.Sp(100)))
 	width := float32(gtx.Px(unit.Sp(1)))
 	px := gtx.Px(unit.Dp(20))
-	var merginTop = float32(px / 2)
-	var merginLeft = float32(gtx.Px(unit.Sp(60)))
+	merginTop := float32(px / 2)
+	merginLeft := float32(gtx.Px(unit.Sp(60)))
 	line := shape.Line{{merginLeft, merginTop}, {length, merginTop}}
 	line.Stroke(util.Black, width, gtx)
 }
