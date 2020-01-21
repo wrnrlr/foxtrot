@@ -11,6 +11,7 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"github.com/wrnrlr/foxtrot/util"
+	"github.com/wrnrlr/shape"
 	"image"
 )
 
@@ -60,12 +61,8 @@ func (m *Margin) layoutMargin(checked bool, gtx *layout.Context) {
 	cs := gtx.Constraints
 
 	if checked {
-		d := image.Point{X: cs.Width.Min, Y: cs.Height.Min}
-		dr := f32.Rectangle{
-			Max: f32.Point{X: float32(d.X), Y: float32(d.Y)},
-		}
-		paint.ColorOp{Color: util.SelectedColor}.Add(gtx.Ops)
-		paint.PaintOp{Rect: dr}.Add(gtx.Ops)
+		a, b := f32.Point{}, f32.Point{float32(cs.Width.Min), float32(cs.Height.Min)}
+		shape.Rectangle{a, b}.Fill(util.SelectedColor, gtx)
 	}
 
 	s := float32(gtx.Px(unit.Sp(1)))
