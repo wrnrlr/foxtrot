@@ -11,7 +11,7 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"gioui.org/widget/material"
-	"github.com/wrnrlr/foxtrot/shape"
+	"github.com/wrnrlr/shape"
 	"image"
 	"image/color"
 	"math"

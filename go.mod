@@ -3,8 +3,9 @@ module github.com/wrnrlr/foxtrot
 go 1.13
 
 require (
-	gioui.org v0.0.0-20191124190138-726270ab2d84
+	gioui.org v0.0.0-20200116122050-18cddc030077
 	github.com/RoaringBitmap/roaring v0.4.21 // indirect
+	github.com/alecthomas/participle v0.4.1
 	github.com/blevesearch/bleve v0.8.1
 	github.com/blevesearch/blevex v0.0.0-20190916190636-152f0fe5c040 // indirect
 	github.com/blevesearch/go-porterstemmer v1.0.2 // indirect
@@ -13,6 +14,7 @@ require (
 	github.com/couchbase/vellum v0.0.0-20190829182332-ef2e028c01fd // indirect
 	github.com/cznic/b v0.0.0-20181122101859-a26611c4d92d // indirect
 	github.com/cznic/mathutil v0.0.0-20181122101859-297441e03548 // indirect
+	github.com/cznic/strutil v0.0.0-20181122101858-275e90344537
 	github.com/etcd-io/bbolt v1.3.3 // indirect
 	github.com/facebookgo/ensure v0.0.0-20160127193407-b4ab57deab51 // indirect
 	github.com/facebookgo/stack v0.0.0-20160209184415-751773369052 // indirect
@@ -23,6 +25,7 @@ require (
 	github.com/stretchr/testify v1.4.0
 	github.com/syndtr/goleveldb v1.0.0 // indirect
 	github.com/tecbot/gorocksdb v0.0.0-20191122205208-eb0a0d0d32b3 // indirect
+	github.com/wrnrlr/shape v0.0.0-20200118210408-71c41767a3ba
 	go.etcd.io/bbolt v1.3.3 // indirect
 	golang.org/x/exp v0.0.0-20191030013958-a1ab85dbe136 // indirect
 	golang.org/x/image v0.0.0-20191009234506-e7c1f5e7dbb8

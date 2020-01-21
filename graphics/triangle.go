@@ -4,10 +4,9 @@ import (
 	"errors"
 	"gioui.org/f32"
 	"gioui.org/layout"
-	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"github.com/corywalker/expreduce/expreduce/atoms"
-	"github.com/wrnrlr/foxtrot/shape"
+	"github.com/wrnrlr/shape"
 )
 
 func toTriangle(e *atoms.Expression) (*Triangle, error) {
@@ -38,9 +37,8 @@ func (t Triangle) Draw(ctx *context, gtx *layout.Context) {
 	p1 := t.p1.Mul(float32(gtx.Px(unit.Sp(100))))
 	p2 := t.p2.Mul(float32(gtx.Px(unit.Sp(100))))
 	p3 := t.p3.Mul(float32(gtx.Px(unit.Sp(100))))
-	shape.StrokeTriangle(p1, p2, p3, float32(gtx.Px(unit.Sp(5))), gtx.Ops)
-	paint.ColorOp{*ctx.style.StrokeColor}.Add(gtx.Ops)
-	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: float32(100), Y: 100}}}.Add(gtx.Ops)
+	rgba := *ctx.style.StrokeColor
+	shape.Triangle{p1, p2, p3}.Stroke(rgba, float32(gtx.Px(unit.Sp(5))), gtx)
 }
 
 func (r Triangle) BoundingBox() (bbox f32.Rectangle) {

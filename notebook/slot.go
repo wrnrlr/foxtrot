@@ -13,8 +13,8 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"github.com/wrnrlr/foxtrot/cell"
-	"github.com/wrnrlr/foxtrot/shape"
 	"github.com/wrnrlr/foxtrot/util"
+	"github.com/wrnrlr/shape"
 	"image"
 	"time"
 )
@@ -200,7 +200,7 @@ func (s Slot) placeholderLayout(gtx *layout.Context) {
 }
 
 func (s Slot) drawLine(gtx *layout.Context) {
-	width := unit.Sp(1)
+	width := float32(gtx.Px(unit.Sp(1)))
 	px := gtx.Px(unit.Dp(20))
 	var lineLen = float32(gtx.Constraints.Width.Max)
 	var merginTop = float32(px / 2)

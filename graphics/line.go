@@ -3,10 +3,9 @@ package graphics
 import (
 	"gioui.org/f32"
 	"gioui.org/layout"
-	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"github.com/corywalker/expreduce/expreduce/atoms"
-	"github.com/wrnrlr/foxtrot/shape"
+	"github.com/wrnrlr/shape"
 )
 
 type Line struct {
@@ -25,10 +24,9 @@ func toLine(e *atoms.Expression) (*Line, error) {
 func (l Line) Draw(ctx *context, gtx *layout.Context) {
 	points := l.transformePoints(l.points, ctx)
 	points = l.scalePoints(points, float32(gtx.Px(unit.Sp(100))))
-	shape.StrokeLine(points, gtx.Px(unit.Sp(1)), gtx.Ops)
-	paint.ColorOp{*ctx.style.StrokeColor}.Add(gtx.Ops)
-	//p := f32.Point{}
-	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: 600, Y: 600}}}.Add(gtx.Ops)
+	width := float32(gtx.Px(unit.Sp(1)))
+	rgba := *ctx.style.StrokeColor
+	shape.Line(points).Stroke(rgba, width, gtx)
 }
 
 func (l Line) BoundingBox() (bb f32.Rectangle) {

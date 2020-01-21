@@ -6,13 +6,12 @@ import (
 	"gioui.org/f32"
 	"gioui.org/layout"
 	"gioui.org/op"
-	"gioui.org/op/paint"
 	"gioui.org/text"
 	"gioui.org/unit"
 	"github.com/corywalker/expreduce/expreduce/atoms"
 	"github.com/corywalker/expreduce/pkg/expreduceapi"
-	"github.com/wrnrlr/foxtrot/shape"
 	"github.com/wrnrlr/foxtrot/util"
+	"github.com/wrnrlr/shape"
 	"image"
 )
 
@@ -88,33 +87,21 @@ func (g *Graphics) Layout(gtx *layout.Context, s *text.Shaper, font text.Font) {
 }
 
 func (g Graphics) drawAxis(gtx *layout.Context, s *text.Shaper, font text.Font) {
-	var stack op.StackOp
-	stack.Push(gtx.Ops)
+	width := float32(gtx.Px(unit.Sp(1)))
 	dims := g.Dimensions(gtx, s, font)
-	paint.ColorOp{Color: util.Black}.Add(gtx.Ops)
 	w := float32(gtx.Constraints.Width.Max)
 	h := float32(dims.Size.Y)
 	xAxis := shape.Line{{0, h / 2}, {w, h / 2}}
-	xAxis.Stroke(unit.Sp(1), gtx)
-	d := f32.Point{X: w, Y: h}
-	r := f32.Rectangle{Max: d}
-	paint.PaintOp{Rect: r}.Add(gtx.Ops)
-	stack.Pop()
+	xAxis.Stroke(util.Black, width, gtx)
 }
 
 func (g Graphics) drawYAxis(gtx *layout.Context, s *text.Shaper, font text.Font) {
-	var stack op.StackOp
-	stack.Push(gtx.Ops)
+	width := float32(gtx.Px(unit.Sp(1)))
 	dims := g.Dimensions(gtx, s, font)
-	paint.ColorOp{Color: util.Black}.Add(gtx.Ops)
 	w := float32(dims.Size.X)
 	h := float32(dims.Size.Y)
 	yAxis := []f32.Point{{w / 2, 0}, {w / 2, h}}
-	shape.StrokeLine(yAxis, gtx.Px(unit.Sp(1)), gtx.Ops)
-	d := f32.Point{X: w, Y: h}
-	r := f32.Rectangle{Max: d}
-	paint.PaintOp{Rect: r}.Add(gtx.Ops)
-	stack.Pop()
+	shape.Line(yAxis).Stroke(util.Black, width, gtx)
 }
 
 func (g *Graphics) size() (bbox f32.Point) {

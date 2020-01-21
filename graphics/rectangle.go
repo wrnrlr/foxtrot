@@ -3,9 +3,8 @@ package graphics
 import (
 	"gioui.org/f32"
 	"gioui.org/layout"
-	"gioui.org/op/paint"
 	"github.com/corywalker/expreduce/expreduce/atoms"
-	"github.com/wrnrlr/foxtrot/shape"
+	"github.com/wrnrlr/shape"
 )
 
 func toRectangle(e *atoms.Expression) (*Rectangle, error) {
@@ -39,9 +38,8 @@ type Rectangle struct {
 func (r Rectangle) Draw(ctx *context, gtx *layout.Context) {
 	p1 := r.min.Mul(100)
 	p2 := r.max.Mul(100)
-	shape.StrokeRectangle(p1, p2, ctx.style.Thickness, gtx.Ops)
-	paint.ColorOp{*ctx.style.StrokeColor}.Add(gtx.Ops)
-	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: float32(100), Y: 100}}}.Add(gtx.Ops)
+	rgba := *ctx.style.StrokeColor
+	shape.Rectangle{p1, p2}.Stroke(rgba, ctx.style.Thickness, gtx)
 }
 
 func (r Rectangle) BoundingBox() (bbox f32.Rectangle) {
