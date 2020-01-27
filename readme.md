@@ -2,7 +2,17 @@
 
 # Project Foxtrot
 
-Foxtrot is an open-source development environment designed for exploratory programming.
+Foxtrot is an open-source computational algebra system.
+It ships with a notebook interface where users mix natual language
+and code to create beautiful interactive documents and web application.
+
+There are builtin [API](https://corywalker.github.io/expreduce-docs/)
+to solving equations, integrate functions, computer graphics, network programming and many more.    
+
+![alt text](screen.png "Screenshot")
+
+The application is written in Go and runs on MacOSX, Linux and Windows,
+and experimental support for iOS, Android and the Web.
 
 ## Installation
 
@@ -23,10 +33,6 @@ cd ..
 go run cmd/main.go
 ```
 
-## API Reference
-
-[Documentation](https://corywalker.github.io/expreduce-docs/)
-
 ## TODO
 
 This software is very much still a work in progress.
@@ -37,3 +43,10 @@ This software is very much still a work in progress.
 * Syntax highlighting
 * Package system to install third-party code
 * Plugin System for graphics
+* Documentation
+
+## Acknowledgements
+
+* [Expreduce](https://github.com/corywalker/expreduce)
+* [Gio](https://gioui.org/)
+* The Foxtrot Language is based on the Wolfram Language that is designed by [Wolfram Research](https://www.wolfram.com/) 
