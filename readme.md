@@ -9,10 +9,10 @@ and code to create beautiful interactive documents and web application.
 There are builtin [API](https://corywalker.github.io/expreduce-docs/)
 to solving equations, integrate functions, computer graphics, network programming and many more.    
 
-![alt text](screen.png "Screenshot")
-
 The application is written in Go and runs on MacOSX, Linux and Windows,
 and experimental support for iOS, Android and the Web.
+
+![alt text](screen.png "Screenshot")
 
 ## Installation
 
