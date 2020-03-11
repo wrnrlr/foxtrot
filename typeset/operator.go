@@ -4,7 +4,7 @@ import (
 	"gioui.org/f32"
 	"gioui.org/layout"
 	"gioui.org/op"
-	"gioui.org/text"
+	"github.com/wrnrlr/foxtrot/style"
 )
 
 func Plus(left, right Shape) Shape {
@@ -35,43 +35,43 @@ type Operator struct {
 	Symbol, Left, Right Shape
 }
 
-func (o *Operator) Dimensions(c *layout.Context, s *text.Shaper, font text.Font) layout.Dimensions {
-	dims := o.Left.Dimensions(c, s, font)
-	d := o.Symbol.Dimensions(c, s, font)
+func (o *Operator) Dimensions(gtx *layout.Context, s style.Style) layout.Dimensions {
+	dims := o.Left.Dimensions(gtx, s)
+	d := o.Symbol.Dimensions(gtx, s)
 	dims.Size.X += d.Size.X
 	//dims.Size.Y += d.Size.Y
 	if o.Right != nil {
-		d = o.Right.Dimensions(c, s, font)
+		d = o.Right.Dimensions(gtx, s)
 		dims.Size.X += d.Size.X
 		//dims.Size.Y += d.Size.Y
 	}
 	return dims
 }
 
-func (o *Operator) Layout(gtx *layout.Context, s *text.Shaper, font text.Font) {
-	dims := o.Dimensions(gtx, s, font)
+func (o *Operator) Layout(gtx *layout.Context, s style.Style) {
+	dims := o.Dimensions(gtx, s)
 	var stack op.StackOp
 	offset := f32.Point{X: 0, Y: 0}
 	stack.Push(gtx.Ops)
-	o.Left.Layout(gtx, s, font)
+	o.Left.Layout(gtx, s)
 	offset.X += float32(gtx.Dimensions.Size.X)
 	stack.Pop()
 
 	stack.Push(gtx.Ops)
-	od := o.Symbol.Dimensions(gtx, s, font)
+	od := o.Symbol.Dimensions(gtx, s)
 	offset.Y = float32((dims.Size.Y - od.Size.Y) / 2)
 	op.TransformOp{}.Offset(offset).Add(gtx.Ops)
-	o.Symbol.Layout(gtx, s, font)
+	o.Symbol.Layout(gtx, s)
 	offset.X += float32(gtx.Dimensions.Size.X)
 	offset.Y = 0
 	stack.Pop()
 
 	if o.Right != nil {
 		stack.Push(gtx.Ops)
-		rd := o.Right.Dimensions(gtx, s, font)
+		rd := o.Right.Dimensions(gtx, s)
 		offset.Y = float32((dims.Size.Y - rd.Size.Y) / 2)
 		op.TransformOp{}.Offset(offset).Add(gtx.Ops)
-		o.Right.Layout(gtx, s, font)
+		o.Right.Layout(gtx, s)
 		//offset.X += float32(gtx.Dimensions.Size.X)
 		//offset.Y += float32(gtx.Dimensions.Size.Y)
 		stack.Pop()

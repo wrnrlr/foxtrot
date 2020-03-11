@@ -6,8 +6,8 @@ import (
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
-	"gioui.org/text"
 	"gioui.org/unit"
+	"github.com/wrnrlr/foxtrot/style"
 	"image"
 )
 
@@ -15,9 +15,9 @@ type Fraction struct {
 	Numerator, Denominator Shape
 }
 
-func (f *Fraction) Dimensions(c *layout.Context, s *text.Shaper, font text.Font) layout.Dimensions {
-	dN := f.Numerator.Dimensions(c, s, font)
-	dD := f.Denominator.Dimensions(c, s, font)
+func (f *Fraction) Dimensions(gtx *layout.Context, s style.Style) layout.Dimensions {
+	dN := f.Numerator.Dimensions(gtx, s)
+	dD := f.Denominator.Dimensions(gtx, s)
 	width := max(dN.Size.X, dD.Size.X)
 	height := dN.Size.Y + dD.Size.Y + int(unit.Sp(4).V)
 	dims := layout.Dimensions{
@@ -26,16 +26,16 @@ func (f *Fraction) Dimensions(c *layout.Context, s *text.Shaper, font text.Font)
 	return dims
 }
 
-func (f *Fraction) Layout(gtx *layout.Context, s *text.Shaper, font text.Font) {
-	dims := f.Dimensions(gtx, s, font)
+func (f *Fraction) Layout(gtx *layout.Context, s style.Style) {
+	dims := f.Dimensions(gtx, s)
 	var stack op.StackOp
 
 	stack.Push(gtx.Ops)
-	dN := f.Numerator.Dimensions(gtx, s, font)
+	dN := f.Numerator.Dimensions(gtx, s)
 	leftOffset := float32(dims.Size.X-dN.Size.X) / 2
 	offset := f32.Point{X: leftOffset, Y: 0}
 	op.TransformOp{}.Offset(offset).Add(gtx.Ops)
-	f.Numerator.Layout(gtx, s, font)
+	f.Numerator.Layout(gtx, s)
 	stack.Pop()
 
 	topOffset := float32(dN.Size.Y + gtx.Px(unit.Sp(1)))
@@ -59,11 +59,11 @@ func (f *Fraction) Layout(gtx *layout.Context, s *text.Shaper, font text.Font) {
 
 	topOffset += float32(gtx.Px(unit.Sp(1)))
 	stack.Push(gtx.Ops)
-	dD := f.Denominator.Dimensions(gtx, s, font)
+	dD := f.Denominator.Dimensions(gtx, s)
 	leftOffset = float32(dims.Size.X-dD.Size.X) / 2
 	offset = f32.Point{X: leftOffset, Y: topOffset}
 	op.TransformOp{}.Offset(offset).Add(gtx.Ops)
-	f.Denominator.Layout(gtx, s, font)
+	f.Denominator.Layout(gtx, s)
 	stack.Pop()
 
 	gtx.Dimensions = dims

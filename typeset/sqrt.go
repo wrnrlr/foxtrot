@@ -6,8 +6,8 @@ import (
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
-	"gioui.org/text"
 	"gioui.org/unit"
+	"github.com/wrnrlr/foxtrot/style"
 )
 
 func Sqrt(body Shape) Shape {
@@ -18,18 +18,18 @@ type sqrt struct {
 	Content Shape
 }
 
-func (o *sqrt) Dimensions(c *layout.Context, s *text.Shaper, font text.Font) layout.Dimensions {
-	dims := o.Content.Dimensions(c, s, font)
-	d := SqrtSymbol.Dimensions(c, s, font)
+func (o *sqrt) Dimensions(gtx *layout.Context, s style.Style) layout.Dimensions {
+	dims := o.Content.Dimensions(gtx, s)
+	d := SqrtSymbol.Dimensions(gtx, s)
 	dims.Size.X += d.Size.X
 	return dims
 }
 
-func (o *sqrt) Layout(gtx *layout.Context, s *text.Shaper, font text.Font) {
+func (o *sqrt) Layout(gtx *layout.Context, s style.Style) {
 	var stack op.StackOp
 	offset := f32.Point{X: 0, Y: 0}
 	stack.Push(gtx.Ops)
-	SqrtSymbol.Layout(gtx, s, font)
+	SqrtSymbol.Layout(gtx, s)
 	offset.X += float32(gtx.Dimensions.Size.X)
 	offset.Y = 0
 	signWidth := float32(gtx.Dimensions.Size.X)
@@ -37,7 +37,7 @@ func (o *sqrt) Layout(gtx *layout.Context, s *text.Shaper, font text.Font) {
 
 	stack.Push(gtx.Ops)
 	op.TransformOp{}.Offset(offset).Add(gtx.Ops)
-	o.Content.Layout(gtx, s, font)
+	o.Content.Layout(gtx, s)
 	offset.X = signWidth
 	contentWidth := float32(gtx.Dimensions.Size.X)
 	offset.Y = 0

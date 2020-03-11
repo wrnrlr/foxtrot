@@ -2,6 +2,7 @@ package typeset
 
 import (
 	"fmt"
+	"github.com/wrnrlr/foxtrot/style"
 	"image"
 
 	"gioui.org/f32"
@@ -26,10 +27,10 @@ type Label struct {
 	MaxLines int
 }
 
-func (l Label) Layout(gtx *layout.Context, s *text.Shaper, font text.Font) {
+func (l Label) Layout(gtx *layout.Context, s style.Style) {
 	//cs := gtx.Constraints
 	options := text.LayoutOptions{MaxWidth: l.MaxWidth}
-	textLayout := s.Layout(gtx, font, l.Text, options)
+	textLayout := s.Shaper.Layout(gtx, s.Font, l.Text, options)
 	//lines := textLayout.Lines
 	//if max := l.MaxLines; max > 0 && len(lines) > max {
 	//	lines = lines[:max]
@@ -38,7 +39,7 @@ func (l Label) Layout(gtx *layout.Context, s *text.Shaper, font text.Font) {
 	//dims.Size = cs.Constrain(dims.Size)
 	clip := textPadding(textLayout.Lines)
 	clip.Max = clip.Max.Add(dims.Size)
-	it := lineIterator{
+	it := LineIterator{
 		Lines:     textLayout.Lines,
 		Clip:      clip,
 		Alignment: l.Alignment,
@@ -53,16 +54,16 @@ func (l Label) Layout(gtx *layout.Context, s *text.Shaper, font text.Font) {
 		var stack op.StackOp
 		stack.Push(gtx.Ops)
 		op.TransformOp{}.Offset(off).Add(gtx.Ops)
-		s.Shape(gtx, font, str).Add(gtx.Ops)
+		s.Shaper.Shape(gtx, s.Font, str).Add(gtx.Ops)
 		paint.PaintOp{Rect: lclip}.Add(gtx.Ops)
 		stack.Pop()
 	}
 	gtx.Dimensions = dims
 }
 
-func (l *Label) Dimensions(c *layout.Context, s *text.Shaper, font text.Font) layout.Dimensions {
+func (l *Label) Dimensions(gtx *layout.Context, s style.Style) layout.Dimensions {
 	options := text.LayoutOptions{MaxWidth: l.MaxWidth}
-	textLayout := s.Layout(c, font, l.Text, options)
+	textLayout := s.Shaper.Layout(gtx, s.Font, l.Text, options)
 	lines := textLayout.Lines
 	if max := l.MaxLines; max > 0 && len(lines) > max {
 		lines = lines[:max]

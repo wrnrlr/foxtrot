@@ -3,11 +3,12 @@ package typeset
 import (
 	"gioui.org/layout"
 	"gioui.org/text"
+	"github.com/wrnrlr/foxtrot/style"
 )
 
 type Shape interface {
-	Dimensions(c *layout.Context, s *text.Shaper, font text.Font) layout.Dimensions
-	Layout(gtx *layout.Context, s *text.Shaper, font text.Font)
+	Dimensions(gtx *layout.Context, s style.Style) layout.Dimensions
+	Layout(gtx *layout.Context, s style.Style)
 }
 
 func scaleDownFont(font text.Font) text.Font {
