@@ -3,9 +3,11 @@ package graphics
 import (
 	"gioui.org/f32"
 	"gioui.org/layout"
+	"gioui.org/op"
 	"gioui.org/unit"
 	"github.com/corywalker/expreduce/expreduce/atoms"
 	"github.com/wrnrlr/shape"
+	"image"
 )
 
 func toCircle(e *atoms.Expression) (*Circle, error) {
@@ -41,7 +43,12 @@ func (c Circle) Draw(ctx *context, gtx *layout.Context) {
 	center := ctx.transformPoint(c.center)
 	radius := c.radius * float32(gtx.Px(unit.Sp(50)))
 	rgba := *ctx.style.StrokeColor
-	shape.Circle{center, radius}.Stroke(rgba, ctx.style.Thickness, gtx)
+	var stack op.StackOp
+	stack.Push(gtx.Ops)
+	r := shape.Circle{center, radius}.Stroke(rgba, ctx.style.Thickness, gtx)
+	stack.Pop()
+	p := image.Point{X: int(r.Max.X), Y: int(r.Max.Y)}
+	gtx.Dimensions = layout.Dimensions{Size: p, Baseline: int(r.Max.Y / 2)}
 }
 
 func (c Circle) BoundingBox() (bbox f32.Rectangle) {
