@@ -1,12 +1,9 @@
 package notebook
 
 import (
-	"bytes"
 	"encoding/xml"
-	"fmt"
 	"gioui.org/layout"
 	"github.com/corywalker/expreduce/expreduce"
-	"github.com/corywalker/expreduce/expreduce/parser"
 	"github.com/wrnrlr/foxtrot/cell"
 	"github.com/wrnrlr/foxtrot/theme"
 	"io/ioutil"
@@ -24,13 +21,13 @@ type Notebook struct {
 	styles     *theme.Styles
 }
 
-func NewNotebook(cells cell.Cells) *Notebook {
+func NewNotebook() *Notebook {
 	kernel := expreduce.NewEvalState()
 	firstSlot := NewSlot()
 	adds := []*Slot{firstSlot}
 	selection := NewSelection()
 	styles := theme.DefaultStyles()
-	return &Notebook{cells, adds, kernel, 1, 0, layout.List{Axis: layout.Vertical}, selection, styles}
+	return &Notebook{nil, adds, kernel, 1, 0, layout.List{Axis: layout.Vertical}, selection, styles}
 }
 
 func (nb *Notebook) Event(gtx *layout.Context) interface{} {
@@ -105,28 +102,6 @@ func (nb *Notebook) Layout(gtx *layout.Context) {
 	})
 }
 
-func (nb *Notebook) eval(i int) {
-	c := nb.Cells[i]
-	textIn := c.Text()
-	if textIn == "" {
-		return
-	}
-	c.SetLabel(fmt.Sprintf("In[%d]:= ", nb.promptCount))
-	src := parser.ReplaceSyms(textIn)
-	buf := bytes.NewBufferString(src)
-	expOut, err := parser.InterpBuf(buf, "nofile", nb.kernel)
-	expOut = nb.kernel.Eval(expOut)
-	if nb.isOutputCell(i + 1) {
-		nb.DeleteCell(i + i)
-	}
-	nb.InsertCell(i+1, cell.Output)
-	nb.Cells[i+1].SetOut(expOut)
-	nb.Cells[i+1].SetErr(err)
-	nb.Cells[i+1].SetLabel(fmt.Sprintf("Out[%d]= ", nb.promptCount))
-	nb.promptCount++
-	nb.focusSlot(i + 1)
-}
-
 func (nb *Notebook) isOutputCell(i int) bool {
 	if i >= 0 && i < len(nb.Cells) {
 		return nb.Cells[i].Type() == cell.Output
@@ -154,12 +129,20 @@ func (nb *Notebook) unfocusSlot() {
 	nb.activeSlot = -1
 }
 
+func (nb *Notebook) AddCells(cells cell.Cells) {
+	for _, c := range cells {
+		nb.slots = append(nb.slots, NewSlot())
+		nb.Cells = append(nb.Cells, c)
+	}
+	nb.selection.Size = len(nb.Cells)
+}
+
 func (nb *Notebook) InsertCell(index int, typ cell.Type) {
 	nb.slots = append(nb.slots, NewSlot())
-	cell := cell.NewCell(typ, "In[ ]:=", nb.styles)
-	nb.Cells = append(nb.Cells, cell)
+	c := cell.NewCell(typ, "Content[ ]:=", nb.styles)
+	nb.Cells = append(nb.Cells, c)
 	copy(nb.Cells[index+1:], nb.Cells[index:])
-	nb.Cells[index] = cell
+	nb.Cells[index] = c
 	nb.selection.Size = len(nb.Cells)
 }
 

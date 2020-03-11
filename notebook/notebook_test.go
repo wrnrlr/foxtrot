@@ -17,7 +17,7 @@ func TestNewNotebook(t *testing.T) {
 func TestNewNotebookWithCells(t *testing.T) {
 	style := theme.DefaultStyles()
 	var cells cell.Cells
-	c := cell.NewCell(cell.Input, "In[0]:=", style)
+	c := cell.NewCell(cell.Input, "Content[0]:=", style)
 	cells = append(cells, c)
 	nb := NewNotebook(nil)
 	assert.Equal(t, 1, nb.Size())
@@ -26,7 +26,7 @@ func TestNewNotebookWithCells(t *testing.T) {
 func TestDeleteCell(t *testing.T) {
 	style := theme.DefaultStyles()
 	var cells cell.Cells
-	c := cell.NewCell(cell.Input, "In[0]:=", style)
+	c := cell.NewCell(cell.Input, "Content[0]:=", style)
 	cells = append(cells, c)
 	nb := NewNotebook(nil)
 	nb.DeleteCell(0)
@@ -54,7 +54,7 @@ func TestEvalCell(t *testing.T) {
 	gtx := &layout.Context{Queue: q}
 	style := theme.DefaultStyles()
 	var cells cell.Cells
-	c := cell.NewCell(cell.Input, "In[0]:=", style)
+	c := cell.NewCell(cell.Input, "Content[0]:=", style)
 	c.SetText("1+1")
 	ec := &evalCell{Cell: c, event: cell.EvalEvent{}}
 	cells = append(cells, ec)
