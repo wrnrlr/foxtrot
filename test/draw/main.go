@@ -1,18 +1,17 @@
 package main
 
 import (
-	"fmt"
 	"gioui.org/app"
-	"gioui.org/f32"
 	"gioui.org/font/gofont"
 	"gioui.org/io/system"
 	"gioui.org/layout"
-	"gioui.org/op"
-	"gioui.org/op/paint"
+	"gioui.org/text"
 	"gioui.org/unit"
 	"gioui.org/widget/material"
-	"github.com/wrnrlr/shape"
-	"image"
+	"github.com/wrnrlr/foxtrot/colors"
+	"github.com/wrnrlr/foxtrot/style"
+	"github.com/wrnrlr/foxtrot/typeset"
+	"github.com/wrnrlr/foxtrot/util"
 	"image/color"
 	"math"
 )
@@ -31,28 +30,6 @@ var theme *material.Theme
 var (
 	red   = color.RGBA{255, 0, 0, 255}
 	black = color.RGBA{0, 0, 0, 255}
-	lines = [][]f32.Point{
-		//{{X: 10, Y: 10}, {X: 110, Y: 10}},
-		//{{X: 110, Y: 10}, {X: 10, Y: 10}},
-		//{{X: 10, Y: 10}, {X: 110, Y: 110}},
-		//{{X: 110, Y: 110}, {X: 10, Y: 10}},
-
-		{{X: 10, Y: 10}, {X: 210, Y: 10}},
-		{{X: 10, Y: 10}, {X: 110, Y: 10}, {X: 210, Y: 10}},
-		{{X: 210, Y: 10}, {X: 110, Y: 10}, {X: 10, Y: 10}},
-
-		{{X: 10, Y: 10}, {X: 110, Y: 110}, {X: 210, Y: 10}},
-		{{X: 210, Y: 10}, {X: 110, Y: 110}, {X: 10, Y: 10}},
-
-		{{X: 10, Y: 110}, {X: 110, Y: 10}, {X: 210, Y: 110}},
-		{{X: 210, Y: 110}, {X: 110, Y: 10}, {X: 10, Y: 110}},
-
-		{{X: 10, Y: 10}, {X: 110, Y: 110}, {X: 10, Y: 210}},
-		{{X: 10, Y: 210}, {X: 110, Y: 110}, {X: 10, Y: 10}},
-
-		{{X: 110, Y: 10}, {X: 10, Y: 110}, {X: 110, Y: 210}},
-		{{X: 110, Y: 210}, {X: 10, Y: 110}, {X: 110, Y: 10}},
-	}
 )
 
 func main() {
@@ -60,7 +37,10 @@ func main() {
 		w := app.NewWindow()
 		gtx := layout.NewContext(w.Queue())
 		gofont.Register()
-		list := &layout.List{Axis: layout.Vertical}
+		theme = material.NewTheme()
+		theme.TextSize = unit.Sp(12)
+		theme.Color.Text = util.Black
+		//list := &layout.List{Axis: layout.Vertical}
 		for {
 			e := <-w.Events()
 			switch e := e.(type) {
@@ -68,25 +48,24 @@ func main() {
 				return
 			case system.FrameEvent:
 				gtx.Reset(e.Config, e.Size)
-				list.Layout(gtx, len(lines), func(i int) {
-					layout.UniformInset(unit.Sp(10)).Layout(gtx, func() {
-						fmt.Printf("%d ============================================================================================================\n", i)
-						drawLine(lines[i], gtx)
-					})
-				})
+				//layout.UniformInset(unit.Sp(10)).Layout(gtx, func() {
+				//	var stack op.StackOp
+				//	stack.Push(gtx.Ops)
+				s := style.Style{
+					Font:   text.Font{Size: unit.Sp(16), Variant: "Mono"},
+					Shaper: theme.Shaper,
+					Color:  colors.Black,
+				}
+				//paint.ColorOp{Color:s.Color}.Add(gtx.Ops)
+				l := &typeset.Label{Text: "x", MaxWidth: typeset.FitContent}
+				s1 := &typeset.Label{Text: "2", MaxWidth: typeset.FitContent}
+				den := &typeset.Word{Content: l, Superscript: s1}
+				den.Layout(gtx, s)
+				//stack.Pop()
+				//})
 				e.Frame(gtx.Ops)
 			}
 		}
 	}()
 	app.Main()
-}
-
-func drawLine(points []f32.Point, gtx *layout.Context) {
-	var stack op.StackOp
-	stack.Push(gtx.Ops)
-	shape.DrawLine(points, gtx.Ops)
-	paint.ColorOp{red}.Add(gtx.Ops)
-	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: 600, Y: 600}}}.Add(gtx.Ops)
-	stack.Pop()
-	gtx.Dimensions = layout.Dimensions{image.Point{X: 600, Y: 210}, 100}
 }

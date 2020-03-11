@@ -16,6 +16,7 @@ func main() {
 
 	defSets := expreduce.GetAllDefinitions()
 	for _, defSet := range defSets {
+		defSet.Defs[0].Tests
 		categoryFn := fmt.Sprintf("builtin/%s/index.md", defSet.Name)
 		writeCategoryIndex(path.Join(*docs_location, categoryFn), defSet)
 		categoryDef := fmt.Sprintf(

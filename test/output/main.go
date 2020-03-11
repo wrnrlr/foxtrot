@@ -14,7 +14,9 @@ import (
 	"github.com/corywalker/expreduce/expreduce/atoms"
 	"github.com/corywalker/expreduce/expreduce/parser"
 	api "github.com/corywalker/expreduce/pkg/expreduceapi"
+	"github.com/wrnrlr/foxtrot/colors"
 	"github.com/wrnrlr/foxtrot/output"
+	"github.com/wrnrlr/foxtrot/style"
 	"github.com/wrnrlr/foxtrot/util"
 	"log"
 )
@@ -39,22 +41,23 @@ func loop(w *app.Window) error {
 	theme.Color.Text = util.Black
 	kernel := expreduce.NewEvalState()
 	expressions := []string{
+		"Graphics[Circle[]]",
+		//"x+2",
 		//"1/c+a^2+b^2",
-		"Graphics[{Red, Line[{{0,0}, {1,1}, {2,0}, {3,1}}]}]",
-		"{Graphics[{Purple, Circle[{0,0}]}], Graphics[{Green, Rectangle[]}], Graphics[{Grey, Circle[{0,0}]}]}",
-		"Graphics[{Rectangle[{1,1}], Red, Circle[{0,0}]}]",
-		"Graphics[{Rectangle[{1,1}], Red, Circle[{0,0}], Orange, Line[{{0,0}, {1,1}, {2,0}, {3,1}}]}]",
-		"Graphics[{Orange, Rectangle[{0.5,1}]}]",
-		"Graphics[{Red, Circle[{0,0}]}]",
-		"Graphics[{Triangle[{0,0}, {2,0}, {1,1}]}]",
-		"{1/2,x^2,y}",
-		"Sin[x]",
+		//"Graphics[{Red, Line[{{0,0}, {1,1}, {2,0}, {3,1}}]}]",
+		//"{Graphics[{Purple, Circle[{0,0}]}], Graphics[{Green, Rectangle[]}], Graphics[{Grey, Circle[{0,0}]}]}",
+		//"Graphics[{Rectangle[{1,1}], Red, Circle[{0,0}]}]",
+		//"Graphics[{Rectangle[{1,1}], Red, Circle[{0,0}], Orange, Line[{{0,0}, {1,1}, {2,0}, {3,1}}]}]",
+		//"Graphics[{Orange, Rectangle[{0.5,1}]}]",
+		//"Graphics[{Red, Circle[{0,0}]}]",
+		//"Graphics[{Triangle[{0,0}, {2,0}, {1,1}]}]",
+		//"{1/2,x^2,y}",
+		//"Sin[x]",
 		//"Blue",
-		"x+2",
-		"1/2",
-		"x^3",
-		"Sqrt[2]",
-		"Table[i,{i,0,100}]",
+		//"1/2",
+		//"x^3",
+		//"Sqrt[2]",
+		//"Table[i,{i,0,100}]",
 		//"{}",
 	}
 	items := []Item{}
@@ -99,7 +102,12 @@ func (i *Item) Layout(gtx *layout.Context) {
 		}),
 		layout.Rigid(func() {
 			w := output.FromEx(i.Ex, gtx)
-			w.Layout(gtx, theme.Shaper, fnt)
+			s := style.Style{
+				Font:   text.Font{Size: unit.Sp(16)},
+				Shaper: theme.Shaper,
+				Color:  colors.Black,
+			}
+			w.Layout(gtx, s)
 		}),
 	)
 }
