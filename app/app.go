@@ -31,11 +31,12 @@ type App struct {
 }
 
 func NewApp(p string) *App {
-	cells, err := nbx.ReadNBX(p)
+	cells, err := nbx.ReadCell(p)
 	if err != nil {
 		fmt.Printf("failed to open file")
 	}
-	nb := notebook.NewNotebook(cells)
+	nb := notebook.NewNotebook()
+	nb.AddCells(cells)
 	//br := browser.NewBrowser()
 	return &App{p, nb}
 }
