@@ -10,7 +10,7 @@ import (
 func TestWrite(t *testing.T) {
 	buffer := new(bytes.Buffer)
 	var cells cell.Cells
-	c := cell.NewCell(cell.Input, "In[0]:=", nil)
+	c := cell.NewCell(cell.Input, "Content[0]:=", nil)
 	cells = append(cells, c)
 	err := Write(buffer, cells)
 	assert.Nil(t, err)
