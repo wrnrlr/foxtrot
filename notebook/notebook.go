@@ -2,7 +2,7 @@ package notebook
 
 import (
 	"encoding/xml"
-	"gioui.org/layout"
+	. "gioui.org/layout"
 	"github.com/corywalker/expreduce/expreduce"
 	"github.com/wrnrlr/foxtrot/cell"
 	"github.com/wrnrlr/foxtrot/theme"
@@ -16,7 +16,7 @@ type Notebook struct {
 	promptCount int
 
 	activeSlot int
-	list       layout.List
+	list       List
 	selection  *Selection
 	styles     *theme.Styles
 }
@@ -27,79 +27,7 @@ func NewNotebook() *Notebook {
 	adds := []*Slot{firstSlot}
 	selection := NewSelection()
 	styles := theme.DefaultStyles()
-	return &Notebook{nil, adds, kernel, 1, 0, layout.List{Axis: layout.Vertical}, selection, styles}
-}
-
-func (nb *Notebook) Event(gtx *layout.Context) interface{} {
-	for i, c := range nb.Cells {
-		e := c.Event(gtx)
-		switch e := e.(type) {
-		case cell.EvalEvent:
-			nb.eval(i)
-		case cell.SelectFirstCellEvent:
-			nb.unfocusSlot()
-			nb.selection.SetFirst(i)
-		case cell.SelectLastCellEvent:
-			nb.unfocusSlot()
-			nb.selection.SetLast(i)
-		case cell.FocusPlaceholder:
-			nb.focusSlot(i + e.Offset)
-		}
-	}
-	for i := range nb.slots {
-		isActive := nb.activeSlot == i
-		es := nb.slots[i].Event(isActive, gtx)
-		for _, e := range es {
-			if _, ok := e.(SelectSlotEvent); ok {
-				nb.focusSlot(i)
-			} else if ce, ok := e.(AddCellEvent); ok {
-				nb.InsertCell(i, ce.Type)
-				nb.focusCell(i)
-			} else if _, ok := e.(FocusPreviousCellEvent); ok {
-				if nb.isOutputCell(i - 1) {
-					i -= 1
-				}
-				nb.focusCell(i - 1)
-			} else if _, ok := e.(FocusNextCellEvent); ok {
-				if nb.isOutputCell(i) {
-					i += 1
-				}
-				nb.focusCell(i)
-			} else if _, ok := e.(SelectPreviousCellEvent); ok {
-				nb.unfocusSlot()
-				nb.selection.SetFirst(i - 1)
-			} else if _, ok := e.(SelectNextCellEvent); ok {
-				nb.unfocusSlot()
-				nb.selection.SetFirst(i)
-			}
-		}
-	}
-	es := nb.selection.Event(gtx)
-	for _, e := range es {
-		switch e := e.(type) {
-		case DeleteSelected:
-			nb.DeleteSelected()
-		case FocusSlotEvent:
-			nb.focusSlot(e.Index)
-		}
-	}
-	return nil
-}
-
-func (nb *Notebook) Layout(gtx *layout.Context) {
-	n := len(nb.Cells)*2 + 1 // Their is one more Slot then Cells
-	nb.list.Layout(gtx, n, func(i int) {
-		if i%2 == 0 {
-			i = i / 2
-			isActive := nb.activeSlot == i && !nb.isOutputCell(i)
-			isLast := i == len(nb.slots)-1
-			nb.slots[i].Layout(isActive, isLast, gtx)
-		} else {
-			i := (i - 1) / 2
-			isSelected := nb.selection.IsSelected(i)
-			nb.Cells[i].Layout(isSelected, gtx)
-		}
-	})
+	return &Notebook{nil, adds, kernel, 1, 0, List{Axis: Vertical}, selection, styles}
 }
 
 func (nb *Notebook) isOutputCell(i int) bool {

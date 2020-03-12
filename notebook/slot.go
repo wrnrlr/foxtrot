@@ -4,14 +4,15 @@ import (
 	"fmt"
 	"gioui.org/f32"
 	"gioui.org/gesture"
-	"gioui.org/io/key"
+	. "gioui.org/io/key"
 	"gioui.org/io/pointer"
-	"gioui.org/layout"
+	. "gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"gioui.org/widget"
-	"github.com/wrnrlr/foxtrot/cell"
+	. "github.com/wrnrlr/foxtrot/cell"
+	"github.com/wrnrlr/foxtrot/colors"
 	"github.com/wrnrlr/foxtrot/util"
 	"github.com/wrnrlr/shape"
 	"image"
@@ -48,7 +49,7 @@ func NewSlot() *Slot {
 		blinkStart:       time.Now()}
 }
 
-func (s *Slot) Event(isActive bool, gtx *layout.Context) []interface{} {
+func (s *Slot) Event(isActive bool, gtx *Context) []interface{} {
 	s.processEvents(isActive, gtx)
 	events := s.events
 	s.events = nil
@@ -56,18 +57,18 @@ func (s *Slot) Event(isActive bool, gtx *layout.Context) []interface{} {
 	return events
 }
 
-func (s *Slot) processEvents(isActive bool, gtx *layout.Context) {
+func (s *Slot) processEvents(isActive bool, gtx *Context) {
 	for s.plusButton.Clicked(gtx) {
-		s.events = append(s.events, AddCellEvent{Type: cell.Input})
+		s.events = append(s.events, AddCell{Type: Input})
 	}
 	for s.backgroundButton.Clicked(gtx) {
 		s.Focus(true)
-		s.events = append(s.events, SelectSlotEvent{})
+		s.events = append(s.events, SelectSlot{})
 	}
 	s.processKey(isActive, gtx)
 }
 
-func (s *Slot) processPointer(gtx *layout.Context) interface{} {
+func (s *Slot) processPointer(gtx *Context) interface{} {
 	if !s.focused {
 		return nil
 	}
@@ -82,16 +83,16 @@ func (s *Slot) processPointer(gtx *layout.Context) interface{} {
 	return nil
 }
 
-func (s *Slot) processKey(isActive bool, gtx *layout.Context) {
+func (s *Slot) processKey(isActive bool, gtx *Context) {
 	if !isActive {
 		return
 	}
 	for _, ke := range gtx.Events(&s.eventKey) {
 		s.blinkStart = gtx.Now()
 		switch ke := ke.(type) {
-		case key.FocusEvent:
+		case FocusEvent:
 			s.focused = ke.Focus
-		case key.Event:
+		case Event:
 			if !s.focused {
 				break
 			}
@@ -99,45 +100,46 @@ func (s *Slot) processKey(isActive bool, gtx *layout.Context) {
 			if e != nil {
 				s.events = append(s.events, e)
 			}
-		case key.EditEvent:
+		case EditEvent:
 			fmt.Println("Slot: key.EditEvent")
 		}
 	}
 }
 
-func (Slot) switchKey(ke key.Event) (e interface{}) {
+func (Slot) switchKey(ke Event) interface{} {
 	switch {
-	case isKey(ke, key.NameUpArrow, key.ModShift):
-		e = SelectPreviousCellEvent{}
-	case isKey(ke, key.NameDownArrow, key.ModShift):
-		e = SelectNextCellEvent{}
-	case isKey(ke, key.NameReturn), isKey(ke, key.NameEnter):
-		e = AddCellEvent{Type: cell.Input}
-	case isKey(ke, key.NameUpArrow), isKey(ke, key.NameLeftArrow):
-		e = FocusPreviousCellEvent{}
-	case isKey(ke, key.NameDownArrow), isKey(ke, key.NameRightArrow):
-		e = FocusNextCellEvent{}
-	case isKey(ke, "1", key.ModCommand):
-		e = AddCellEvent{Type: cell.H1}
-	case isKey(ke, "2", key.ModCommand):
-		e = AddCellEvent{Type: cell.H2}
-	case isKey(ke, "3", key.ModCommand):
-		e = AddCellEvent{Type: cell.H3}
-	case isKey(ke, "4", key.ModCommand):
-		e = AddCellEvent{Type: cell.H4}
-	case isKey(ke, "5", key.ModCommand):
-		e = AddCellEvent{Type: cell.Text}
-	case isKey(ke, "6", key.ModCommand):
-		e = AddCellEvent{Type: cell.Code}
+	case isKey(ke, NameUpArrow, ModShift):
+		return SelectPreviousCell{}
+	case isKey(ke, NameDownArrow, ModShift):
+		return SelectNextCell{}
+	case isKey(ke, NameReturn), isKey(ke, NameEnter):
+		return AddCell{Type: Input}
+	case isKey(ke, NameUpArrow), isKey(ke, NameLeftArrow):
+		return FocusPreviousCell{}
+	case isKey(ke, NameDownArrow), isKey(ke, NameRightArrow):
+		return FocusNextCell{}
+	case isKey(ke, "1", ModCommand):
+		return AddCell{Type: H1}
+	case isKey(ke, "2", ModCommand):
+		return AddCell{Type: H2}
+	case isKey(ke, "3", ModCommand):
+		return AddCell{Type: H3}
+	case isKey(ke, "4", ModCommand):
+		return AddCell{Type: H4}
+	case isKey(ke, "5", ModCommand):
+		return AddCell{Type: Text}
+	case isKey(ke, "6", ModCommand):
+		return AddCell{Type: Code}
+	default:
+		return nil
 	}
-	return e
 }
 
-func isKey(e key.Event, k string, ms ...key.Modifiers) bool {
+func isKey(e Event, k string, ms ...Modifiers) bool {
 	return e.Name == k && hasMod(e, ms)
 }
 
-func hasMod(e key.Event, ms []key.Modifiers) bool {
+func hasMod(e Event, ms []Modifiers) bool {
 	for _, m := range ms {
 		if !e.Modifiers.Contain(m) {
 			return false
@@ -150,7 +152,7 @@ func (s *Slot) Focus(requestFocus bool) {
 	s.requestFocus = requestFocus
 }
 
-func (s *Slot) Layout(isActive, isLast bool, gtx *layout.Context) {
+func (s *Slot) Layout(isActive, isLast bool, gtx *Context) {
 	// Flush events from before the previous frame.
 	copy(s.events, s.events[s.prevEvents:])
 	s.events = s.events[:len(s.events)-s.prevEvents]
@@ -159,23 +161,23 @@ func (s *Slot) Layout(isActive, isLast bool, gtx *layout.Context) {
 	s.layout(isActive, isLast, gtx)
 }
 
-func (s *Slot) layout(isActive, isLast bool, gtx *layout.Context) {
-	key.InputOp{Key: &s.eventKey, Focus: s.requestFocus}.Add(gtx.Ops)
+func (s *Slot) layout(isActive, isLast bool, gtx *Context) {
+	InputOp{Key: &s.eventKey, Focus: s.requestFocus}.Add(gtx.Ops)
 	s.requestFocus = false
 	if isLast {
 		gtx.Constraints.Height.Min = 2000
 	} else {
 		px := gtx.Px(unit.Dp(20))
-		constraint := layout.Constraint{Min: px, Max: px}
+		constraint := Constraint{Min: px, Max: px}
 		gtx.Constraints.Height = constraint
 	}
 	if isActive {
-		st := layout.Stack{Alignment: layout.NW}
-		c := layout.Expanded(func() {
+		st := Stack{Alignment: NW}
+		c := Expanded(func() {
 			PlusButton{}.Layout(gtx, s.plusButton)
 		})
-		l := layout.Expanded(func() {
-			s.drawLine(gtx)
+		l := Expanded(func() {
+			//s.drawLine(gtx)
 			s.drawCursor(gtx)
 		})
 		st.Layout(gtx, l, c)
@@ -184,21 +186,19 @@ func (s *Slot) layout(isActive, isLast bool, gtx *layout.Context) {
 	}
 }
 
-func (s Slot) placeholderLayout(gtx *layout.Context) {
+func (s Slot) placeholderLayout(gtx *Context) {
 	width := gtx.Constraints.Width.Max
 	height := gtx.Constraints.Height.Max
-	dr := f32.Rectangle{
-		Max: f32.Point{X: float32(width), Y: float32(height)},
-	}
+	dr := f32.Rectangle{Max: f32.Point{X: float32(width), Y: float32(height)}}
 	paint.ColorOp{Color: util.White}.Add(gtx.Ops)
 	paint.PaintOp{Rect: dr}.Add(gtx.Ops)
-	gtx.Dimensions = layout.Dimensions{Size: image.Point{X: width, Y: height}}
+	gtx.Dimensions = Dimensions{Size: image.Point{X: width, Y: height}}
 	r := image.Rectangle{Max: gtx.Dimensions.Size}
 	pointer.Rect(r).Add(gtx.Ops)
 	s.backgroundButton.Layout(gtx)
 }
 
-func (s Slot) drawLine(gtx *layout.Context) {
+func (s Slot) drawLine(gtx *Context) {
 	width := float32(gtx.Px(unit.Sp(1)))
 	px := gtx.Px(unit.Dp(20))
 	var lineLen = float32(gtx.Constraints.Width.Max)
@@ -207,7 +207,7 @@ func (s Slot) drawLine(gtx *layout.Context) {
 	line.Stroke(util.LightGrey, width, gtx)
 }
 
-func (s *Slot) drawCursor(gtx *layout.Context) {
+func (s *Slot) drawCursor(gtx *Context) {
 	if !s.focused {
 		return
 	}
@@ -236,12 +236,12 @@ func (s *Slot) drawCursor(gtx *layout.Context) {
 
 type PlusButton struct{}
 
-func (b PlusButton) Layout(gtx *layout.Context, button *widget.Button) {
-	inset := layout.Inset{Left: unit.Sp(20)}
+func (b PlusButton) Layout(gtx *Context, button *widget.Button) {
+	inset := Inset{Left: unit.Sp(20)}
 	inset.Layout(gtx, func() {
 		size := gtx.Px(unit.Sp(20))
-		gtx.Constraints = layout.RigidConstraints(image.Point{size, size})
-		b.drawCircle(gtx)
+		gtx.Constraints = RigidConstraints(image.Point{size, size})
+		//b.drawCircle(gtx)
 		b.drawPlus(gtx)
 		r := image.Rectangle{Max: gtx.Dimensions.Size}
 		pointer.Ellipse(r).Add(gtx.Ops)
@@ -249,7 +249,7 @@ func (b PlusButton) Layout(gtx *layout.Context, button *widget.Button) {
 	})
 }
 
-func (b PlusButton) drawCircle(gtx *layout.Context) {
+func (b PlusButton) drawCircle(gtx *Context) {
 	width := float32(gtx.Px(unit.Sp(1)))
 	px := gtx.Px(unit.Sp(20))
 	size := float32(px)
@@ -259,32 +259,26 @@ func (b PlusButton) drawCircle(gtx *layout.Context) {
 	c1.Stroke(util.LightGrey, width, gtx)
 }
 
-func (b PlusButton) drawPlus(gtx *layout.Context) {
-	size := gtx.Constraints
-	width := float32(gtx.Px(unit.Sp(1)))
-	ycenter := float32(size.Height.Min / 2)
-	xcenter := float32(size.Width.Min / 2)
-	offset := float32(size.Width.Min) / 4
+func (b PlusButton) drawPlus(gtx *Context) {
+	s := gtx.Constraints
+	w := float32(gtx.Px(unit.Sp(1)))
+	yc := float32(s.Height.Min / 2)
+	xc := float32(s.Width.Min / 2)
+	offset := float32(s.Width.Min) / 4
 	length := float32(gtx.Constraints.Width.Min) - offset
-	line1 := shape.Line{{offset, ycenter}, {length, ycenter}}
-	line1.Stroke(util.LightGrey, width, gtx)
-	line2 := shape.Line{{xcenter, offset}, {xcenter, length}}
-	line2.Stroke(util.LightGrey, width, gtx)
+	line1 := shape.Line{{offset, yc}, {length, yc}}
+	line1.Stroke(colors.Black, w, gtx)
+	line2 := shape.Line{{xc, offset}, {xc, length}}
+	line2.Stroke(colors.Black, w, gtx)
 }
 
-type AddCellEvent struct {
-	Type cell.Type
+type AddCell struct {
+	Type Type
 }
 
-type SelectSlotEvent struct{}
-
-type FocusNextCellEvent struct{}
-
-type FocusPreviousCellEvent struct{}
-
-type SelectNextCellEvent struct{}
-
-type SelectPreviousCellEvent struct{}
-
-type Slots struct {
-}
+type SelectSlot struct{}
+type FocusNextCell struct{}
+type FocusPreviousCell struct{}
+type SelectNextCell struct{}
+type SelectPreviousCell struct{}
+type Slots struct{}
