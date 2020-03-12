@@ -26,7 +26,7 @@ func (c cell) Layout(selected bool, gtx *layout.Context) {
 func (c *cell) cellLayout(gtx *layout.Context) {
 	switch c.Type() {
 	case Input:
-		c.input(gtx)
+		c.layoutInput(gtx)
 	case Output:
 		c.output(gtx)
 	case H1:
@@ -56,13 +56,13 @@ func (c cell) layoutContent(gtx *layout.Context) {
 func (c cell) layoutLabel(gtx *layout.Context)  {}
 func (c cell) layoutMargin(gtx *layout.Context) {}
 
-func (c *cell) input(gtx *layout.Context) {
+func (c *cell) layoutInput(gtx *layout.Context) {
 	f := layout.Flex{Alignment: layout.Middle}
 	c1 := layout.Rigid(func() {
 		c.labelLayout(gtx)
 	})
 	c2 := layout.Flexed(1, func() {
-		c.styles.Foxtrot.Layout(gtx, c.Input)
+		c.styles.Foxtrot.Layout(gtx, c.input)
 	})
 	layout.Inset{Bottom: unit.Dp(8)}.Layout(gtx, func() {
 		f.Layout(gtx, c1, c2)
@@ -75,10 +75,10 @@ func (c *cell) output(gtx *layout.Context) {
 		c.labelLayout(gtx)
 	})
 	c2 := layout.Flexed(1, func() {
-		if c.Out == nil {
+		if c.out == nil {
 			return
 		}
-		w := output.FromEx(c.Out, gtx)
+		w := output.FromEx(c.out, gtx)
 		var stack op.StackOp
 		stack.Push(gtx.Ops)
 		//paint.ColorOp{Color: util.Black}.Add(gtx.Ops)
@@ -98,37 +98,37 @@ func (c *cell) output(gtx *layout.Context) {
 
 func (c *cell) h1(gtx *layout.Context) {
 	layout.Inset{Left: unit.Sp(10)}.Layout(gtx, func() {
-		c.styles.H1.Layout(gtx, c.Input)
+		c.styles.H1.Layout(gtx, c.input)
 	})
 }
 
 func (c *cell) h2(gtx *layout.Context) {
 	layout.Inset{Left: unit.Sp(10)}.Layout(gtx, func() {
-		c.styles.H2.Layout(gtx, c.Input)
+		c.styles.H2.Layout(gtx, c.input)
 	})
 }
 
 func (c *cell) h3(gtx *layout.Context) {
 	layout.Inset{Left: unit.Sp(10)}.Layout(gtx, func() {
-		c.styles.H3.Layout(gtx, c.Input)
+		c.styles.H3.Layout(gtx, c.input)
 	})
 }
 
 func (c *cell) h4(gtx *layout.Context) {
 	layout.Inset{Left: unit.Sp(10)}.Layout(gtx, func() {
-		c.styles.H4.Layout(gtx, c.Input)
+		c.styles.H4.Layout(gtx, c.input)
 	})
 }
 
 func (c *cell) text(gtx *layout.Context) {
 	layout.Inset{Left: unit.Sp(10)}.Layout(gtx, func() {
-		c.styles.Text.Layout(gtx, c.Input)
+		c.styles.Text.Layout(gtx, c.input)
 	})
 }
 
 func (c *cell) code(gtx *layout.Context) {
 	layout.Inset{Left: unit.Sp(10)}.Layout(gtx, func() {
-		c.styles.Code.Layout(gtx, c.Input)
+		c.styles.Code.Layout(gtx, c.input)
 	})
 }
 
@@ -137,7 +137,7 @@ func (c *cell) labelLayout(gtx *layout.Context) {
 		px := gtx.Px(unit.Sp(50))
 		constraint := layout.Constraint{Min: px, Max: px}
 		gtx.Constraints.Width = constraint
-		label := c.styles.Theme.Label(unit.Sp(12), c.Label)
+		label := c.styles.Theme.Label(unit.Sp(12), c.label)
 		label.Alignment = text.End
 		label.Layout(gtx)
 	})

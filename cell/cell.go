@@ -4,10 +4,9 @@ import (
 	"gioui.org/layout"
 	"github.com/corywalker/expreduce/pkg/expreduceapi"
 	"github.com/wrnrlr/foxtrot/editor"
+	. "github.com/wrnrlr/foxtrot/slot"
 	"github.com/wrnrlr/foxtrot/theme"
 )
-
-type Cells []Cell
 
 type Cell interface {
 	Layout(selected bool, gtx *layout.Context)
@@ -23,49 +22,37 @@ type Cell interface {
 }
 
 type cell struct {
-	typ     Type
-	Content string
-	Out     expreduceapi.Ex
-	Label   string
+	typ Type
 
-	Input  *editor.Editor
+	content string
+	out     expreduceapi.Ex
+	label   string
+
+	input *editor.Editor
+
+	Err    error
+	Hide   bool
+	slot   Slot
 	margin *Margin
-
 	styles *theme.Styles
-
-	Err  error
-	Hide bool
+	// Ex // Expression of cell
 	//Rules   map[string]string
 }
 
 func NewCell(typ Type, label string, styles *theme.Styles) Cell {
 	inEditor := &editor.Editor{}
-	return &cell{typ: typ, Label: label, Input: inEditor, margin: &Margin{}, styles: styles}
-}
-
-func (c cell) Event(gtx *layout.Context) interface{} {
-	for _, e := range c.Input.Events(gtx) {
-		switch e.(type) {
-		case editor.SubmitEvent:
-			return EvalEvent{}
-		case editor.UpEvent:
-			return FocusPlaceholder{Offset: 0}
-		case editor.DownEvent:
-			return FocusPlaceholder{Offset: 1}
-		}
-	}
-	return c.margin.Event(gtx)
+	return &cell{typ: typ, label: label, input: inEditor, margin: &Margin{}, styles: styles}
 }
 
 func (c *cell) evaluate() {
-	textIn := c.Input.Text()
+	textIn := c.input.Text()
 	if textIn == "" {
 		return
 	}
 }
 
 func (c *cell) Text() string {
-	return c.Input.Text()
+	return c.input.Text()
 }
 
 func (c *cell) Type() Type {
@@ -73,7 +60,7 @@ func (c *cell) Type() Type {
 }
 
 func (c *cell) SetText(txt string) {
-	c.Input.SetText(txt)
+	c.input.SetText(txt)
 }
 
 func (c *cell) SetType(typ Type) {
@@ -81,12 +68,12 @@ func (c *cell) SetType(typ Type) {
 }
 
 func (c *cell) SetLabel(s string) {
-	c.Label = s
+	c.label = s
 }
 
 func (c *cell) SetErr(err error) {
 	c.Err = err
 }
 func (c *cell) SetOut(ex expreduceapi.Ex) {
-	c.Out = ex
+	c.out = ex
 }

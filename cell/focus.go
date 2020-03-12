@@ -1,5 +1,5 @@
 package cell
 
-func (c *cell) Focus() {
-	c.Input.Focus()
+func (c cell) Focus() {
+	c.input.Focus()
 }
