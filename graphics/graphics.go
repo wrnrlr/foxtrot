@@ -6,10 +6,10 @@ import (
 	"gioui.org/f32"
 	"gioui.org/layout"
 	"gioui.org/op"
-	"gioui.org/text"
 	"gioui.org/unit"
 	"github.com/corywalker/expreduce/expreduce/atoms"
 	"github.com/corywalker/expreduce/pkg/expreduceapi"
+	"github.com/wrnrlr/foxtrot/style"
 	"github.com/wrnrlr/foxtrot/util"
 	"github.com/wrnrlr/shape"
 	"image"
@@ -55,10 +55,19 @@ func (ps primetives) bbox() (bbox f32.Rectangle) {
 	return bbox
 }
 
-func (g *Graphics) Dimensions(gtx *layout.Context, _ *text.Shaper, font text.Font) layout.Dimensions {
+func (g *Graphics) Dimensions(gtx *layout.Context, s style.Style) layout.Dimensions {
 	//width := g.BBox.Min.X*-1 + g.BBox.Max.X
 	//height := g.BBox.Min.Y*-1 + g.BBox.Max.Y
+	size := gtx.Dimensions.Size
+	maxWidth := gtx.Px(unit.Sp(300))
+	maxHeight := gtx.Px(unit.Sp(200))
+	if size.X > maxWidth || size.Y > maxHeight {
+		size = image.Point{X: maxWidth, Y: maxHeight}
+	}
 	g.BBox = g.elements.bbox()
+	//bb := g.elements.bbox()
+	//width := bb.Max.X + bb.Min.X
+	//heigth := bb.Max.Y + bb.Min.Y
 	r := g.size()
 	f := float32(gtx.Px(unit.Sp(100)))
 	r = r.Mul(f)
@@ -70,11 +79,11 @@ func (g *Graphics) Dimensions(gtx *layout.Context, _ *text.Shaper, font text.Fon
 	return dims
 }
 
-func (g *Graphics) Layout(gtx *layout.Context, s *text.Shaper, font text.Font) {
+func (g *Graphics) Layout(gtx *layout.Context, s style.Style) {
 	// X Axis
-	dims := g.Dimensions(gtx, s, font)
-	g.drawAxis(gtx, s, font)
-	g.drawYAxis(gtx, s, font)
+	dims := g.Dimensions(gtx, s)
+	//g.drawAxis(gtx, s)
+	//g.drawYAxis(gtx, s)
 	*g.ctx.style.StrokeColor = util.Black
 	g.ctx.style.Thickness = float32(0.95)
 	var stack op.StackOp
@@ -86,18 +95,18 @@ func (g *Graphics) Layout(gtx *layout.Context, s *text.Shaper, font text.Font) {
 	gtx.Dimensions = dims
 }
 
-func (g Graphics) drawAxis(gtx *layout.Context, s *text.Shaper, font text.Font) {
+func (g Graphics) drawAxis(gtx *layout.Context, s style.Style) {
 	width := float32(gtx.Px(unit.Sp(1)))
-	dims := g.Dimensions(gtx, s, font)
+	dims := g.Dimensions(gtx, s)
 	w := float32(gtx.Constraints.Width.Max)
 	h := float32(dims.Size.Y)
 	xAxis := shape.Line{{0, h / 2}, {w, h / 2}}
 	xAxis.Stroke(util.Black, width, gtx)
 }
 
-func (g Graphics) drawYAxis(gtx *layout.Context, s *text.Shaper, font text.Font) {
+func (g Graphics) drawYAxis(gtx *layout.Context, s style.Style) {
 	width := float32(gtx.Px(unit.Sp(1)))
-	dims := g.Dimensions(gtx, s, font)
+	dims := g.Dimensions(gtx, s)
 	w := float32(dims.Size.X)
 	h := float32(dims.Size.Y)
 	yAxis := []f32.Point{{w / 2, 0}, {w / 2, h}}
