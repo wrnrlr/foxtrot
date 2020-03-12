@@ -13,7 +13,7 @@ import (
 //	clip   clip.Op
 //}
 
-type lineIterator struct {
+type LineIterator struct {
 	Lines     []text.Line
 	Clip      image.Rectangle
 	Alignment text.Alignment
@@ -25,7 +25,7 @@ type lineIterator struct {
 
 const inf = 1e6
 
-func (l *lineIterator) Next() (text.String, f32.Point, bool) {
+func (l *LineIterator) Next() (text.String, f32.Point, bool) {
 	for len(l.Lines) > 0 {
 		line := l.Lines[0]
 		l.Lines = l.Lines[1:]
