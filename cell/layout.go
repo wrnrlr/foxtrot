@@ -10,7 +10,12 @@ import (
 	"github.com/wrnrlr/foxtrot/style"
 )
 
-func (c *cell) Layout(selected bool, gtx *layout.Context) {
+func (c cell) Layout(selected bool, gtx *layout.Context) {
+	// Layout Slot
+	// Layout Label
+	// layout Text
+	// Layout Output
+	// Layout margin
 	layout.Inset{Right: unit.Sp(10)}.Layout(gtx, func() {
 		c.margin.Layout(gtx, selected, func() {
 			c.cellLayout(gtx)
@@ -32,14 +37,24 @@ func (c *cell) cellLayout(gtx *layout.Context) {
 		c.h3(gtx)
 	case H4:
 		c.h4(gtx)
-	case Text:
+	case Paragraph:
 		c.text(gtx)
 	case Code:
 		c.code(gtx)
-	case Paragraph:
-		c.code(gtx)
 	}
 }
+
+func (c cell) layoutSlot(gtx *layout.Context) {
+
+}
+
+func (c cell) layoutContent(gtx *layout.Context) {
+	c.layoutLabel(gtx)
+	c.layoutMargin(gtx)
+}
+
+func (c cell) layoutLabel(gtx *layout.Context)  {}
+func (c cell) layoutMargin(gtx *layout.Context) {}
 
 func (c *cell) input(gtx *layout.Context) {
 	f := layout.Flex{Alignment: layout.Middle}
