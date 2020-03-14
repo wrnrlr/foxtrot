@@ -11,7 +11,7 @@ import (
 )
 
 func (c cell) Layout(selected bool, gtx *layout.Context) {
-	// Layout Slot
+	// Layout Slot Placeholder
 	// Layout Label
 	// layout Text
 	// Layout Output
