@@ -14,18 +14,31 @@ import (
 	"time"
 )
 
-func (s *Slot) Layout(isActive, isLast bool, gtx *Context) {
+func (s *slot) Layout(isLast bool, gtx *Context) {
 	// Flush events from before the previous frame.
 	copy(s.events, s.events[s.prevEvents:])
 	s.events = s.events[:len(s.events)-s.prevEvents]
 	s.prevEvents = len(s.events)
-	s.processEvents(isActive, gtx)
-	s.layout(isActive, isLast, gtx)
+	s.processEvents(gtx)
+	s.layout(isLast, gtx)
 }
 
-func (s *Slot) layout(isActive, isLast bool, gtx *Context) {
+func (s *slot) layout(isLast bool, gtx *Context) {
 	InputOp{Key: &s.eventKey, Focus: s.requestFocus}.Add(gtx.Ops)
 	s.requestFocus = false
+	s.layoutHeight(isLast, gtx)
+	st := Stack{Alignment: NW}
+	c := Expanded(func() {
+		PlusButton{}.Layout(gtx, s.plusButton)
+	})
+	l := Expanded(func() {
+		s.drawLine(gtx)
+		s.drawCursor(gtx)
+	})
+	st.Layout(gtx, l, c)
+}
+
+func (s *slot) layoutHeight(isLast bool, gtx *Context) {
 	if isLast {
 		gtx.Constraints.Height.Min = 2000
 	} else {
@@ -33,22 +46,9 @@ func (s *Slot) layout(isActive, isLast bool, gtx *Context) {
 		constraint := Constraint{Min: px, Max: px}
 		gtx.Constraints.Height = constraint
 	}
-	if isActive {
-		st := Stack{Alignment: NW}
-		c := Expanded(func() {
-			PlusButton{}.Layout(gtx, s.plusButton)
-		})
-		l := Expanded(func() {
-			s.drawLine(gtx)
-			s.drawCursor(gtx)
-		})
-		st.Layout(gtx, l, c)
-	} else {
-		s.placeholderLayout(gtx)
-	}
 }
 
-func (s Slot) placeholderLayout(gtx *Context) {
+func (s slot) placeholderLayout(gtx *Context) {
 	width := gtx.Constraints.Width.Max
 	height := gtx.Constraints.Height.Max
 	dr := f32.Rectangle{Max: f32.Point{X: float32(width), Y: float32(height)}}
@@ -57,10 +57,10 @@ func (s Slot) placeholderLayout(gtx *Context) {
 	gtx.Dimensions = Dimensions{Size: image.Point{X: width, Y: height}}
 	r := image.Rectangle{Max: gtx.Dimensions.Size}
 	pointer.Rect(r).Add(gtx.Ops)
-	s.backgroundButton.Layout(gtx)
+	//s.backgroundButton.Layout(gtx)
 }
 
-func (s Slot) drawLine(gtx *Context) {
+func (s slot) drawLine(gtx *Context) {
 	width := float32(gtx.Px(unit.Sp(1)))
 	px := gtx.Px(unit.Dp(20))
 	var lineLen = float32(gtx.Constraints.Width.Max)
@@ -69,7 +69,7 @@ func (s Slot) drawLine(gtx *Context) {
 	line.Stroke(util.LightGrey, width, gtx)
 }
 
-func (s *Slot) drawCursor(gtx *Context) {
+func (s *slot) drawCursor(gtx *Context) {
 	if !s.focused {
 		return
 	}

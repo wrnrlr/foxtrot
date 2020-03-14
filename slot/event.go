@@ -6,10 +6,10 @@ import (
 	. "gioui.org/io/key"
 	"gioui.org/io/pointer"
 	. "gioui.org/layout"
-	. "github.com/wrnrlr/foxtrot/cell"
+	//. "github.com/wrnrlr/foxtrot/cell"
 )
 
-func (s *Slot) Event(isActive bool, gtx *Context) []interface{} {
+func (s *slot) Event(isActive bool, gtx *Context) []interface{} {
 	s.processEvents(isActive, gtx)
 	events := s.events
 	s.events = nil
@@ -17,18 +17,19 @@ func (s *Slot) Event(isActive bool, gtx *Context) []interface{} {
 	return events
 }
 
-func (s *Slot) processEvents(isActive bool, gtx *Context) {
-	for s.plusButton.Clicked(gtx) {
-		s.events = append(s.events, AddCell{Type: Input})
-	}
-	for s.backgroundButton.Clicked(gtx) {
-		s.Focus(true)
-		s.events = append(s.events, SelectSlot{})
-	}
+func (s *slot) processEvents(isActive bool, gtx *Context) {
+	//for s.plusButton.Clicked(gtx) {
+	//s.events = append(s.events,
+	//s.events = append(s.events, AddCell{Type: Input})
+	//}
+	//for s.backgroundButton.Clicked(gtx) {
+	//	s.Focus(true)
+	//	s.events = append(s.events, SelectSlot{})
+	//}
 	s.processKey(isActive, gtx)
 }
 
-func (s *Slot) processPointer(gtx *Context) interface{} {
+func (s *slot) processPointer(gtx *Context) interface{} {
 	if !s.focused {
 		return nil
 	}
@@ -43,7 +44,7 @@ func (s *Slot) processPointer(gtx *Context) interface{} {
 	return nil
 }
 
-func (s *Slot) processKey(isActive bool, gtx *Context) {
+func (s *slot) processKey(isActive bool, gtx *Context) {
 	if !isActive {
 		return
 	}
@@ -61,46 +62,59 @@ func (s *Slot) processKey(isActive bool, gtx *Context) {
 				s.events = append(s.events, e)
 			}
 		case EditEvent:
-			fmt.Println("Slot: key.EditEvent")
+			fmt.Println("slot: key.EditEvent")
 		}
 	}
 }
 
-func (Slot) switchKey(ke Event) interface{} {
+func (slot) switchKey(ke Event) interface{} {
 	switch {
 	case isKey(ke, NameUpArrow, ModShift):
-		return SelectPreviousCell{}
+		return SelectPrevCell
 	case isKey(ke, NameDownArrow, ModShift):
-		return SelectNextCell{}
-	case isKey(ke, NameReturn), isKey(ke, NameEnter):
-		return AddCell{Type: Input}
+		return SelectNextCell
+	//case isKey(ke, NameReturn), isKey(ke, NameEnter):
+	//	return ke
 	case isKey(ke, NameUpArrow), isKey(ke, NameLeftArrow):
-		return FocusPreviousCell{}
+		return FocusPrevCell
 	case isKey(ke, NameDownArrow), isKey(ke, NameRightArrow):
-		return FocusNextCell{}
+		return FocusNextCell
 	case isKey(ke, "1", ModCommand):
-		return AddCell{Type: H1}
+		return AddCell{"Header1", ""}
 	case isKey(ke, "2", ModCommand):
-		return AddCell{Type: H2}
+		return AddCell{"Header2", ""}
 	case isKey(ke, "3", ModCommand):
-		return AddCell{Type: H3}
+		return AddCell{"Header3", ""}
 	case isKey(ke, "4", ModCommand):
-		return AddCell{Type: H4}
+		return AddCell{"Header4", ""}
 	case isKey(ke, "5", ModCommand):
-		return AddCell{Type: Paragraph}
+		return AddCell{"Paragraph", ""}
 	case isKey(ke, "6", ModCommand):
-		return AddCell{Type: Code}
+		return AddCell{"Code", ""}
 	default:
 		return nil
 	}
 }
 
-type AddCell struct{ Type Type }
-type SelectSlot struct{}
-type FocusNextCell struct{}
-type FocusPreviousCell struct{}
-type SelectNextCell struct{}
-type SelectPreviousCell struct{}
+type SlotEvent interface{ SlotEvent() }
+
+type FocusCell struct{ Delta int }
+
+func (SelectCell) SlotEvent() {}
+
+var FocusPrevCell = FocusCell{Delta: -1}
+var FocusNextCell = FocusCell{Delta: 1}
+
+type SelectCell struct{ Delta int }
+
+func (FocusCell) SlotEvent() {}
+
+var SelectPrevCell = FocusCell{Delta: -1}
+var SelectNextCell = FocusCell{Delta: 1}
+
+type AddCell struct{ Type, Content string }
+
+func (AddCell) SlotEvent() {}
 
 func isKey(e Event, k string, ms ...Modifiers) bool {
 	return e.Name == k && hasMod(e, ms)

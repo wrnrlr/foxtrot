@@ -2,6 +2,7 @@ package slot
 
 import (
 	"gioui.org/gesture"
+	"gioui.org/layout"
 	"gioui.org/widget"
 	"time"
 )
@@ -11,14 +12,17 @@ const (
 	maxBlinkDuration = 10 * time.Second
 )
 
-// Every cell has a slot above and below it that allow new Cells to be inserted insert.
-type Slot struct {
-	Active           bool
-	plusButton       *widget.Button
-	backgroundButton *widget.Button
+type Slot interface {
+	Index() int
+	Layout(isLast bool, gtx *layout.Context)
+}
+
+// Every cell has a slot above and below it that allow new cells to be inserted insert.
+type slot struct {
+	plusButton *widget.Button
+	blinkStart time.Time
 
 	eventKey     int
-	blinkStart   time.Time
 	focused      bool
 	caretOn      bool
 	requestFocus bool
@@ -27,15 +31,23 @@ type Slot struct {
 
 	events     []interface{}
 	prevEvents int
+	index      int
+	menu       menu
 }
 
-func NewSlot() *Slot {
-	return &Slot{
-		plusButton:       new(widget.Button),
-		backgroundButton: new(widget.Button),
-		blinkStart:       time.Now()}
+func NewSlot() Slot {
+	return &slot{
+		plusButton: new(widget.Button),
+		blinkStart: time.Now()}
 }
 
-func (s *Slot) Focus(requestFocus bool) {
-	s.requestFocus = requestFocus
+func (s slot) Index() int {
+	return s.index
+}
+
+func (s slot) Focus(i int, requestFocus bool) {
+	s.index = i
+	if i > 0 {
+		s.requestFocus = requestFocus
+	}
 }
